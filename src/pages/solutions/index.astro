@@ -1,0 +1,829 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const email = 'aklovup@gmail.com';
+
+const mail = (subject: string) =>
+  `mailto:${email}?subject=${encodeURIComponent(`Aklov enquiry — ${subject}`)}`;
+
+// Swap this for any image link. Warm, dark, architectural workspace crops work best.
+const sectionImage = 'https://unsplash.com/photos/teRVpNnlR_c/download?force=true&w=1600';
+
+const solutions = [
+  {
+    number: '01',
+    variant: 1,
+    theme: 'light',
+    id: 'website',
+    title: 'Website Design & Development',
+    tagline: 'Give your business a stronger online presence.',
+    paragraphs: [
+      'Your website should make it easier for the right people to understand what you offer, trust your business and take the next step.',
+      'We design and develop websites that combine clear messaging, distinctive visual design, responsive layouts and purposeful user journeys.',
+    ],
+    includes: [
+      'Business and service websites',
+      'Landing pages designed around a clear goal',
+      'Website redesigns and improvements',
+      'Mobile-responsive layouts',
+      'Contact forms and enquiry pathways',
+      'Website integrations and functional enhancements',
+    ],
+    goal: 'A website that represents your business well and gives visitors a clear path forward.',
+    cta: 'Discuss a Website Project',
+    subject: 'Website project',
+  },
+  {
+    number: '02',
+    variant: 2,
+    theme: 'dark',
+    id: 'customer',
+    title: 'Customer & Sales Systems',
+    tagline: 'Keep customer relationships and sales activity organized.',
+    paragraphs: [
+      'When enquiries, conversations, follow-ups and customer information are scattered across different places, opportunities can slip through the cracks.',
+      'We build and improve systems that help businesses organize customer information, manage sales activity and create a more consistent process from first enquiry to ongoing relationship.',
+    ],
+    includes: [
+      'Lead capture and organization',
+      'Sales pipelines and deal tracking',
+      'Follow-up reminders and task assignment',
+      'Customer onboarding workflows',
+      'Customer records and activity tracking',
+      'CRM configuration and process improvement',
+    ],
+    goal: 'Better visibility into customer relationships, clearer next steps and a more reliable sales process.',
+    cta: 'Improve Your Customer Workflow',
+    subject: 'Customer and sales systems',
+  },
+  {
+    number: '03',
+    variant: 3,
+    theme: 'deep',
+    id: 'workflow',
+    title: 'Workflow Automation',
+    tagline: 'Spend less time repeating work that can be handled more efficiently.',
+    paragraphs: [
+      'Repetitive tasks, manual handoffs and disconnected processes can consume time that should be spent serving customers and running the business.',
+      'We identify opportunities to simplify everyday work, then build workflows that move information and tasks between the right people and systems.',
+    ],
+    includes: [
+      'Automated notifications and reminders',
+      'Form submissions that trigger follow-up actions',
+      'Task assignment and status updates',
+      'Approval and review workflows',
+      'Email and business application integrations',
+      'Automated data handling and routine reporting',
+    ],
+    goal: 'Less avoidable manual work, more consistent processes and fewer tasks falling through the cracks.',
+    cta: 'Explore Workflow Automation',
+    subject: 'Workflow automation',
+  },
+  {
+    number: '04',
+    variant: 4,
+    theme: 'light',
+    id: 'applications',
+    title: 'Custom Business Applications',
+    tagline: 'Build tools around the way your business actually operates.',
+    paragraphs: [
+      'Sometimes an off-the-shelf application does not fit the process you need to manage. Your team may rely on spreadsheets, workarounds or several separate tools to complete one task.',
+      'We build purpose-specific applications that organize information, support business processes and give teams a more suitable way to get work done.',
+    ],
+    includes: [
+      'Internal business applications',
+      'Operational and data-entry tools',
+      'Request and approval systems',
+      'Service delivery and job-tracking applications',
+      'Custom forms, dashboards and record management',
+      'Connections to existing business systems',
+    ],
+    goal: 'A more suitable way to manage work without forcing every process into a generic solution.',
+    cta: 'Discuss a Custom Application',
+    subject: 'Custom business application',
+  },
+  {
+    number: '05',
+    variant: 5,
+    theme: 'dark',
+    id: 'integrations',
+    title: 'Integrations & Reporting',
+    tagline: 'Bring your tools and business information closer together.',
+    paragraphs: [
+      'When business applications operate in isolation, people end up copying data, switching between platforms and assembling reports manually.',
+      'We connect relevant systems and improve how information moves between them, helping businesses reduce unnecessary duplication and get a clearer view of their operations.',
+    ],
+    includes: [
+      'Connections between business applications',
+      'API-based integrations',
+      'Synchronization of relevant records',
+      'Automated data transfer and updates',
+      'Operational dashboards and reports',
+      'Data consolidation and visibility improvements',
+    ],
+    goal: 'Better-connected tools, more accessible information and clearer operational visibility.',
+    cta: 'Connect Your Business Systems',
+    subject: 'Integrations and reporting',
+  },
+];
+
+const steps = [
+  {
+    number: '01',
+    title: 'Understand',
+    description: 'We start by learning how your business works today, what is getting in the way and what a better outcome would look like.',
+  },
+  {
+    number: '02',
+    title: 'Design',
+    description: 'We define a practical solution around your requirements, existing tools, team and priorities.',
+  },
+  {
+    number: '03',
+    title: 'Build',
+    description: 'We implement the website, workflow, application or integration with the intended users and real working conditions in mind.',
+  },
+  {
+    number: '04',
+    title: 'Test and refine',
+    description: 'We check that the solution behaves as expected, address issues and refine the experience before handover.',
+  },
+];
+---
+
+<BaseLayout
+  title="Solutions — Aklov®"
+  description="Aklov designs digital experiences and builds connected business solutions: websites, customer and sales systems, workflow automation, custom applications, integrations and reporting."
+  contactHref="#contact"
+>
+  <!-- Hero -->
+  <section class="dark hero-surface" aria-labelledby="page-title">
+    <div class="arc arc-hero" aria-hidden="true"></div>
+    <div class="arc arc-hero-2" aria-hidden="true"></div>
+
+    <div class="wrap hero">
+      <div class="hero-meta mono">
+        <span>What we help businesses do</span>
+        <span>Solutions / Aklov</span>
+      </div>
+
+      <h1 id="page-title">
+        <span class="l1">Better ways</span>
+        <span class="l2">to run, <em>connect</em></span>
+        <span class="l3">and grow your</span>
+        <span class="l4">business.</span>
+      </h1>
+
+      <div class="hero-lower">
+        <div class="hero-copy-block">
+          <p class="hero-copy">
+            A business needs more than individual tools. It needs a website that communicates its value, workflows that keep work moving, and systems that help people stay organized.
+          </p>
+          <p class="hero-copy">
+            Aklov designs digital experiences and builds connected business solutions around the way your business actually works.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn btn-gold" href={mail('A new project')}>
+              Discuss Your Project <span aria-hidden="true">↗</span>
+            </a>
+            <a class="btn btn-ghost" href="#solutions">
+              Explore Our Solutions <span aria-hidden="true">↓</span>
+            </a>
+          </div>
+        </div>
+
+        <nav class="idx" aria-label="Our solutions">
+          <div class="idx-top mono">Explore Our Solutions</div>
+          {solutions.map((s) => (
+            <a class="idx-row" href={`#${s.id}`}>
+              <span class="idx-n">{s.number}</span>
+              <span class="idx-t">{s.title}</span>
+              <span class="idx-a" aria-hidden="true">↓</span>
+            </a>
+          ))}
+        </nav>
+      </div>
+    </div>
+  </section>
+
+  <!-- Introduction -->
+  <section class="section intro" aria-labelledby="intro-title">
+    <div class="wrap">
+      <div class="kicker mono">The right solution starts with the problem</div>
+      <h2 id="intro-title">When the way you work starts <em>holding you back.</em></h2>
+
+      <div class="intro-grid">
+        <p class="intro-big">
+          As a business grows, the gaps become harder to ignore. A website no longer reflects the quality of the business. Enquiries get missed. Teams repeat the same manual tasks. Information lives in different places, and simple processes take more effort than they should.
+        </p>
+
+        <div class="intro-side">
+          <p>These problems often have something in common: the way things are connected, organized or presented needs to improve.</p>
+          <p>We help businesses address those gaps through thoughtful website design, practical business systems, workflow automation and integrations built around their needs.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Solutions intro -->
+  <div class="sols-head" id="solutions">
+    <div class="wrap sols-head-grid">
+      <figure class="sols-figure">
+        <img src={sectionImage} alt="" loading="lazy" decoding="async" />
+      </figure>
+
+      <div class="sols-head-text">
+        <div class="kicker mono">What we can help with</div>
+        <h2>Practical solutions for the work <em>behind your business.</em></h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- The five solutions -->
+  {solutions.map((s) => (
+    <section
+      class:list={[
+        'sol',
+        `sol-${s.variant}`,
+        { 'is-dark': s.theme === 'dark', 'is-deep': s.theme === 'deep' },
+      ]}
+      id={s.id}
+      aria-labelledby={`${s.id}-title`}
+    >
+      <div class="wrap">
+        <div class="sol-top">
+          <span class="sol-num" aria-hidden="true">{s.number}</span>
+          <h3 class="sol-title" id={`${s.id}-title`}>{s.title}</h3>
+        </div>
+
+        <div class="sol-body">
+          <div class="sol-lead">
+            <p class="sol-tag">{s.tagline}</p>
+            {s.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+          </div>
+
+          <div class="sol-list">
+            <h4 class="mono">What this can include:</h4>
+            <ul>
+              {s.includes.map((item) => <li>{item}</li>)}
+            </ul>
+          </div>
+        </div>
+
+        <div class="sol-goal">
+          <div>
+            <span class="mono">The goal</span>
+            <p>{s.goal}</p>
+          </div>
+
+          <a class="btn btn-line" href={mail(s.subject)}>
+            {s.cta} <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <!-- Approach -->
+  <section class="section approach" aria-labelledby="approach-title">
+    <div class="wrap">
+      <div class="kicker mono">Our approach</div>
+      <h2 id="approach-title">Understand the work before changing the system.</h2>
+
+      <div class="steps">
+        {steps.map((step, index) => (
+          <article class:list={['step', `st${index + 1}`]}>
+            <div class="step-n" aria-hidden="true">{step.number}</div>
+            <h3>{step.title}</h3>
+            <p>{step.description}</p>
+          </article>
+        ))}
+      </div>
+
+      <p class="approach-note">
+        Every project is different. The process should fit the problem rather than introduce unnecessary complexity.
+      </p>
+    </div>
+  </section>
+
+  <!-- Choosing the right solution -->
+  <section class="section choose" aria-labelledby="choose-title">
+    <div class="arc arc-choose" aria-hidden="true"></div>
+
+    <div class="wrap">
+      <div class="kicker mono">Not sure where to start?</div>
+      <h2 id="choose-title">You don’t need to know the <em>technical answer</em> yet.</h2>
+
+      <div class="choose-grid">
+        <p>
+          You might know that your website needs work, that your team is spending too much time on manual tasks, or that your business tools are not working well together. You do not need to arrive with a complete technical specification.
+        </p>
+
+        <div>
+          <p>
+            Tell us what is happening, what you would like to improve and what you have already tried. We can explore the requirements and determine a sensible direction together.
+          </p>
+
+          <div class="choose-cta">
+            <a class="btn btn-gold" href={mail('What needs to work better')}>
+              Tell Us What Needs to Work Better <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Closing -->
+  <section class="closing" id="contact" aria-labelledby="closing-title">
+    <div class="wrap">
+      <div class="kicker mono">Let’s talk about your business</div>
+      <h2 id="closing-title">What would you change if your <em>systems worked better?</em></h2>
+
+      <div class="closing-grid">
+        <div>
+          <p>Whether you need a stronger website, a more reliable workflow or a better-connected operation, the first step is understanding the challenge.</p>
+          <p>Let’s discuss what you need and work out a practical way forward.</p>
+        </div>
+
+        <div class="closing-act">
+          <a class="btn btn-dark" href={mail('Start a conversation')}>
+            Start a Conversation <span aria-hidden="true">↗</span>
+          </a>
+          <p>Tell us about your project, your current challenges and the outcome you want to achieve.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  h1, h2, h3, h4, p, ul, figure { margin: 0; }
+
+  /* Hero */
+
+  .dark {
+    position: relative;
+    overflow: hidden;
+    background: var(--charcoal);
+    color: var(--ivory);
+  }
+
+  .dark > .wrap { position: relative; z-index: 1; }
+
+  .arc-hero { right: -20vw; top: -2vw; width: 74vw; max-width: 1200px; }
+  .arc-hero-2 { left: -26vw; bottom: -34vw; width: 60vw; max-width: 980px; opacity: .55; }
+
+  .hero { padding-block: 56px 0; }
+
+  .hero-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 34px;
+    color: var(--gold);
+  }
+
+  .hero-meta span:last-child { color: var(--on-dark-dim); text-align: right; }
+
+  .hero h1 {
+    position: relative;
+    z-index: 2;
+    font-family: var(--display);
+    font-size: clamp(62px, 10.8vw, 190px);
+    font-weight: 400;
+    line-height: .86;
+    letter-spacing: -.045em;
+  }
+
+  .hero h1 span { display: block; }
+  .hero h1 .l2 { padding-left: clamp(24px, 12vw, 230px); }
+  .hero h1 .l3 { padding-left: clamp(10px, 4vw, 80px); }
+  .hero h1 .l4 { padding-left: clamp(30px, 14vw, 270px); }
+  .hero h1 em { color: var(--gold); font-style: italic; }
+
+  .hero-lower {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 410px);
+    gap: clamp(30px, 6vw, 100px);
+    align-items: start;
+    padding-bottom: 100px;
+  }
+
+  .hero-copy-block { max-width: 520px; padding-top: clamp(40px, 5vw, 80px); }
+  .hero-copy { color: var(--on-dark); font-size: 15px; line-height: 1.9; }
+  .hero-copy + .hero-copy { margin-top: 18px; color: var(--ivory); }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+
+  .idx {
+    position: relative;
+    width: 100%;
+    max-width: 410px;
+    margin: clamp(-175px, -9.6vw, -44px) 0 0 auto;
+    padding: 24px 28px 14px;
+    background: var(--ivory);
+    color: var(--charcoal);
+  }
+
+  .idx::before {
+    content: "";
+    position: absolute;
+    inset: 14px -14px -14px 14px;
+    z-index: -1;
+    border: 1px solid var(--gold);
+  }
+
+  .idx-top { padding-bottom: 16px; border-bottom: 1px solid var(--charcoal); color: var(--gold-dark); }
+
+  .idx-row {
+    display: grid;
+    grid-template-columns: 34px 1fr auto;
+    align-items: baseline;
+    gap: 10px;
+    padding: 17px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .idx-row:last-child { border-bottom: 0; }
+  .idx-n { color: var(--gold-dark); font-size: 10px; font-weight: 600; letter-spacing: 1px; }
+  .idx-t { font-family: var(--display); font-size: 24px; line-height: 1.05; }
+  .idx-a { color: var(--stone); font-family: var(--display); font-size: 20px; }
+
+  /* Introduction */
+
+  .section { padding-block: clamp(80px, 10vw, 150px); }
+
+  .intro h2,
+  .sols-head h2,
+  .choose h2,
+  .approach h2,
+  .closing h2 {
+    font-family: var(--display);
+    font-weight: 400;
+    letter-spacing: -.04em;
+  }
+
+  .intro h2 { max-width: 13ch; margin-top: 30px; font-size: clamp(56px, 9.8vw, 170px); line-height: .88; }
+  .intro h2 em, .sols-head h2 em { color: var(--gold-dark); font-style: italic; }
+
+  .intro-grid {
+    display: grid;
+    grid-template-columns: 1.15fr .85fr;
+    gap: clamp(40px, 7vw, 120px);
+    margin-top: clamp(50px, 7vw, 100px);
+    padding-top: 40px;
+    border-top: 1px solid var(--charcoal);
+  }
+
+  .intro-big { font-family: var(--display); font-size: clamp(26px, 2.9vw, 46px); line-height: 1.24; letter-spacing: -.02em; }
+  .intro-side p { max-width: 460px; color: var(--body); font-size: 14.5px; line-height: 1.95; }
+  .intro-side p + p { margin-top: 22px; color: var(--charcoal); }
+
+  /* Solutions intro: image + heading */
+
+  .sols-head {
+    padding-block: clamp(70px, 9vw, 130px) clamp(50px, 6vw, 90px);
+    border-top: 1px solid var(--charcoal);
+    background: var(--paper-deep);
+  }
+
+  .sols-head-grid {
+    display: grid;
+    grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+    gap: clamp(36px, 6vw, 100px);
+    align-items: end;
+  }
+
+  .sols-figure {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    max-height: 760px;
+    overflow: hidden;
+    background: var(--charcoal);
+  }
+
+  .sols-figure img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(.7) contrast(1.05) sepia(.2);
+  }
+
+  .sols-figure::after {
+    content: "";
+    position: absolute;
+    inset: 14px;
+    border: 1px solid rgba(216, 189, 120, .5);
+    pointer-events: none;
+  }
+
+  .sols-head-text { padding-bottom: 6px; }
+  .sols-head-text h2 { max-width: 11ch; margin-top: 30px; font-size: clamp(50px, 7.4vw, 132px); line-height: .9; text-align: left; }
+
+  /* Solution sections */
+
+  .sol {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(72px, 8vw, 125px);
+    border-bottom: 1px solid var(--charcoal);
+  }
+
+  .sol.is-deep { background: var(--paper-deep); }
+  .sol.is-dark { border-bottom-color: var(--line-dark); background: var(--charcoal); color: var(--ivory); }
+  .sol > .wrap { position: relative; z-index: 1; }
+
+  .sol-num {
+    font-family: var(--display);
+    font-weight: 400;
+    line-height: .72;
+    letter-spacing: -.06em;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--gold-dark);
+    user-select: none;
+  }
+
+  .is-dark .sol-num { -webkit-text-stroke-color: var(--gold); }
+
+  .sol-title { font-family: var(--display); font-size: clamp(46px, 7.4vw, 132px); font-weight: 400; line-height: .92; letter-spacing: -.04em; }
+  .sol-tag { margin-bottom: 28px; font-family: var(--display); font-size: clamp(28px, 3vw, 48px); line-height: 1.08; letter-spacing: -.025em; }
+  .sol-lead p:not(.sol-tag) { max-width: 470px; color: var(--body); font-size: 14.5px; line-height: 1.95; }
+  .sol-lead p + p { margin-top: 18px; }
+  .is-dark .sol-lead p:not(.sol-tag) { color: var(--on-dark); }
+
+  .sol-list h4 { margin-bottom: 18px; color: var(--gold-dark); }
+  .is-dark .sol-list h4 { color: var(--gold); }
+
+  .sol-list ul { padding: 0; list-style: none; counter-reset: item; border-top: 1px solid currentColor; }
+
+  .sol-list li {
+    counter-increment: item;
+    display: grid;
+    grid-template-columns: 38px 1fr;
+    align-items: baseline;
+    padding: 17px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .is-dark .sol-list li { border-bottom-color: var(--line-dark); }
+
+  .sol-list li::before {
+    content: counter(item, decimal-leading-zero);
+    color: var(--gold-dark);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .is-dark .sol-list li::before { color: var(--gold); }
+
+  .sol-goal {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 40px;
+    align-items: end;
+    margin-top: clamp(50px, 6vw, 90px);
+    padding-top: 34px;
+    border-top: 1px solid currentColor;
+  }
+
+  .sol-goal .mono { display: block; margin-bottom: 14px; color: var(--gold-dark); }
+  .is-dark .sol-goal .mono { color: var(--gold); }
+  .sol-goal p { max-width: 30ch; font-family: var(--display); font-size: clamp(26px, 2.8vw, 42px); line-height: 1.12; letter-spacing: -.02em; }
+  .is-dark .sol-goal .btn-line { color: var(--gold); }
+
+  /* 01 */
+  .sol-1 .sol-top { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(20px, 3vw, 50px); align-items: end; margin-bottom: clamp(50px, 6vw, 90px); }
+  .sol-1 .sol-num { font-size: clamp(120px, 19vw, 320px); }
+  .sol-1 .sol-body { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(40px, 8vw, 130px); }
+
+  /* 02 */
+  .sol-2 .sol-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 30px; margin-bottom: clamp(50px, 6vw, 90px); }
+  .sol-2 .sol-title { max-width: 9ch; }
+  .sol-2 .sol-num { order: 2; margin-top: -.04em; font-size: clamp(150px, 24vw, 400px); }
+  .sol-2 .sol-body { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(40px, 8vw, 130px); }
+  .sol-2 .sol-list { order: 1; }
+  .sol-2 .sol-lead { order: 2; }
+
+  /* 03 */
+  .sol-3 .sol-top { position: relative; margin-bottom: clamp(50px, 6vw, 90px); text-align: center; }
+  .sol-3 .sol-num { display: block; font-size: clamp(150px, 21vw, 350px); }
+  .sol-3 .sol-title { position: relative; max-width: 12ch; margin: -.36em auto 0; font-size: clamp(50px, 8.2vw, 148px); }
+  .sol-3 .sol-body { display: grid; gap: clamp(40px, 5vw, 70px); }
+  .sol-3 .sol-lead { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(30px, 6vw, 100px); align-items: start; }
+  .sol-3 .sol-tag { grid-column: 1; grid-row: 1 / span 2; margin-bottom: 0; }
+  .sol-3 .sol-lead p:not(.sol-tag) { grid-column: 2; max-width: none; }
+  .sol-3 .sol-lead p + p { margin-top: 0; }
+  .sol-3 .sol-list ul { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--charcoal); border-left: 1px solid var(--charcoal); }
+
+  .sol-3 .sol-list li {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    min-height: 150px;
+    padding: 22px;
+    border-right: 1px solid var(--charcoal);
+    border-bottom: 1px solid var(--charcoal);
+    font-family: var(--display);
+    font-size: clamp(22px, 2vw, 30px);
+    line-height: 1.1;
+  }
+
+  /* 04 */
+  .sol-4 .sol-top { position: relative; min-height: clamp(150px, 20vw, 300px); margin-bottom: clamp(50px, 6vw, 90px); }
+  .sol-4 .sol-num { position: absolute; top: 0; left: 0; font-size: clamp(150px, 25vw, 430px); }
+  .sol-4 .sol-title { position: relative; max-width: 11ch; margin-left: clamp(0px, 22vw, 420px); padding-top: clamp(20px, 6vw, 100px); }
+  .sol-4 .sol-body { display: grid; grid-template-columns: .8fr 1.2fr; gap: clamp(40px, 8vw, 130px); }
+  .sol-4 .sol-list li { padding-block: 20px; font-family: var(--display); font-size: clamp(24px, 2.6vw, 38px); line-height: 1.08; letter-spacing: -.02em; }
+  .sol-4 .sol-list li::before { padding-top: .5em; }
+
+  /* 05 */
+  .sol-5 .sol-num { position: absolute; z-index: 0; top: -.12em; right: -3vw; font-size: clamp(260px, 40vw, 680px); opacity: .55; }
+  .sol-5 .sol-top { position: relative; z-index: 1; margin-bottom: clamp(50px, 6vw, 90px); }
+  .sol-5 .sol-title { max-width: 10ch; }
+  .sol-5 .sol-body { display: grid; grid-template-columns: .85fr 1.15fr; gap: clamp(40px, 8vw, 130px); }
+  .sol-5 .sol-list ul { display: grid; grid-template-columns: 1fr 1fr; column-gap: 36px; }
+
+  /* Approach */
+
+  .approach { background: var(--ivory); }
+  .approach h2 { max-width: 13ch; margin: 30px 0 clamp(50px, 7vw, 100px); font-size: clamp(52px, 8.4vw, 146px); line-height: .9; }
+
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); align-items: start; }
+  .step { padding: 30px 26px 50px 0; border-top: 1px solid var(--charcoal); }
+  .step + .step { padding-left: 26px; border-left: 1px solid var(--charcoal); }
+  .st2 { margin-top: 56px; }
+  .st3 { margin-top: 112px; }
+  .st4 { margin-top: 168px; }
+
+  .step-n {
+    margin-bottom: 30px;
+    font-family: var(--display);
+    font-size: clamp(110px, 13vw, 230px);
+    line-height: .75;
+    letter-spacing: -.05em;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--gold-dark);
+  }
+
+  .step h3 { margin-bottom: 14px; font-family: var(--display); font-size: clamp(28px, 2.8vw, 44px); font-weight: 400; line-height: 1; }
+  .step p { max-width: 300px; color: var(--body); font-size: 13.5px; line-height: 1.9; }
+
+  .approach-note {
+    max-width: 22ch;
+    margin-top: clamp(40px, 5vw, 70px);
+    padding-top: 30px;
+    border-top: 1px solid var(--charcoal);
+    font-family: var(--display);
+    font-size: clamp(26px, 3vw, 48px);
+    font-style: italic;
+    line-height: 1.15;
+    letter-spacing: -.02em;
+  }
+
+  /* Choosing */
+
+  .choose { position: relative; overflow: hidden; background: var(--charcoal); color: var(--ivory); }
+  .choose > .wrap { position: relative; z-index: 1; }
+  .arc-choose { left: -18vw; top: -14vw; width: 62vw; max-width: 1000px; }
+  .choose .kicker { color: var(--gold); }
+  .choose h2 { max-width: 11ch; margin-top: 30px; font-size: clamp(56px, 10.4vw, 180px); line-height: .88; }
+  .choose h2 em { color: var(--gold); font-style: italic; }
+
+  .choose-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(30px, 7vw, 120px);
+    margin-top: clamp(50px, 7vw, 100px);
+    padding-top: 38px;
+    border-top: 1px solid var(--line-dark);
+  }
+
+  .choose-grid p { max-width: 480px; color: var(--on-dark); font-size: 14.5px; line-height: 1.95; }
+  .choose-grid > p { max-width: 560px; color: var(--ivory); font-family: var(--display); font-size: clamp(24px, 2.5vw, 38px); line-height: 1.25; letter-spacing: -.02em; }
+  .choose-cta { margin-top: 40px; }
+
+  /* Closing */
+
+  .closing { padding-block: clamp(80px, 10vw, 150px) 0; background: var(--gold); color: var(--charcoal); }
+  .closing .kicker { color: var(--charcoal); }
+  .closing h2 { max-width: 12ch; margin-top: 30px; font-size: clamp(58px, 11.4vw, 200px); line-height: .84; letter-spacing: -.045em; }
+  .closing h2 em { font-style: italic; }
+
+  .closing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(30px, 6vw, 100px);
+    margin-top: clamp(50px, 6vw, 90px);
+    padding-block: 36px 60px;
+    border-top: 1px solid var(--charcoal);
+  }
+
+  .closing-grid > div:first-child p { max-width: 430px; font-size: 15px; line-height: 1.95; }
+  .closing-grid > div:first-child p + p { margin-top: 18px; }
+  .closing-act .btn { margin-bottom: 22px; }
+  .closing-act p { max-width: 380px; font-size: 13px; line-height: 1.9; }
+
+  /* Hover (pointer devices) */
+
+  @media (hover: hover) {
+    .is-dark .btn-line:hover { border-color: var(--gold); background: var(--gold); color: var(--charcoal); }
+    .idx-row { transition: padding .25s ease; }
+    .idx-row:hover { padding-left: 8px; }
+    .idx-row:hover .idx-t { color: var(--gold-dark); }
+    .sol-list li { transition: padding .25s ease; }
+    .sol-1 .sol-list li:hover,
+    .sol-2 .sol-list li:hover,
+    .sol-4 .sol-list li:hover,
+    .sol-5 .sol-list li:hover { padding-left: 10px; }
+    .sol-3 .sol-list li { transition: background-color .25s ease; }
+    .sol-3 .sol-list li:hover { background: var(--charcoal); color: var(--ivory); }
+  }
+
+  /* Tablet */
+
+  @media (max-width: 1000px) {
+    .hero-lower { grid-template-columns: 1fr; }
+    .idx { max-width: none; margin-top: 0; }
+    .arc-hero { top: 40vw; right: -40vw; width: 120vw; }
+
+    .intro-grid,
+    .choose-grid,
+    .closing-grid { grid-template-columns: 1fr; }
+
+    .sols-head-grid { grid-template-columns: 1fr; gap: 40px; }
+    .sols-figure { aspect-ratio: 4 / 3; max-height: none; }
+    .sols-head-text h2 { max-width: 13ch; }
+
+    .sol-1 .sol-body,
+    .sol-2 .sol-body,
+    .sol-4 .sol-body,
+    .sol-5 .sol-body { grid-template-columns: 1fr; }
+
+    .sol-2 .sol-list { order: 2; }
+    .sol-2 .sol-lead { order: 1; }
+    .sol-3 .sol-lead { grid-template-columns: 1fr; }
+    .sol-3 .sol-tag { grid-row: auto; margin-bottom: 10px; }
+    .sol-3 .sol-lead p:not(.sol-tag) { grid-column: 1; }
+    .sol-3 .sol-lead p + p { margin-top: 8px; }
+    .sol-3 .sol-list ul { grid-template-columns: repeat(2, 1fr); }
+    .sol-4 .sol-top { min-height: 0; }
+    .sol-4 .sol-title { margin-left: 0; padding-top: clamp(70px, 14vw, 140px); }
+
+    .steps { grid-template-columns: 1fr 1fr; }
+    .st2, .st3, .st4 { margin-top: 0; }
+    .step, .step + .step { padding: 30px 20px 40px 0; border-left: 0; }
+    .step:nth-child(even) { padding-left: 24px; border-left: 1px solid var(--charcoal); }
+  }
+
+  /* Mobile */
+
+  @media (max-width: 640px) {
+    .hero { padding-top: 38px; }
+    .hero-meta { font-size: 8px; letter-spacing: 1.2px; }
+    .hero h1 { font-size: clamp(54px, 14.2vw, 84px); }
+    .hero h1 .l2 { padding-left: 18px; }
+    .hero h1 .l3 { padding-left: 0; }
+    .hero h1 .l4 { padding-left: 34px; }
+    .hero-actions { flex-direction: column; align-items: stretch; }
+    .hero-actions .btn { width: 100%; }
+
+    .idx { padding: 20px 20px 10px; }
+    .idx::before { inset: 10px -8px -10px 8px; }
+    .idx-t { font-size: 22px; }
+
+    .intro h2 { font-size: clamp(50px, 13vw, 74px); }
+
+    .sols-figure { aspect-ratio: 1 / 1; }
+    .sols-head-text h2 { font-size: clamp(46px, 12.4vw, 70px); }
+
+    .sol-title { font-size: clamp(42px, 11.4vw, 64px); }
+    .sol-1 .sol-top { grid-template-columns: 1fr; gap: 6px; }
+    .sol-1 .sol-num { font-size: 110px; }
+    .sol-2 .sol-top { flex-direction: column; }
+    .sol-2 .sol-num { order: 0; font-size: 150px; }
+    .sol-3 .sol-num { font-size: 150px; }
+    .sol-3 .sol-list ul { grid-template-columns: 1fr; }
+    .sol-3 .sol-list li { min-height: 0; gap: 14px; }
+    .sol-4 .sol-num { position: relative; display: block; font-size: 150px; }
+    .sol-4 .sol-title { margin-top: -.18em; padding-top: 0; }
+    .sol-5 .sol-num { right: -8vw; font-size: 220px; opacity: .4; }
+    .sol-5 .sol-list ul { grid-template-columns: 1fr; }
+    .sol-goal { grid-template-columns: 1fr; gap: 26px; }
+    .sol-goal .btn { width: 100%; }
+
+    .steps { grid-template-columns: 1fr; }
+    .step, .step + .step, .step:nth-child(even) { padding: 28px 0 36px; border-left: 0; }
+    .step-n { font-size: 120px; }
+
+    .approach h2,
+    .choose h2,
+    .closing h2 { font-size: clamp(48px, 13vw, 72px); }
+  }
+</style>
