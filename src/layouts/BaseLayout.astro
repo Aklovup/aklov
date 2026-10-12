@@ -1,0 +1,192 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+const {
+  title = 'Aklov® — Websites, Business Systems & Digital Solutions',
+  description = 'Aklov designs distinctive websites and improves business systems, operational workflows, custom applications and integrations for growing businesses.',
+  contactHref = '/#contact',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#151515" />
+  <meta name="description" content={description} />
+  <title>{title}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <Header contactHref={contactHref} />
+
+  <main id="main">
+    <slot />
+  </main>
+
+  <Footer contactHref={contactHref} />
+</body>
+</html>
+
+<style is:global>
+  :root {
+    /* Brand palette */
+    --charcoal: #151515;
+    --ivory: #f5f2ea;
+    --gold: #d8bd78;
+    --stone: #77766f;
+
+    /* Derived tones */
+    --paper-deep: color-mix(in srgb, var(--ivory) 90%, var(--stone));
+    --gold-dark: color-mix(in srgb, var(--gold) 55%, var(--charcoal));
+    --body: color-mix(in srgb, var(--charcoal) 72%, var(--ivory));
+    --on-dark: color-mix(in srgb, var(--ivory) 74%, var(--charcoal));
+    --on-dark-dim: color-mix(in srgb, var(--ivory) 52%, var(--charcoal));
+    --line: color-mix(in srgb, var(--stone) 35%, var(--ivory));
+    --line-dark: color-mix(in srgb, var(--ivory) 19%, transparent);
+    --gold-soft: color-mix(in srgb, var(--gold) 80%, var(--ivory));
+
+    --display: "Instrument Serif", Georgia, serif;
+    --sans: "DM Sans", Arial, sans-serif;
+    --pad: clamp(20px, 3.4vw, 52px);
+    --max: 1800px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 24px;
+  }
+
+  body {
+    margin: 0;
+    background: var(--ivory);
+    color: var(--charcoal);
+    font-family: var(--sans);
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, p, ul { margin-top: 0; }
+
+  a { color: inherit; text-decoration: none; }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 5px;
+  }
+
+  ::selection { background: var(--gold); color: var(--charcoal); }
+
+  .skip-link {
+    position: absolute;
+    z-index: 20;
+    top: 12px;
+    left: var(--pad);
+    padding: 12px 18px;
+    background: var(--gold);
+    color: var(--charcoal);
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus { transform: translateY(0); }
+
+  /* Shared building blocks */
+
+  .wrap {
+    width: 100%;
+    max-width: var(--max);
+    margin-inline: auto;
+    padding-inline: var(--pad);
+  }
+
+  .mono {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    line-height: 1.6;
+    text-transform: uppercase;
+  }
+
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--gold-dark);
+  }
+
+  .kicker::before {
+    content: "";
+    flex: 0 0 26px;
+    width: 26px;
+    height: 1px;
+    background: currentColor;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    min-height: 52px;
+    padding: 0 24px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: transform .2s ease, background-color .2s ease, border-color .2s ease, color .2s ease;
+  }
+
+  .btn:active { transform: translateY(0); }
+  .btn-gold { background: var(--gold); color: var(--charcoal); }
+  .btn-dark { background: var(--charcoal); color: var(--ivory); }
+  .btn-ghost { border: 1px solid var(--stone); color: var(--ivory); }
+  .btn-line { border: 1px solid currentColor; }
+
+  .arc {
+    position: absolute;
+    z-index: 0;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(
+      circle,
+      transparent 61%,
+      rgba(216, 189, 120, .07) 62%,
+      rgba(216, 189, 120, .5) 66.5%,
+      rgba(216, 189, 120, .06) 71%,
+      transparent 72%
+    );
+  }
+
+  .arc::after {
+    content: "";
+    position: absolute;
+    inset: 11%;
+    border-radius: 50%;
+    border: 1px solid rgba(216, 189, 120, .22);
+  }
+
+  @media (hover: hover) {
+    .btn:hover { transform: translateY(-2px); }
+    .btn-gold:hover { background: var(--gold-soft); }
+    .btn-dark:hover { background: color-mix(in srgb, var(--charcoal) 85%, var(--gold)); }
+    .btn-ghost:hover { border-color: var(--ivory); }
+    .btn-line:hover { background: var(--charcoal); border-color: var(--charcoal); color: var(--ivory); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
