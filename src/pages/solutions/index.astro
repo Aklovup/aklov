@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { links } from '../../data/links';
 
 const email = 'aklovup@gmail.com';
 
@@ -32,6 +33,8 @@ const solutions = [
     goal: 'A website that represents your business well and gives visitors a clear path forward.',
     cta: 'Discuss a Website Project',
     subject: 'Website project',
+    projectsLabel: 'View Website Projects',
+    projectsHref: links.workWebsite,
   },
   {
     number: '02',
@@ -53,8 +56,10 @@ const solutions = [
       'CRM configuration and process improvement',
     ],
     goal: 'Better visibility into customer relationships, clearer next steps and a more reliable sales process.',
-    cta: 'Improve Your Customer Workflow',
+    cta: 'Discuss Customer & Sales Systems',
     subject: 'Customer and sales systems',
+    projectsLabel: 'View CRM Projects',
+    projectsHref: links.workCustomer,
   },
   {
     number: '03',
@@ -76,8 +81,10 @@ const solutions = [
       'Automated data handling and routine reporting',
     ],
     goal: 'Less avoidable manual work, more consistent processes and fewer tasks falling through the cracks.',
-    cta: 'Explore Workflow Automation',
+    cta: 'Discuss Workflow Automation',
     subject: 'Workflow automation',
+    projectsLabel: 'View Automation Projects',
+    projectsHref: links.workAutomation,
   },
   {
     number: '04',
@@ -101,6 +108,8 @@ const solutions = [
     goal: 'A more suitable way to manage work without forcing every process into a generic solution.',
     cta: 'Discuss a Custom Application',
     subject: 'Custom business application',
+    projectsLabel: 'View Application Projects',
+    projectsHref: links.workApplications,
   },
   {
     number: '05',
@@ -122,8 +131,10 @@ const solutions = [
       'Data consolidation and visibility improvements',
     ],
     goal: 'Better-connected tools, more accessible information and clearer operational visibility.',
-    cta: 'Connect Your Business Systems',
+    cta: 'Discuss Your Integration Needs',
     subject: 'Integrations and reporting',
+    projectsLabel: 'View Integration & Reporting Projects',
+    projectsHref: links.workIntegrations,
   },
 ];
 
@@ -277,9 +288,19 @@ const steps = [
             <p>{s.goal}</p>
           </div>
 
-          <a class="btn btn-line" href={mail(s.subject)}>
-            {s.cta} <span aria-hidden="true">↗</span>
-          </a>
+          <div class="sol-actions">
+            <a
+              class="btn btn-line"
+              href={mail(s.subject)}
+              aria-label={`${s.cta} (opens your email app)`}
+            >
+              {s.cta} <span aria-hidden="true">↗</span>
+            </a>
+
+            <a class="text-link" href={s.projectsHref}>
+              {s.projectsLabel} <span aria-hidden="true">→</span>
+            </a>
+          </div>
         </div>
       </div>
     </section>
@@ -598,6 +619,23 @@ const steps = [
   .sol-goal p { max-width: 30ch; font-family: var(--display); font-size: clamp(26px, 2.8vw, 42px); line-height: 1.12; letter-spacing: -.02em; }
   .is-dark .sol-goal .btn-line { color: var(--gold); }
 
+  /* Action group: one discussion button + one quieter project link */
+  .sol-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+
+  .text-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid currentColor;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .text-link span { font-family: var(--display); font-size: 20px; line-height: 1; }
+  .is-dark .text-link { color: var(--ivory); }
+
   /* 01 */
   .sol-1 .sol-top { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(20px, 3vw, 50px); align-items: end; margin-bottom: clamp(50px, 6vw, 90px); }
   .sol-1 .sol-num { font-size: clamp(120px, 19vw, 320px); }
@@ -734,6 +772,9 @@ const steps = [
 
   @media (hover: hover) {
     .is-dark .btn-line:hover { border-color: var(--gold); background: var(--gold); color: var(--charcoal); }
+    .text-link span { transition: transform .2s ease; }
+    .text-link:hover span { transform: translateX(4px); }
+    .is-dark .text-link:hover { color: var(--gold); }
     .idx-row { transition: padding .25s ease; }
     .idx-row:hover { padding-left: 8px; }
     .idx-row:hover .idx-t { color: var(--gold-dark); }
@@ -816,7 +857,9 @@ const steps = [
     .sol-5 .sol-num { right: -8vw; font-size: 220px; opacity: .4; }
     .sol-5 .sol-list ul { grid-template-columns: 1fr; }
     .sol-goal { grid-template-columns: 1fr; gap: 26px; }
-    .sol-goal .btn { width: 100%; }
+    .sol-actions { align-items: stretch; gap: 10px; }
+    .sol-actions .btn { width: 100%; }
+    .sol-actions .text-link { align-self: flex-start; }
 
     .steps { grid-template-columns: 1fr; }
     .step, .step + .step, .step:nth-child(even) { padding: 28px 0 36px; border-left: 0; }
