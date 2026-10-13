@@ -1,0 +1,73 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContactForm from '../../components/contact/ContactForm.astro';
+import { contact } from '../../data/contact';
+import { links } from '../../data/links';
+---
+<BaseLayout title={contact.metadata.title} description={contact.metadata.description}>
+  <div class="contact-page">
+    <div class="wrap contact-composition">
+      <section class="contact-introduction" aria-labelledby="contact-title">
+        <p class="kicker mono">{contact.eyebrow}</p>
+        <h1 id="contact-title">Let's talk about <em>what you're working on.</em></h1>
+        <div class="introduction-copy">
+          {contact.introduction.map((paragraph) => <p data-approved-copy>{paragraph}</p>)}
+        </div>
+      </section>
+      <div class="form-column"><ContactForm /></div>
+      <section class="direct-contact" aria-labelledby="direct-title">
+        <h2 id="direct-title">{contact.direct.heading}</h2>
+        <p data-approved-copy>{contact.direct.body}</p>
+        <div class="direct-links">
+          <a href={links.email}>{contact.email}</a>
+          <a href={links.linkedin} target="_blank" rel="noopener noreferrer">{contact.direct.linkedinLabel}</a>
+        </div>
+        <p class="signature">{contact.name} <span class="mono">Aklov</span></p>
+      </section>
+    </div>
+    <div class="closing-note">
+      <div class="wrap"><p data-approved-copy>{contact.closing}</p></div>
+    </div>
+  </div>
+</BaseLayout>
+<style>
+  .contact-page { background: var(--charcoal); color: var(--ivory); }
+  h1, h2, p { margin: 0; }
+  .contact-composition { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: clamp(36px, 6vw, 110px); row-gap: 48px; padding-block: clamp(40px, 5vw, 80px) clamp(48px, 6vw, 96px); }
+  .contact-introduction { grid-column: 1; grid-row: 1; }
+  .kicker { color: var(--gold); }
+  h1 { max-width: 13ch; margin-top: 28px; font: 400 clamp(56px, 6.4vw, 112px)/.97 var(--display); letter-spacing: -.04em; }
+  h1 em { color: var(--gold); }
+  .introduction-copy { max-width: 54ch; margin-top: 32px; color: var(--on-dark); font-size: 14px; line-height: 1.85; }
+  .introduction-copy p + p { margin-top: 18px; }
+  .form-column { grid-column: 2; grid-row: 1 / span 2; min-width: 0; align-self: start; }
+  .direct-contact { grid-column: 1; grid-row: 2; align-self: end; border-top: 1px solid var(--line-dark); padding-top: 28px; }
+  h2 { font: 400 clamp(28px, 2.7vw, 42px)/1.1 var(--display); letter-spacing: -.02em; }
+  .direct-contact > p:not(.signature) { margin-top: 14px; color: var(--on-dark); font-size: 13px; line-height: 1.8; }
+  .direct-links { display: flex; flex-direction: column; align-items: start; gap: 8px; margin-top: 20px; }
+  .direct-links a { display: flex; align-items: center; min-height: 44px; border-bottom: 1px solid var(--line-dark); color: var(--gold); font-size: 15px; line-height: 1.5; overflow-wrap: anywhere; transition: border-color .2s ease, color .2s ease; }
+  .direct-links a:hover { border-color: var(--gold); color: var(--ivory); }
+  .signature { display: flex; align-items: baseline; flex-wrap: wrap; gap: 16px; margin-top: 30px; color: var(--on-dark); font-size: 12px; line-height: 1.6; }
+  .signature .mono { color: var(--gold); font-size: 9px; }
+  .closing-note { background: var(--gold); color: var(--charcoal); padding-block: clamp(30px, 4vw, 60px); }
+  .closing-note p { max-width: 48ch; font: 400 clamp(26px, 3vw, 44px)/1.2 var(--display); letter-spacing: -.015em; }
+  @media (max-width: 1000px) {
+    .contact-composition { column-gap: 28px; }
+    h1 { font-size: clamp(52px, 6.8vw, 72px); }
+  }
+  @media (max-width: 760px) {
+    .contact-composition { grid-template-columns: 1fr; grid-template-rows: auto auto auto; row-gap: 36px; }
+    .contact-introduction { grid-area: 1 / 1; }
+    .form-column { grid-area: 2 / 1; }
+    .direct-contact { grid-area: 3 / 1; }
+    h1 { max-width: 15ch; font-size: clamp(54px, 10vw, 80px); }
+    .introduction-copy { max-width: 58ch; }
+  }
+  @media (max-width: 640px) {
+    .contact-composition { padding-top: 32px; row-gap: 32px; }
+    h1 { margin-top: 24px; font-size: clamp(49px, 12.5vw, 76px); }
+    .introduction-copy { margin-top: 26px; }
+    .direct-contact { padding-top: 26px; }
+    .closing-note p { max-width: 30ch; }
+  }
+</style>

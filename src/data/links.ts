@@ -1,8 +1,8 @@
 export const links = {
   work: '/work/',
-  // Pending Contact page (/contact/): use the existing email as a working placeholder.
-  // Replace this destination here when the Contact page is implemented.
-  contact: 'mailto:aklovup@gmail.com',
+  contact: '/contact/',
+  email: 'mailto:aklovup@gmail.com',
+  linkedin: 'https://www.linkedin.com/in/loveth-akpochimora-38283b226',
   workWebsite: '/work/?category=websites',
   workCustomer: '/work/?category=customer-systems',
   workAutomation: '/work/?category=automation',
