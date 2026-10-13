@@ -144,6 +144,7 @@ try {
     assert.equal(await dialog.locator('.external-links a').count(), (project.externalUrl ? 1 : 0) + (project.externalLinks?.length || 0));
     await page.keyboard.press('Escape');
     await page.waitForFunction(() => !document.querySelector('dialog').open && !document.querySelector('[data-dialog-content]').children.length && !new URL(location.href).searchParams.has('project'));
+    await page.waitForFunction((slug) => document.activeElement?.getAttribute('data-project-open') === slug, project.slug);
     assert.ok(await trigger.evaluate((el) => el === document.activeElement), 'Focus was not restored to the project card control.');
     assert.equal(await page.evaluate(() => document.documentElement.style.overflow), '');
   }

@@ -36,6 +36,19 @@ const details = await Promise.all(projects.map(async (project) => ({
     let scrollLocked = false;
     let pointerStartedOutside = false;
     let activeSlug: string | undefined;
+    let waitingForBack = false;
+    let returnTarget: HTMLButtonElement | undefined;
+
+    const restoreFocus = () => {
+      const target = returnTarget || opener;
+      if (!target) return;
+      requestAnimationFrame(() => {
+        if (dialog.open) return;
+        if (target.isConnected && !target.closest('[hidden]')) target.focus({ preventScroll: true });
+        else document.querySelector<HTMLButtonElement>('[data-filter][aria-pressed="true"]')?.focus({ preventScroll: true });
+        returnTarget = undefined;
+      });
+    };
 
     const outsideDialog = (event: MouseEvent) => {
       const box = dialog.getBoundingClientRect();
@@ -43,10 +56,17 @@ const details = await Promise.all(projects.map(async (project) => ({
     };
     const syncFromUrl = () => {
       const slug = resolveProjectSlug(new URL(window.location.href).searchParams.get('project'), references);
-      if (!slug) { if (dialog.open) dialog.close(); return; }
+      if (!slug) {
+        waitingForBack = false;
+        if (dialog.open) dialog.close();
+        else restoreFocus();
+        return;
+      }
       if (dialog.open && activeSlug === slug) return;
       const template = templates.find((item) => item.dataset.projectDetail === slug)!;
       opener = triggers.find((trigger) => trigger.dataset.projectOpen === slug);
+      returnTarget = undefined;
+      waitingForBack = false;
       content.querySelectorAll('video').forEach((video) => video.pause());
       content.replaceChildren(template.content.cloneNode(true));
       activeSlug = slug;
@@ -67,6 +87,7 @@ const details = await Promise.all(projects.map(async (project) => ({
     const requestClose = () => {
       if (!dialog.open) return;
       const ownedEntry = history.state?.aklovProject;
+      waitingForBack = Boolean(ownedEntry);
       dialog.close();
       if (ownedEntry) history.back();
       else history.replaceState(history.state, '', urlForProject(new URL(window.location.href)));
@@ -112,9 +133,9 @@ const details = await Promise.all(projects.map(async (project) => ({
       document.documentElement.style.overflow = previousOverflow;
       document.documentElement.style.scrollbarGutter = previousGutter;
       scrollLocked = false;
-      if (opener?.isConnected && !opener.closest('[hidden]')) opener.focus({ preventScroll: true });
-      else document.querySelector<HTMLButtonElement>('[data-filter][aria-pressed="true"]')?.focus({ preventScroll: true });
+      returnTarget = opener;
       opener = undefined;
+      if (!waitingForBack) restoreFocus();
     });
     window.addEventListener('popstate', syncFromUrl);
     syncFromUrl();
