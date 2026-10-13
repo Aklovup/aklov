@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { projectCategories } from '../../data/projectCategories';
 import ProjectCard from './ProjectCard.astro';
+import ProjectDialog from './ProjectDialog.astro';
 
 interface Props { projects: CollectionEntry<'projects'>[]; }
 const { projects } = Astro.props;
@@ -43,6 +44,7 @@ const countFor = (id: string) => projects.filter(({ data }) =>
     <p class="empty-state" hidden data-empty-state>No projects in this category yet.</p>
   </div>
 </section>
+<ProjectDialog projects={projects} />
 
 <script>
   import { filterFromUrl, matchesFilter, urlForFilter } from '../../scripts/projectFilter';

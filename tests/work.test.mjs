@@ -1,17 +1,16 @@
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { stripTypeScriptTypes } from 'node:module';
 import test from 'node:test';
 import vm from 'node:vm';
 import { filterFromUrl, matchesFilter, urlForFilter } from '../src/scripts/projectFilter.ts';
+import { resolveProjectSlug, urlForProject } from '../src/scripts/projectState.ts';
+import { readProjects } from './project-content.mjs';
 
-const projects = readdirSync(new URL('../src/content/projects/', import.meta.url))
-  .filter((file) => file.endsWith('.json'))
-  .map((file) => JSON.parse(readFileSync(new URL('../src/content/projects/' + file, import.meta.url), 'utf8')))
-  .sort((a, b) => a.order - b.order);
+const projects = readProjects();
 
 const expectedCounts = {
-  all: 10, websites: 5, 'customer-systems': 2, automation: 5, applications: 2, integrations: 6,
+  all: 10, websites: 5, 'customer-systems': 2, automation: 5, applications: 2, integrations: 7,
 };
 
 test('all ten projects have unique slugs, ordered entries and stable media identifiers', () => {
@@ -19,10 +18,49 @@ test('all ten projects have unique slugs, ordered entries and stable media ident
   assert.equal(new Set(projects.map((p) => p.slug)).size, 10);
   assert.equal(new Set(projects.map((p) => p.cover.id)).size, 10);
   assert.deepEqual(projects.map((p) => p.order), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-  assert.ok(projects.every((p) => !p.cover.url && !p.caseStudy));
+  assert.ok(projects.every((p) => !p.cover.url && p.headline && p.body));
   assert.equal(projects.filter((p) => p.cover.type === 'gif').length, 2);
   assert.equal(projects.filter((p) => p.projectType === 'Independent Concept').length, 2);
-  assert.ok(projects.filter((p) => /Agent$/.test(p.title)).every((p) => p.classificationNote.includes('provisional')));
+  assert.equal(projects.filter((p) => p.projectType === 'Client Project').length, 8);
+  assert.ok(projects.every((p) => !p.classificationNote));
+  assert.equal(projects.flatMap((p) => p.media).length, 21);
+  assert.equal(new Set(projects.flatMap((p) => p.media.map((media) => media.id))).size, 21);
+});
+
+test('case-study structure distinguishes client implementations and independent concepts', () => {
+  for (const project of projects) {
+    assert.ok(project.body.includes('### Overview'));
+    if (project.projectType === 'Client Project') {
+      for (const heading of ['The challenge', 'What I built', 'The outcome', 'Technologies']) assert.ok(project.body.includes('### ' + heading));
+    } else {
+      for (const heading of ['The design direction', 'What the concept explores', 'Outcome', 'Important classification']) assert.ok(project.body.includes('### ' + heading));
+      assert.equal(project.externalUrl, undefined);
+      assert.ok(!project.body.includes('### The challenge'));
+    }
+  }
+  assert.ok(projects.find((p) => p.slug === 'moving-company-crm').description.startsWith('A completed Zoho CRM implementation'));
+  assert.ok(projects.find((p) => p.slug === 'wound-concierge').body.includes('defined manual administrative steps where necessary'));
+  assert.ok(projects.find((p) => p.slug === 'instantresidency-booking').body.includes('structured outputs for SMS and WhatsApp communication'));
+});
+
+test('project deep links resolve canonical and legacy slugs; unknown values do not open a project', () => {
+  for (const project of projects) {
+    assert.equal(resolveProjectSlug(project.slug, projects), project.slug);
+    for (const alias of project.aliases) assert.equal(resolveProjectSlug(alias, projects), project.slug);
+  }
+  assert.equal(resolveProjectSlug('unknown-project', projects), undefined);
+  assert.equal(resolveProjectSlug(null, projects), undefined);
+});
+
+test('project URL changes preserve category, unrelated parameters and hash', () => {
+  const current = new URL('https://aklov.example/work/?category=applications&source=solutions#projects');
+  const next = urlForProject(current, 'impex-automotive');
+  assert.equal(next.searchParams.get('category'), 'applications');
+  assert.equal(next.searchParams.get('project'), 'impex-automotive');
+  assert.equal(next.searchParams.get('source'), 'solutions');
+  assert.equal(next.hash, '#projects');
+  assert.equal(urlForProject(next).href, current.href);
+  assert.equal(current.searchParams.has('project'), false);
 });
 
 test('every filter matches both primary and additional categories', () => {

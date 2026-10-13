@@ -2,10 +2,15 @@ import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { readProjects } from './project-content.mjs';
 
 const base = 'http://127.0.0.1:4321';
 const output = 'artifacts/work-review';
-const counts = { all: 10, websites: 5, 'customer-systems': 2, automation: 5, applications: 2, integrations: 6 };
+const counts = { all: 10, websites: 5, 'customer-systems': 2, automation: 5, applications: 2, integrations: 7 };
+const projects = readProjects();
+const normalize = (value) => value.replace(/\s+/g, ' ').trim();
 const server = spawn('npm', ['run', 'preview', '--', '--host', '127.0.0.1', '--port', '4321'], { stdio: 'inherit' });
 let browser;
 
@@ -74,7 +79,9 @@ try {
   assert.equal(await page.locator('.media-placeholder').count(), 10);
   assert.equal(await page.locator('.project-media img, .project-media video').count(), 0);
   assert.equal(await page.locator('[data-project] a[target="_blank"]').count(), 2);
-  assert.equal(await page.locator('[data-project] button, dialog').count(), 0);
+  assert.equal(await page.locator('[data-project-open]').count(), 10);
+  assert.equal(await page.locator('dialog').count(), 1);
+  assert.equal(await page.locator('dialog').isVisible(), false);
   for (const width of [320, 390, 640, 768, 1000, 1440, 1920]) {
     await page.setViewportSize({ width, height: 1000 });
     await checkOverflow(page);
@@ -111,6 +118,114 @@ try {
   await page.goto(base + '/');
   assert.equal(await page.locator('h1').innerText(), 'Better systems.\nBetter business.');
   assert.equal(await page.locator('.service').count(), 5);
+
+  // All project bodies must match the approved source, without missing paragraphs.
+  await page.goto(base + '/work/?source=review#projects');
+  await checkFilter(page, 'all', 10);
+  const dialog = page.getByRole('dialog');
+  const close = dialog.locator('[data-dialog-close]');
+  for (const project of projects) {
+    const trigger = page.locator('[data-project-open="' + project.slug + '"]');
+    await trigger.click();
+    await dialog.waitFor({ state: 'visible' });
+    assert.equal(await dialog.locator('h2').innerText(), project.title);
+    assert.equal(await dialog.locator('.detail-headline').innerText(), project.headline);
+    assert.equal(await dialog.locator('.detail-introduction').innerText(), project.description);
+    assert.equal(normalize(await dialog.locator('.case-study-copy').innerText()), normalize(project.body.replace(/^### /gm, '')));
+    assert.equal(new URL(page.url()).searchParams.get('project'), project.slug);
+    assert.equal(new URL(page.url()).searchParams.get('source'), 'review');
+    assert.equal(new URL(page.url()).hash, '#projects');
+    assert.equal(await page.evaluate(() => document.documentElement.style.overflow), 'hidden');
+    assert.equal(await dialog.locator('img, video').count(), 0, 'Missing media created an empty or broken element.');
+    if (project.slug === 'moving-company-crm') assert.equal(await dialog.locator('.media-placeholder').count(), 0);
+    else assert.equal(await dialog.locator('.media-placeholder').count(), 1);
+    assert.equal(await dialog.locator('.detail-type').innerText(), project.projectType);
+    assert.equal(await dialog.locator('.external-links a').count(), (project.externalUrl ? 1 : 0) + (project.externalLinks?.length || 0));
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(() => !document.querySelector('dialog').open && !document.querySelector('[data-dialog-content]').children.length && !new URL(location.href).searchParams.has('project'));
+    assert.ok(await trigger.evaluate((el) => el === document.activeElement), 'Focus was not restored to the project card control.');
+    assert.equal(await page.evaluate(() => document.documentElement.style.overflow), '');
+  }
+
+  // Card clicks, keyboard activation, focus boundaries, backdrop and scroll behavior.
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.locator('[data-project="divine-health-black-onyx"] h2').click();
+  await dialog.waitFor({ state: 'visible' });
+  assert.equal(await dialog.locator('h2').innerText(), 'Divine Health & Wellness / Black Onyx');
+  await page.keyboard.press('Shift+Tab');
+  assert.ok(await dialog.locator('.external-links a').last().evaluate((el) => el === document.activeElement));
+  await page.keyboard.press('Tab');
+  assert.ok(await close.evaluate((el) => el === document.activeElement));
+  await dialog.locator('h2').click();
+  assert.ok(await dialog.isVisible(), 'Clicking dialog content closed it.');
+  await page.screenshot({ path: output + '/project-desktop.png' });
+  await dialog.evaluate((el) => { el.scrollTop = el.scrollHeight; });
+  assert.ok(await dialog.evaluate((el) => el.scrollTop > 0));
+  const closeBox = await close.boundingBox();
+  assert.ok(closeBox.y >= 0 && closeBox.y < 1000, 'Close control disappeared during long-content scrolling.');
+  await page.mouse.click(5, 5);
+  await page.waitForFunction(() => !document.querySelector('dialog').open && !new URL(location.href).searchParams.has('project'));
+
+  for (const width of [320, 390, 640, 768, 1000, 1440, 1920]) {
+    await page.setViewportSize({ width, height: 844 });
+    const trigger = page.locator('[data-project-open="impex-automotive"]');
+    await trigger.focus();
+    await page.keyboard.press('Enter');
+    await dialog.waitFor({ state: 'visible' });
+    assert.equal(await dialog.evaluate((el) => el.scrollWidth > el.clientWidth + 1), false, 'Popup overflow at width ' + width);
+    if (width <= 640) {
+      const box = await dialog.boundingBox();
+      assert.equal(Math.round(box.width), width);
+      assert.equal(Math.round(box.height), 844);
+    }
+    if (width === 390) await page.screenshot({ path: output + '/project-mobile.png' });
+    await close.click();
+    await page.waitForFunction(() => !document.querySelector('dialog').open && !new URL(location.href).searchParams.has('project'));
+  }
+
+  // Back/Forward reconstructs the modal as well as the existing category filter.
+  await page.goto(base + '/work/?category=applications&source=review');
+  await checkFilter(page, 'applications', 2);
+  await page.locator('[data-project-open="impex-automotive"]').click();
+  await page.goBack();
+  await dialog.waitFor({ state: 'hidden' });
+  await checkFilter(page, 'applications', 2);
+  await page.goForward();
+  await dialog.waitFor({ state: 'visible' });
+  assert.equal(await dialog.locator('h2').innerText(), 'Impex Automotive');
+  await close.click();
+  await page.waitForFunction(() => !document.querySelector('dialog').open && !new URL(location.href).searchParams.has('project'));
+  await checkFilter(page, 'applications', 2);
+
+  // Direct links can show a project outside the selected category; both parameters are retained.
+  await page.goto(base + '/work/?category=websites&project=impex-automotive');
+  await dialog.waitFor({ state: 'visible' });
+  await checkFilter(page, 'websites', 5);
+  await close.click();
+  await page.waitForFunction(() => !document.querySelector('dialog').open && !new URL(location.href).searchParams.has('project'));
+  await checkFilter(page, 'websites', 5);
+  await page.goto(base + '/work/?category=websites&project=unknown');
+  await checkFilter(page, 'websites', 5);
+  assert.equal(await dialog.isVisible(), false);
+  for (const project of projects.filter((item) => item.aliases.length)) {
+    await page.goto(base + '/work/?project=' + project.aliases[0]);
+    await dialog.waitFor({ state: 'visible' });
+    assert.equal(await dialog.locator('h2').innerText(), project.title);
+  }
+  await page.goto(base + '/work/?project=vera-skincare-concept');
+  await dialog.waitFor({ state: 'visible' });
+  await page.screenshot({ path: output + '/concept-desktop.png' });
+
+  // The portable preview uses the actual built CSS and JS and works from a file URL.
+  const preview = await context.newPage();
+  await preview.goto(pathToFileURL(resolve(output + '/aklov-work-preview.html')).href);
+  await checkFilter(preview, 'all', 10);
+  await preview.locator('[data-filter="applications"]').click();
+  await checkFilter(preview, 'applications', 2);
+  await preview.locator('[data-project-open="impex-automotive"]').click();
+  await preview.getByRole('dialog').waitFor({ state: 'visible' });
+  assert.equal(await preview.getByRole('dialog').locator('h2').innerText(), 'Impex Automotive');
+  await preview.close();
   assert.deepEqual(errors, []);
 
   const noJs = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
@@ -119,9 +234,10 @@ try {
   assert.equal(await noJsPage.locator('[data-project]:visible').count(), 10);
   assert.equal(await noJsPage.locator('[data-filters]:visible').count(), 0);
   assert.ok(await noJsPage.locator('noscript').isVisible());
+  assert.equal(await noJsPage.locator('[data-project-open]:visible').count(), 0);
   await noJs.close();
   await context.close();
-  console.log('Passed: every category, direct URLs, browser history, no reload, keyboard controls, reduced motion, placeholders, navigation, no-JS fallback and seven viewport widths.');
+  console.log('Passed: all ten complete project bodies, project/category URLs and aliases, Back/Forward, card and keyboard activation, dismissal, focus boundaries/restoration, background scroll locking, long-content scrolling, media placeholders, external links, no-JS fallback, portable HTML and seven viewport widths.');
 } finally {
   await browser?.close();
   server.kill('SIGTERM');

@@ -31,6 +31,9 @@ const categories = [...new Set([data.primaryCategory, ...data.additionalCategori
     </p>
     <div class="card-footer">
       <span class="details-pending">Project details forthcoming</span>
+      <button type="button" class="project-open" data-project-open={data.slug} aria-haspopup="dialog" aria-controls="project-dialog" aria-label={`View project: ${data.title}`} hidden>
+        View project <span aria-hidden="true">→</span>
+      </button>
       {data.externalUrl && (
         <a href={data.externalUrl} target="_blank" rel="noopener noreferrer" aria-label={`Visit external website for ${data.title} (opens in a new tab)`}>
           Visit website <span aria-hidden="true">↗</span>
@@ -73,10 +76,17 @@ const categories = [...new Set([data.primaryCategory, ...data.additionalCategori
     line-height: 1.6;
   }
   .details-pending { color: var(--body); }
+  .project-open { display: inline-flex; align-items: center; gap: 14px; min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--charcoal); font: 600 12px var(--sans); cursor: pointer; }
+  .project-open[hidden], .details-pending[hidden] { display: none; }
+  .project-open:focus-visible { outline-color: var(--charcoal); }
+  .project-open span { font-size: 19px; transition: transform .2s ease; }
+  .project-card[data-can-open] { cursor: pointer; }
   .card-footer a { display: inline-flex; align-items: center; gap: 14px; min-height: 44px; font-weight: 600; }
   .card-footer a span { font-size: 19px; transition: transform .2s ease; }
   .card-footer a:focus-visible { outline-color: var(--charcoal); }
   @media (hover: hover) {
+    .project-open:hover { color: var(--gold-dark); }
+    .project-open:hover span { transform: translateX(3px); }
     .card-footer a:hover { color: var(--gold-dark); }
     .card-footer a:hover span { transform: translate(2px, -2px); }
   }

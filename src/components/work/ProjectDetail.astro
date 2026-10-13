@@ -1,0 +1,80 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { categoryLabel } from '../../data/projectCategories';
+import ProjectMediaGallery from './ProjectMediaGallery.astro';
+
+interface Props { project: CollectionEntry<'projects'>; }
+const { project } = Astro.props;
+const { data } = project;
+const number = String(data.order).padStart(2, '0');
+const categories = [...new Set([data.primaryCategory, ...data.additionalCategories])];
+const externalLinks = [
+  ...(data.externalUrl ? [{ label: 'Visit Website', url: data.externalUrl }] : []),
+  ...data.externalLinks,
+];
+---
+
+<article class="project-detail" data-dialog-project={data.slug}>
+  <div class="detail-controls">
+    <span class="mono">Project / {number}</span>
+    <button type="button" data-dialog-close autofocus aria-label="Close project">
+      Close <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  <div class="detail-body">
+    <header class="detail-header">
+      <p class="detail-type">{data.projectType}</p>
+      <h2 id="project-dialog-title">{data.title}</h2>
+      <p class="detail-headline">{data.headline}</p>
+      <p class="detail-introduction">{data.description}</p>
+      <ul class="detail-categories" aria-label="Project categories">
+        {categories.map((category) => <li>{categoryLabel(category)}</li>)}
+      </ul>
+    </header>
+    <div class="detail-layout">
+      <div class="detail-copy">
+        <div class="case-study-copy"><slot /></div>
+        {!!externalLinks.length && (
+          <nav class="external-links" aria-label="External project websites">
+            {externalLinks.map((link) => (
+              <a href={link.url} target="_blank" rel="noopener noreferrer" aria-label={`${link.label} for ${data.title} (opens in a new tab)`}>
+                {link.label} <span aria-hidden="true">↗</span>
+              </a>
+            ))}
+          </nav>
+        )}
+      </div>
+      <div class="detail-media"><ProjectMediaGallery project={project} /></div>
+    </div>
+  </div>
+</article>
+
+<style>
+  .detail-controls { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 12px clamp(20px, 3vw, 48px); border-bottom: 1px solid var(--line); background: var(--ivory); }
+  .detail-controls .mono { color: var(--gold-dark); }
+  .detail-controls button { display: inline-flex; align-items: center; gap: 18px; min-height: 44px; padding: 0 4px; border: 0; background: transparent; color: var(--charcoal); font: 600 12px var(--sans); cursor: pointer; }
+  .detail-controls button span { font-size: 24px; font-weight: 400; }
+  .detail-controls button:focus-visible, .external-links a:focus-visible { outline-color: var(--charcoal); outline-offset: 3px; }
+  .detail-body { padding: clamp(28px, 4vw, 64px) clamp(20px, 3vw, 48px) clamp(36px, 5vw, 80px); }
+  .detail-type { margin: 0 0 12px; color: var(--gold-dark); font-size: 11px; line-height: 1.6; }
+  h2 { margin: 0; font-family: var(--display); font-size: clamp(26px, 2.5vw, 38px); font-weight: 400; line-height: 1.1; letter-spacing: -.02em; }
+  .detail-headline { max-width: 25ch; margin: 28px 0 24px; font-family: var(--display); font-size: clamp(40px, 5.8vw, 88px); font-weight: 400; line-height: .98; letter-spacing: -.035em; overflow-wrap: anywhere; }
+  .detail-introduction { max-width: 64ch; margin: 0; color: var(--body); font-size: 14px; line-height: 1.9; }
+  .detail-categories { display: flex; flex-wrap: wrap; gap: 12px 26px; list-style: none; padding: 18px 0; margin: 28px 0 0; border-block: 1px solid var(--line); color: var(--gold-dark); font-size: 11px; line-height: 1.7; font-weight: 600; }
+  .detail-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .85fr); align-items: start; gap: clamp(32px, 5vw, 80px); margin-top: clamp(28px, 4vw, 56px); }
+  .detail-copy, .detail-media { min-width: 0; }
+  .detail-copy :global(h3) { margin: 32px 0 16px; padding-top: 24px; border-top: 1px solid var(--line); font-family: var(--display); font-size: 32px; font-weight: 400; line-height: 1.1; letter-spacing: -.02em; }
+  .detail-copy :global(h3:first-child) { margin-top: 0; padding-top: 0; border: 0; }
+  .detail-copy :global(p) { margin: 0; color: var(--body); font-size: 14px; line-height: 1.9; overflow-wrap: anywhere; }
+  .detail-copy :global(p + p) { margin-top: 18px; }
+  .external-links { display: flex; flex-wrap: wrap; gap: 12px 30px; margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .external-links a { display: inline-flex; align-items: center; gap: 16px; min-height: 44px; font-size: 12px; font-weight: 600; }
+  @media (hover: hover) { .external-links a:hover, .detail-controls button:hover { color: var(--gold-dark); } }
+  @media (max-width: 1000px) { .detail-layout { grid-template-columns: 1fr; } .detail-copy { max-width: 66ch; } }
+  @media (max-width: 640px) {
+    .detail-controls { padding-top: max(12px, env(safe-area-inset-top)); padding-inline: max(20px, env(safe-area-inset-left)) max(20px, env(safe-area-inset-right)); }
+    .detail-body { padding-inline: max(20px, env(safe-area-inset-left)) max(20px, env(safe-area-inset-right)); padding-bottom: max(40px, env(safe-area-inset-bottom)); }
+    .detail-headline { font-size: clamp(40px, 10.8vw, 62px); }
+    .detail-categories { gap: 10px 18px; }
+  }
+</style>

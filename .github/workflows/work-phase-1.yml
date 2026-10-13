@@ -1,4 +1,4 @@
-name: Work page Phase 1 validation
+name: Work page validation
 
 on:
   pull_request:
@@ -25,6 +25,8 @@ jobs:
         run: npm install --no-save --package-lock=false playwright
       - name: Build the static site
         run: npm run build
+      - name: Package a standalone Work page preview
+        run: node tests/make-preview.mjs
       - name: Check content and filtering logic
         run: node --test --test-isolation=none tests/work.test.mjs
       - name: Install the test browser
@@ -35,6 +37,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: work-phase-1-review
+          name: work-phase-2-review
           path: artifacts/work-review/
           if-no-files-found: ignore
