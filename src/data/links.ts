@@ -1,7 +1,7 @@
 export const links = {
-  workWebsite: '/work/websites/',
-  workCustomer: '/work/customer-systems/',
-  workAutomation: '/work/automation/',
-  workApplications: '/work/applications/',
-  workIntegrations: '/work/integrations/',
+  workWebsite: '/work/?category=websites',
+  workCustomer: '/work/?category=customer-systems',
+  workAutomation: '/work/?category=automation',
+  workApplications: '/work/?category=applications',
+  workIntegrations: '/work/?category=integrations',
 };

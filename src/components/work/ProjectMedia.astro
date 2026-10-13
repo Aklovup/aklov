@@ -1,0 +1,104 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  cover: CollectionEntry<'projects'>['data']['cover'];
+  number: string;
+  title: string;
+}
+const { cover, number, title } = Astro.props;
+const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'Video preview' : 'Image preview';
+---
+
+<figure class="project-media" data-media-id={cover.id} data-media-type={cover.type}>
+  {cover.url ? (
+    cover.type === 'video' ? (
+      <video
+        controls
+        playsinline
+        preload="none"
+        poster={cover.poster}
+        width={cover.width}
+        height={cover.height}
+        aria-label={cover.alt}
+      >
+        <source src={cover.url} />
+        <a href={cover.url}>View video: {title}</a>
+      </video>
+    ) : (
+      <img
+        src={cover.url}
+        alt={cover.alt}
+        width={cover.width}
+        height={cover.height}
+        loading="lazy"
+        decoding="async"
+      />
+    )
+  ) : (
+    <div class="media-placeholder" role="img" aria-label={`Media placeholder for ${title}; ${label.toLowerCase()} pending.`}>
+      <div class="placeholder-top"><span>{label}</span><span>Media placeholder</span></div>
+      <span class="placeholder-number" aria-hidden="true">{number}</span>
+      <div class="placeholder-bottom"><span>{cover.id}</span><span>Preview pending</span></div>
+    </div>
+  )}
+  {cover.caption && <figcaption>{cover.caption}</figcaption>}
+</figure>
+
+<style>
+  .project-media { margin: 0; }
+  .project-media img,
+  .project-media video,
+  .media-placeholder { display: block; width: 100%; aspect-ratio: 8 / 5; }
+  .project-media img,
+  .project-media video { height: auto; object-fit: contain; background: var(--charcoal); }
+  .media-placeholder {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    padding: clamp(18px, 2.2vw, 36px);
+    background: var(--charcoal);
+    color: var(--ivory);
+  }
+  .media-placeholder::before {
+    content: "";
+    position: absolute;
+    inset: 14px;
+    border: 1px solid var(--line-dark);
+    pointer-events: none;
+  }
+  .placeholder-top,
+  .placeholder-bottom {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 10px;
+    line-height: 1.6;
+  }
+  .placeholder-top { color: var(--gold); letter-spacing: 1.2px; text-transform: uppercase; }
+  .placeholder-bottom { color: var(--on-dark); }
+  .placeholder-bottom span:first-child { overflow-wrap: anywhere; }
+  .placeholder-bottom span:last-child { flex-shrink: 0; }
+  .placeholder-number {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: transparent;
+    -webkit-text-stroke: 1px var(--gold);
+    font-family: var(--display);
+    font-size: clamp(90px, 14vw, 240px);
+    line-height: .8;
+    letter-spacing: -.05em;
+  }
+  figcaption { margin-top: 12px; color: var(--body); font-size: 12px; line-height: 1.6; }
+  @media (max-width: 640px) {
+    .placeholder-top, .placeholder-bottom { font-size: 9px; gap: 10px; }
+    .placeholder-top { letter-spacing: .8px; }
+    .placeholder-number { font-size: clamp(100px, 30vw, 170px); }
+  }
+</style>

@@ -1,0 +1,88 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { categoryLabel } from '../../data/projectCategories';
+import ProjectMedia from './ProjectMedia.astro';
+
+interface Props { project: CollectionEntry<'projects'>; index: number; }
+const { project, index } = Astro.props;
+const { data } = project;
+const number = String(data.order).padStart(2, '0');
+const categories = [...new Set([data.primaryCategory, ...data.additionalCategories])];
+---
+
+<article
+  class="project-card"
+  data-project={data.slug}
+  data-categories={categories.join(' ')}
+  data-layout={index % 4}
+  aria-labelledby={`project-${data.slug}`}
+>
+  <ProjectMedia cover={data.cover} number={number} title={data.title} />
+  <div class="card-copy">
+    <div class="card-category">
+      <span class="project-number">{number}</span>
+      <span>{categoryLabel(data.primaryCategory)}</span>
+    </div>
+    <h2 id={`project-${data.slug}`}>{data.title}</h2>
+    <p class="project-description">{data.description}</p>
+    <p class="project-type">
+      {data.projectType}
+      {data.classificationNote && <span class="classification-note"> — {data.classificationNote}</span>}
+    </p>
+    <div class="card-footer">
+      <span class="details-pending">Project details forthcoming</span>
+      {data.externalUrl && (
+        <a href={data.externalUrl} target="_blank" rel="noopener noreferrer" aria-label={`Visit external website for ${data.title} (opens in a new tab)`}>
+          Visit website <span aria-hidden="true">↗</span>
+        </a>
+      )}
+    </div>
+  </div>
+</article>
+
+<style>
+  .project-card { min-width: 0; }
+  .project-card[hidden] { display: none !important; }
+  .card-copy { padding-top: 24px; }
+  .card-category { display: flex; gap: 18px; color: var(--gold-dark); font-size: 11px; font-weight: 600; line-height: 1.6; }
+  .project-number { font-variant-numeric: tabular-nums; }
+  h2 {
+    max-width: 20ch;
+    margin: 18px 0;
+    font-family: var(--display);
+    font-size: clamp(34px, 3.6vw, 66px);
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -.03em;
+    overflow-wrap: anywhere;
+  }
+  .project-description { max-width: 58ch; margin: 0; color: var(--body); font-size: 14px; line-height: 1.85; }
+  .project-type { margin: 20px 0 0; color: var(--body); font-size: 12px; line-height: 1.7; }
+  .classification-note { font-style: italic; }
+  .card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 20px;
+    min-height: 58px;
+    margin-top: 22px;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .details-pending { color: var(--body); }
+  .card-footer a { display: inline-flex; align-items: center; gap: 14px; min-height: 44px; font-weight: 600; }
+  .card-footer a span { font-size: 19px; transition: transform .2s ease; }
+  .card-footer a:focus-visible { outline-color: var(--charcoal); }
+  @media (hover: hover) {
+    .card-footer a:hover { color: var(--gold-dark); }
+    .card-footer a:hover span { transform: translate(2px, -2px); }
+  }
+  @media (max-width: 640px) {
+    .card-copy { padding-top: 20px; }
+    h2 { font-size: clamp(34px, 8.5vw, 48px); }
+    .card-category { gap: 12px; }
+  }
+</style>

@@ -1,0 +1,21 @@
+{
+  "slug": "instantresidency-booking-agent",
+  "title": "InstantResidency Booking Agent",
+  "description": "An AI-powered consultation booking workflow integrating calendar availability, lead records, appointment scheduling, and automated confirmations.",
+  "projectType": "Client Project",
+  "classificationNote": "provisional; confirm classification before final publication.",
+  "primaryCategory": "automation",
+  "additionalCategories": [
+    "customer-systems",
+    "integrations"
+  ],
+  "cover": {
+    "id": "instantresidency-cover",
+    "type": "image",
+    "alt": "",
+    "width": 1600,
+    "height": 1000
+  },
+  "featured": false,
+  "order": 8
+}

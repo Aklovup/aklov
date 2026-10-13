@@ -1,0 +1,20 @@
+{
+  "slug": "guideyusuf-ai-support-agent",
+  "title": "GuideYusuf AI Support Agent",
+  "description": "An n8n-powered travel support agent connecting conversational AI with tour information, booking links, pickup details, and contextual knowledge retrieval.",
+  "projectType": "Client Project",
+  "classificationNote": "provisional; confirm classification before final publication.",
+  "primaryCategory": "automation",
+  "additionalCategories": [
+    "integrations"
+  ],
+  "cover": {
+    "id": "guideyusuf-cover",
+    "type": "image",
+    "alt": "",
+    "width": 1600,
+    "height": 1000
+  },
+  "featured": false,
+  "order": 7
+}
