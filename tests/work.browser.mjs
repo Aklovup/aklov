@@ -10,7 +10,8 @@ const base = 'http://127.0.0.1:4321';
 const output = 'artifacts/work-review';
 const counts = { all: 10, websites: 5, 'customer-systems': 2, automation: 5, applications: 2, integrations: 7 };
 const projects = readProjects();
-const normalize = (value) => value.replace(/\s+/g, ' ').trim();
+// Astro applies smart typography; quotation-mark formatting does not alter copy.
+const normalize = (value) => value.replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/\s+/g, ' ').trim();
 const server = spawn('npm', ['run', 'preview', '--', '--host', '127.0.0.1', '--port', '4321'], { stdio: 'inherit' });
 let browser;
 
