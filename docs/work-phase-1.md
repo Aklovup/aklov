@@ -16,7 +16,7 @@ Build with `npm run build` and inspect the static build with `npm run preview`.
 The dependency-free logic tests use Node 24:
 
 ```sh
-node --test tests/work.test.mjs
+node --test --test-isolation=none tests/work.test.mjs
 ```
 
 These cover category counts, direct URL initialization, secondary-category membership, URL preservation, filter state, layout reassignment and Back/Forward logic. They do not replace rendered browser testing.

@@ -88,6 +88,9 @@ try {
 
   const keyboardButton = page.locator('[data-filter="applications"]');
   await keyboardButton.focus();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
+  assert.ok(await keyboardButton.evaluate((el) => el === document.activeElement));
   assert.ok(await keyboardButton.evaluate((el) => el.matches(':focus-visible')));
   await page.keyboard.press('Enter');
   await checkFilter(page, 'applications', 2);
