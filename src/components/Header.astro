@@ -1,12 +1,11 @@
 ---
-const { contactHref = '/#contact' } = Astro.props;
-
 const pathname = Astro.url.pathname;
 const path = pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
 const isHome = path === '/';
 const isSolutions = path.startsWith('/solutions');
 const isWork = path === '/work';
 const isAbout = path === '/about';
+const isContact = path === '/contact';
 ---
 
 <div class="header-surface">
@@ -23,7 +22,7 @@ const isAbout = path === '/about';
         <a href="/solutions/" aria-current={isSolutions ? 'page' : undefined}>Solutions</a>
         <a href="/work/" aria-current={isWork ? 'page' : undefined}>Work</a>
         <a href="/about/" aria-current={isAbout ? 'page' : undefined}>About</a>
-        <a href={contactHref}>Let’s talk <span aria-hidden="true">↗</span></a>
+        <a href="/contact/" aria-current={isContact ? 'page' : undefined}>Let’s talk <span aria-hidden="true">↗</span></a>
       </nav>
     </header>
   </div>
@@ -81,6 +80,7 @@ const isAbout = path === '/about';
     border-radius: 99px;
     color: var(--ivory);
   }
+  .nav a:last-child[aria-current='page'] { color: var(--gold); border-color: var(--gold); }
 
   .menu-toggle {
     display: none;

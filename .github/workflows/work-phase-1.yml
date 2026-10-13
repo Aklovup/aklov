@@ -26,13 +26,15 @@ jobs:
       - name: Build the static site
         run: npm run build
       - name: Check content and filtering logic
-        run: node --test --test-isolation=none tests/work.test.mjs
+        run: node --test --test-isolation=none tests/work.test.mjs tests/contact.test.mjs
       - name: Install the test browser
         run: npx playwright install --with-deps chromium
       - name: Review rendered page and browser interactions
         run: node tests/work.browser.mjs
       - name: Validate the About page
         run: node tests/about.browser.mjs
+      - name: Validate the Contact page and form states
+        run: node tests/contact.browser.mjs
       - name: Save desktop and mobile review screenshots
         if: always()
         uses: actions/upload-artifact@v4
@@ -46,4 +48,11 @@ jobs:
         with:
           name: about-page-review
           path: artifacts/about-review/
+          if-no-files-found: ignore
+      - name: Save Contact page screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contact-page-review
+          path: artifacts/contact-review/
           if-no-files-found: ignore
