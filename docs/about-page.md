@@ -20,7 +20,7 @@ Update the actual width, height and alternative text as necessary. The portrait 
 
 The existing Header and Footer add About. Their shared styling and behavior are unchanged.
 
-The repository does not currently contain a Contact page. The primary invitation uses the existing `mailto:aklovup@gmail.com` destination. Both Work CTAs point to `/work/`. Header and footer contact navigation retain their existing homepage contact destination.
+All About cross-page CTA destinations come from `src/data/links.ts`: `links.work` points to `/work/`, and `links.contact` holds the pending Contact destination. Until `/contact/` is implemented, its working placeholder is the existing `mailto:aklovup@gmail.com`. Update this central entry when the page is ready. Header and footer contact navigation retain their existing homepage contact destination.
 
 ## Review and validation
 

@@ -10,8 +10,6 @@ export const profile = {
     width: 1200,
     height: 1500,
   },
-  // There is no Contact page yet; this is the existing homepage email destination.
-  contactHref: 'mailto:aklovup@gmail.com',
 };
 
 export const about = {

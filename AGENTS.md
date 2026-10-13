@@ -388,6 +388,8 @@ Maintain consistency across:
 
 Use shared components when appropriate.
 
+Store cross-page button and CTA destinations in `src/data/links.ts`, including destinations for pages not yet created. Use a documented working placeholder until a planned page is available. Reference these shared entries from page code rather than hard-coding destinations. Header and footer navigation are excluded from this rule.
+
 Links from the Solutions page to portfolio categories should use the agreed Work page URL parameters.
 
 Do not modify unrelated page content while implementing navigation changes.

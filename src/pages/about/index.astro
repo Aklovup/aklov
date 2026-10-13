@@ -1,7 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import AboutPortrait from '../../components/about/AboutPortrait.astro';
-import { about, profile } from '../../data/about';
+import { about } from '../../data/about';
+import { links } from '../../data/links';
 
 const [headlineStart, headlineEnd] = about.introduction.headline.split('understanding');
 ---
@@ -88,7 +89,7 @@ const [headlineStart, headlineEnd] = about.introduction.headline.split('understa
             ))}
           </div>
         </div>
-        <a class="editorial-link" href="/work/" data-about-work-link>{about.work.cta}</a>
+        <a class="editorial-link" href={links.work} data-about-work-link>{about.work.cta}</a>
       </div>
     </section>
 
@@ -118,8 +119,8 @@ const [headlineStart, headlineEnd] = about.introduction.headline.split('understa
         <div class="closing-grid">
           <p data-approved-copy>{about.closing.paragraph}</p>
           <div class="closing-actions">
-            <a class="btn btn-dark" href={profile.contactHref} data-about-contact>{about.closing.primaryCta}</a>
-            <a class="btn btn-line" href="/work/" data-about-work-secondary>{about.closing.secondaryCta}</a>
+            <a class="btn btn-dark" href={links.contact} data-about-contact>{about.closing.primaryCta}</a>
+            <a class="btn btn-line" href={links.work} data-about-work-secondary>{about.closing.secondaryCta}</a>
           </div>
         </div>
       </div>

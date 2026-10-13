@@ -3,6 +3,7 @@ import { mkdir } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
 import { about, profile } from '../src/data/about.ts';
+import { links } from '../src/data/links.ts';
 
 const base = 'http://127.0.0.1:4321';
 const output = 'artifacts/about-review';
@@ -74,9 +75,10 @@ try {
   assert.equal(await page.locator('.fallback-name').innerText(), profile.name);
   assert.equal(await page.locator('.portrait-fallback').count(), 1);
   assert.equal(await page.locator('[data-about-portrait] img').count(), 0);
-  assert.equal(await page.locator('[data-about-contact]').getAttribute('href'), profile.contactHref);
+  assert.equal(await page.locator('[data-about-contact]').getAttribute('href'), links.contact);
   assert.equal(await page.locator('[data-about-contact]').innerText(), about.closing.primaryCta);
-  assert.equal(await page.locator('[data-about-work-link]').getAttribute('href'), '/work/');
+  assert.equal(await page.locator('[data-about-work-link]').getAttribute('href'), links.work);
+  assert.equal(await page.locator('[data-about-work-secondary]').getAttribute('href'), links.work);
   assert.equal(await page.locator('[data-about-work-link]').innerText(), about.work.cta);
   assert.equal(await page.locator('[data-about-work-secondary]').innerText(), about.closing.secondaryCta);
   assert.equal(await page.locator('#site-nav a[aria-current="page"]').getAttribute('href'), '/about/');
