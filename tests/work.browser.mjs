@@ -2,8 +2,6 @@ import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
-import { resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
 import { readProjects } from './project-content.mjs';
 
 const base = 'http://127.0.0.1:4321';
@@ -218,16 +216,6 @@ try {
   await dialog.waitFor({ state: 'visible' });
   await page.screenshot({ path: output + '/concept-desktop.png' });
 
-  // The portable preview uses the actual built CSS and JS and works from a file URL.
-  const preview = await context.newPage();
-  await preview.goto(pathToFileURL(resolve(output + '/aklov-work-preview.html')).href);
-  await checkFilter(preview, 'all', 10);
-  await preview.locator('[data-filter="applications"]').click();
-  await checkFilter(preview, 'applications', 2);
-  await preview.locator('[data-project-open="impex-automotive"]').click();
-  await preview.getByRole('dialog').waitFor({ state: 'visible' });
-  assert.equal(await preview.getByRole('dialog').locator('h2').innerText(), 'Impex Automotive');
-  await preview.close();
   assert.deepEqual(errors, []);
 
   const noJs = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
@@ -239,7 +227,7 @@ try {
   assert.equal(await noJsPage.locator('[data-project-open]:visible').count(), 0);
   await noJs.close();
   await context.close();
-  console.log('Passed: all ten complete project bodies, project/category URLs and aliases, Back/Forward, card and keyboard activation, dismissal, focus boundaries/restoration, background scroll locking, long-content scrolling, media placeholders, external links, no-JS fallback, portable HTML and seven viewport widths.');
+  console.log('Passed: all ten complete project bodies, project/category URLs and aliases, Back/Forward, card and keyboard activation, dismissal, focus boundaries/restoration, background scroll locking, long-content scrolling, media placeholders, external links, no-JS fallback and seven viewport widths.');
 } finally {
   await browser?.close();
   server.kill('SIGTERM');

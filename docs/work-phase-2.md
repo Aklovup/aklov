@@ -6,12 +6,11 @@ All work remains on `feat/work-phase-1`; the existing PR is unmerged.
 
 The GitHub validation artifact `work-phase-2-review` contains:
 
-- `aklov-work-preview.html`: a standalone Work-only preview generated from the actual Astro build. Download and open it in a browser. Filters and project popups work; navigation to the rest of the site requires the hosted or local site.
 - Desktop and mobile Work page screenshots.
 - Desktop and mobile project popup screenshots.
 - A concept popup screenshot.
 
-For a complete local preview: check out the branch, run `npm install` and `npm run dev`, then open `/work/`.
+Review uses screenshots only. For an optional interactive local preview: check out the branch, run `npm install` and `npm run dev`, then open `/work/`.
 
 ## Content
 

@@ -25,8 +25,6 @@ jobs:
         run: npm install --no-save --package-lock=false playwright
       - name: Build the static site
         run: npm run build
-      - name: Package a standalone Work page preview
-        run: node tests/make-preview.mjs
       - name: Check content and filtering logic
         run: node --test --test-isolation=none tests/work.test.mjs
       - name: Install the test browser
