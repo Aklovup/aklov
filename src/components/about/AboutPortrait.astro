@@ -1,0 +1,46 @@
+---
+import { Image } from 'astro:assets';
+import { profile } from '../../data/about';
+
+const { portrait } = profile;
+---
+
+<figure class="portrait" data-about-portrait>
+  <div class="portrait-frame">
+    {portrait.src ? (
+      <Image
+        src={portrait.src}
+        alt={portrait.alt}
+        width={portrait.width}
+        height={portrait.height}
+        widths={[480, 760, 1200]}
+        sizes="(max-width: 640px) 80vw, (max-width: 1000px) 40vw, 38vw"
+        loading="eager"
+        decoding="async"
+      />
+    ) : (
+      <div class="portrait-fallback" role="img" aria-label="Typographic profile of Loveth Akpochimora; portrait photograph pending.">
+        <span class="monogram" aria-hidden="true">LA</span>
+        <span class="fallback-name" aria-hidden="true">{profile.name}</span>
+      </div>
+    )}
+  </div>
+  <figcaption>
+    {portrait.src && <span class="portrait-name">{profile.name}</span>}
+    <span class="designation">{profile.designation}</span>
+  </figcaption>
+</figure>
+
+<style>
+  .portrait { margin: 0; }
+  .portrait-frame { aspect-ratio: 4 / 5; background: var(--paper-deep); overflow: hidden; }
+  .portrait-frame img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+  .portrait-fallback { position: relative; display: flex; flex-direction: column; justify-content: space-between; height: 100%; min-height: 0; padding: clamp(24px, 3vw, 48px); background: var(--gold); color: var(--charcoal); }
+  .portrait-fallback::before { content: ""; position: absolute; inset: 14px; border: 1px solid color-mix(in srgb, var(--charcoal) 35%, var(--gold)); pointer-events: none; }
+  .monogram { display: block; padding-top: 12px; font-family: var(--display); font-size: clamp(160px, 24vw, 400px); line-height: .85; letter-spacing: -.07em; }
+  .fallback-name { position: relative; max-width: 12ch; font-family: var(--display); font-size: clamp(30px, 3.6vw, 58px); line-height: 1; letter-spacing: -.025em; }
+  figcaption { display: grid; gap: 10px; padding-top: 20px; border-top: 1px solid var(--line-dark); margin-top: 20px; }
+  .portrait-name { font-family: var(--display); font-size: 30px; line-height: 1.1; }
+  .designation { max-width: 30ch; color: var(--on-dark); font-size: 13px; line-height: 1.6; }
+  @media (max-width: 640px) { .monogram { font-size: clamp(150px, 46vw, 240px); } .fallback-name { font-size: clamp(30px, 9vw, 44px); } }
+</style>

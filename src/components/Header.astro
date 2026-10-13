@@ -6,6 +6,7 @@ const path = pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -
 const isHome = path === '/';
 const isSolutions = path.startsWith('/solutions');
 const isWork = path === '/work';
+const isAbout = path === '/about';
 ---
 
 <div class="header-surface">
@@ -21,6 +22,7 @@ const isWork = path === '/work';
         <a href="/" aria-current={isHome ? 'page' : undefined}>Home</a>
         <a href="/solutions/" aria-current={isSolutions ? 'page' : undefined}>Solutions</a>
         <a href="/work/" aria-current={isWork ? 'page' : undefined}>Work</a>
+        <a href="/about/" aria-current={isAbout ? 'page' : undefined}>About</a>
         <a href={contactHref}>Let’s talk <span aria-hidden="true">↗</span></a>
       </nav>
     </header>
