@@ -1,0 +1,40 @@
+name: Work page validation
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/work-phase-1.yml'
+      - 'src/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'astro.config.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install the declared Astro dependency and browser test tooling
+        run: npm install --no-save --package-lock=false playwright
+      - name: Build the static site
+        run: npm run build
+      - name: Check content and filtering logic
+        run: node --test --test-isolation=none tests/work.test.mjs
+      - name: Install the test browser
+        run: npx playwright install --with-deps chromium
+      - name: Review rendered page and browser interactions
+        run: node tests/work.browser.mjs
+      - name: Save desktop and mobile review screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: work-phase-2-review
+          path: artifacts/work-review/
+          if-no-files-found: ignore

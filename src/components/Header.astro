@@ -5,6 +5,7 @@ const pathname = Astro.url.pathname;
 const path = pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
 const isHome = path === '/';
 const isSolutions = path.startsWith('/solutions');
+const isWork = path === '/work';
 ---
 
 <div class="header-surface">
@@ -19,6 +20,7 @@ const isSolutions = path.startsWith('/solutions');
       <nav class="nav" id="site-nav" aria-label="Main navigation">
         <a href="/" aria-current={isHome ? 'page' : undefined}>Home</a>
         <a href="/solutions/" aria-current={isSolutions ? 'page' : undefined}>Solutions</a>
+        <a href="/work/" aria-current={isWork ? 'page' : undefined}>Work</a>
         <a href={contactHref}>Let’s talk <span aria-hidden="true">↗</span></a>
       </nav>
     </header>

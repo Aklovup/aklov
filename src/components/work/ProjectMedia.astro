@@ -1,0 +1,158 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  cover: CollectionEntry<'projects'>['data']['cover'];
+  number: string;
+  title: string;
+  presentation?: 'card' | 'detail';
+  showCaption?: boolean;
+}
+const { cover, number, title, presentation = 'card', showCaption = true } = Astro.props;
+const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'Video preview' : 'Image preview';
+---
+
+<figure class:list={['project-media', { 'detail-presentation': presentation === 'detail' }]} data-media-id={cover.id} data-media-type={cover.type} style={presentation === 'detail' ? `--media-ratio: ${cover.width} / ${cover.height}` : undefined}>
+  {cover.url ? (
+    cover.type === 'gif' ? (
+      <div class="gif-preview" data-gif-preview data-src={cover.url} data-alt={cover.alt} data-width={cover.width} data-height={cover.height}>
+        {cover.poster && <img class="gif-poster" src={cover.poster} alt={cover.alt} width={cover.width} height={cover.height} loading="lazy" />}
+        <div class="gif-fallback" hidden={!!cover.poster}>GIF preview</div>
+        <button class="gif-toggle" type="button" data-gif-toggle aria-pressed="false" hidden>Play GIF</button>
+        <noscript><a href={cover.url} target="_blank" rel="noopener noreferrer">Open GIF (new tab)</a></noscript>
+      </div>
+    ) : cover.type === 'video' ? (
+      <video
+        controls
+        playsinline
+        preload="none"
+        poster={cover.poster}
+        width={cover.width}
+        height={cover.height}
+        aria-label={cover.alt}
+      >
+        <source src={cover.url} />
+        <a href={cover.url}>View video: {title}</a>
+      </video>
+    ) : (
+      <img
+        src={cover.url}
+        alt={cover.alt}
+        width={cover.width}
+        height={cover.height}
+        loading="lazy"
+        decoding="async"
+      />
+    )
+  ) : (
+    <div class="media-placeholder" role="img" aria-label={`Media placeholder for ${title}; ${label.toLowerCase()} pending.`}>
+      <div class="placeholder-top"><span>{label}</span><span>Media placeholder</span></div>
+      <span class="placeholder-number" aria-hidden="true">{number}</span>
+      <div class="placeholder-bottom"><span>{cover.id}</span><span>Preview pending</span></div>
+    </div>
+  )}
+  {showCaption && cover.caption && <figcaption>{cover.caption}</figcaption>}
+</figure>
+
+<script>
+  const enableControls = (root: ParentNode) => root.querySelectorAll<HTMLButtonElement>('[data-gif-toggle]').forEach((button) => { button.hidden = false; });
+  enableControls(document);
+  document.addEventListener('aklov:project-open', (event) => enableControls((event as CustomEvent<{ root: ParentNode }>).detail.root));
+  document.addEventListener('click', (event) => {
+    const button = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('[data-gif-toggle]') : null;
+    const preview = button?.closest<HTMLElement>('[data-gif-preview]');
+    if (!button || !preview) return;
+    const playing = preview.querySelector<HTMLImageElement>('[data-playing-gif]');
+    const poster = preview.querySelector<HTMLImageElement>('.gif-poster');
+    const fallback = preview.querySelector<HTMLElement>('.gif-fallback')!;
+    if (playing) {
+      playing.remove();
+      if (poster) poster.hidden = false;
+      fallback.hidden = !!poster;
+      button.textContent = 'Play GIF';
+      button.setAttribute('aria-pressed', 'false');
+    } else {
+      const image = document.createElement('img');
+      image.dataset.playingGif = 'true';
+      image.src = preview.dataset.src!;
+      image.alt = preview.dataset.alt!;
+      image.width = Number(preview.dataset.width);
+      image.height = Number(preview.dataset.height);
+      image.decoding = 'async';
+      preview.prepend(image);
+      if (poster) poster.hidden = true;
+      fallback.hidden = true;
+      button.textContent = 'Pause GIF';
+      button.setAttribute('aria-pressed', 'true');
+    }
+  });
+</script>
+
+<style>
+  .project-media { margin: 0; }
+  .project-media img,
+  .project-media video,
+  .media-placeholder,
+  .gif-preview { display: block; width: 100%; aspect-ratio: 8 / 5; }
+  .project-media img,
+  .project-media video { height: auto; object-fit: contain; background: var(--charcoal); }
+  .detail-presentation img,
+  .detail-presentation video,
+  .detail-presentation .media-placeholder,
+  .detail-presentation .gif-preview { aspect-ratio: var(--media-ratio); }
+  .detail-presentation img, .detail-presentation video { max-height: 75dvh; }
+  .gif-preview { position: relative; overflow: hidden; background: var(--charcoal); color: var(--ivory); }
+  .gif-preview img { position: absolute; inset: 0; width: 100%; height: 100%; max-height: none; object-fit: contain; }
+  .gif-preview [hidden] { display: none !important; }
+  .gif-fallback { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--display); font-size: 32px; }
+  .gif-toggle { position: absolute; z-index: 1; bottom: 16px; right: 16px; min-height: 44px; padding: 0 18px; border: 1px solid var(--gold); border-radius: 99px; background: var(--charcoal); color: var(--ivory); font: 600 12px var(--sans); cursor: pointer; }
+  .media-placeholder {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    padding: clamp(18px, 2.2vw, 36px);
+    background: var(--charcoal);
+    color: var(--ivory);
+  }
+  .media-placeholder::before {
+    content: "";
+    position: absolute;
+    inset: 14px;
+    border: 1px solid var(--line-dark);
+    pointer-events: none;
+  }
+  .placeholder-top,
+  .placeholder-bottom {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 10px;
+    line-height: 1.6;
+  }
+  .placeholder-top { color: var(--gold); letter-spacing: 1.2px; text-transform: uppercase; }
+  .placeholder-bottom { color: var(--on-dark); }
+  .placeholder-bottom span:first-child { overflow-wrap: anywhere; }
+  .placeholder-bottom span:last-child { flex-shrink: 0; }
+  .placeholder-number {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: transparent;
+    -webkit-text-stroke: 1px var(--gold);
+    font-family: var(--display);
+    font-size: clamp(90px, 14vw, 240px);
+    line-height: .8;
+    letter-spacing: -.05em;
+  }
+  figcaption { margin-top: 12px; color: var(--body); font-size: 12px; line-height: 1.6; }
+  @media (max-width: 640px) {
+    .placeholder-top, .placeholder-bottom { font-size: 9px; gap: 10px; }
+    .placeholder-top { letter-spacing: .8px; }
+    .placeholder-number { font-size: clamp(100px, 30vw, 170px); }
+  }
+</style>

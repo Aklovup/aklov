@@ -1,0 +1,149 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import ProjectDetail from './ProjectDetail.astro';
+
+interface Props { projects: CollectionEntry<'projects'>[]; }
+const { projects } = Astro.props;
+const details = await Promise.all(projects.map(async (project) => ({
+  project, Content: (await render(project)).Content,
+})));
+---
+
+<dialog id="project-dialog" class="project-dialog" aria-labelledby="project-dialog-title" data-project-dialog>
+  <div data-dialog-content></div>
+</dialog>
+{details.map(({ project, Content }) => (
+  <template data-project-detail={project.data.slug} data-project-aliases={project.data.aliases.join(' ')}>
+    <ProjectDetail project={project}><Content /></ProjectDetail>
+  </template>
+))}
+
+<script>
+  import { resolveProjectSlug, urlForProject } from '../../scripts/projectState';
+  const dialog = document.querySelector<HTMLDialogElement>('[data-project-dialog]');
+  const content = dialog?.querySelector<HTMLElement>('[data-dialog-content]');
+  const templates = [...document.querySelectorAll<HTMLTemplateElement>('[data-project-detail]')];
+  const triggers = [...document.querySelectorAll<HTMLButtonElement>('[data-project-open]')];
+
+  if (dialog && content && typeof dialog.showModal === 'function') {
+    const references = templates.map((template) => ({
+      slug: template.dataset.projectDetail!,
+      aliases: (template.dataset.projectAliases || '').split(' ').filter(Boolean),
+    }));
+    let opener: HTMLButtonElement | undefined;
+    let previousOverflow = '';
+    let previousGutter = '';
+    let scrollLocked = false;
+    let pointerStartedOutside = false;
+    let activeSlug: string | undefined;
+    let waitingForBack = false;
+    let returnTarget: HTMLButtonElement | undefined;
+
+    const restoreFocus = () => {
+      const target = returnTarget || opener;
+      if (!target) return;
+      requestAnimationFrame(() => {
+        if (dialog.open) return;
+        if (target.isConnected && !target.closest('[hidden]')) target.focus({ preventScroll: true });
+        else document.querySelector<HTMLButtonElement>('[data-filter][aria-pressed="true"]')?.focus({ preventScroll: true });
+        returnTarget = undefined;
+      });
+    };
+
+    const outsideDialog = (event: MouseEvent) => {
+      const box = dialog.getBoundingClientRect();
+      return event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom;
+    };
+    const syncFromUrl = () => {
+      const slug = resolveProjectSlug(new URL(window.location.href).searchParams.get('project'), references);
+      if (!slug) {
+        waitingForBack = false;
+        if (dialog.open) dialog.close();
+        else restoreFocus();
+        return;
+      }
+      if (dialog.open && activeSlug === slug) return;
+      const template = templates.find((item) => item.dataset.projectDetail === slug)!;
+      opener = triggers.find((trigger) => trigger.dataset.projectOpen === slug);
+      returnTarget = undefined;
+      waitingForBack = false;
+      content.querySelectorAll('video').forEach((video) => video.pause());
+      content.replaceChildren(template.content.cloneNode(true));
+      activeSlug = slug;
+      if (!dialog.open) {
+        if (!scrollLocked) {
+          previousOverflow = document.documentElement.style.overflow;
+          previousGutter = document.documentElement.style.scrollbarGutter;
+          document.documentElement.style.scrollbarGutter = 'stable';
+          document.documentElement.style.overflow = 'hidden';
+          scrollLocked = true;
+        }
+        dialog.showModal();
+      }
+      dialog.scrollTop = 0;
+      content.querySelector<HTMLButtonElement>('[data-dialog-close]')?.focus({ preventScroll: true });
+      document.dispatchEvent(new CustomEvent('aklov:project-open', { detail: { root: content } }));
+    };
+    const requestClose = () => {
+      if (!dialog.open) return;
+      const ownedEntry = history.state?.aklovProject;
+      waitingForBack = Boolean(ownedEntry);
+      dialog.close();
+      if (ownedEntry) history.back();
+      else history.replaceState(history.state, '', urlForProject(new URL(window.location.href)));
+    };
+    for (const trigger of triggers) {
+      trigger.hidden = false;
+      const card = trigger.closest<HTMLElement>('[data-project]')!;
+      card.dataset.canOpen = 'true';
+      const pending = card.querySelector<HTMLElement>('.details-pending');
+      if (pending) pending.hidden = true;
+      trigger.addEventListener('click', () => {
+        const current = new URL(window.location.href);
+        const next = urlForProject(current, trigger.dataset.projectOpen);
+        history.pushState({ ...history.state, aklovProject: true }, '', next);
+        syncFromUrl();
+      });
+      card.addEventListener('click', (event) => {
+        if (event.target instanceof Element && !event.target.closest('a, button, video, input, select, textarea')) trigger.click();
+      });
+    }
+    dialog.addEventListener('cancel', (event) => { event.preventDefault(); requestClose(); });
+    dialog.addEventListener('click', (event) => {
+      if (event.target instanceof Element && event.target.closest('[data-dialog-close]')) requestClose();
+      else if (event.target === dialog && pointerStartedOutside && outsideDialog(event)) requestClose();
+      pointerStartedOutside = false;
+    });
+    dialog.addEventListener('pointerdown', (event) => { pointerStartedOutside = event.target === dialog && outsideDialog(event); });
+    dialog.addEventListener('keydown', (event) => {
+      if (event.key !== 'Tab') return;
+      const controls = [...content.querySelectorAll<HTMLElement>('button, a[href], video[controls], [tabindex]:not([tabindex="-1"])')]
+        .filter((control) => !control.hasAttribute('disabled') && control.getClientRects().length);
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    });
+    dialog.addEventListener('close', () => {
+      // A quick Back/Forward sequence can reopen the dialog before this queued event.
+      if (dialog.open) return;
+      content.querySelectorAll('video').forEach((video) => video.pause());
+      content.replaceChildren();
+      activeSlug = undefined;
+      document.documentElement.style.overflow = previousOverflow;
+      document.documentElement.style.scrollbarGutter = previousGutter;
+      scrollLocked = false;
+      returnTarget = opener;
+      opener = undefined;
+      if (!waitingForBack) restoreFocus();
+    });
+    window.addEventListener('popstate', syncFromUrl);
+    syncFromUrl();
+  }
+</script>
+
+<style>
+  .project-dialog { width: min(1440px, calc(100% - 64px)); max-width: none; max-height: calc(100dvh - 64px); margin: auto; padding: 0; border: 1px solid var(--line); background: var(--ivory); color: var(--charcoal); overflow: auto; overscroll-behavior: contain; }
+  .project-dialog::backdrop { background: rgba(21, 21, 21, .85); }
+  @media (max-width: 640px) { .project-dialog { width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; border: 0; } }
+</style>
