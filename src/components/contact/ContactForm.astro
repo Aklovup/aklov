@@ -8,7 +8,10 @@ import { inquiryLimits, inquiryServices } from '../../lib/inquiry';
     <h2 id="inquiry-title">{contact.formHeading}</h2>
     <p class="field-note">Required fields are marked <span aria-hidden="true">*</span>.</p>
   </div>
-  <form action={inquiryDelivery.endpoint} method="post" data-inquiry-form data-delivery-enabled={String(inquiryDelivery.enabled)}>
+  <form action={inquiryDelivery.endpoint} method="post" data-inquiry-form>
+    <input type="hidden" name="access_key" value={inquiryDelivery.accessKey} />
+    <input type="hidden" name="subject" value={inquiryDelivery.subject} />
+    <input type="hidden" name="from_name" value={inquiryDelivery.fromName} />
     <div class="field-pair">
       <div class="field">
         <label for="inquiry-name">Your name <span aria-hidden="true">*</span></label>
@@ -36,13 +39,16 @@ import { inquiryLimits, inquiryServices } from '../../lib/inquiry';
       <p class="field-error" id="message-error" data-error="message" aria-live="polite"></p>
     </div>
     <div class="honey" aria-hidden="true" inert>
-      <label for="inquiry-website">Leave this field empty</label>
-      <input id="inquiry-website" name="website" tabindex="-1" autocomplete="off" />
+      <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" />
     </div>
-    {!inquiryDelivery.enabled && <p class="availability" id="inquiry-availability">{inquiryDelivery.unavailableMessage} <a href={links.email}>{contact.email}</a></p>}
+    <div class="captcha-region">
+      <div class="h-captcha" data-captcha="true" data-size="compact" data-theme="light" data-callback="aklovCaptchaVerified" data-expired-callback="aklovCaptchaExpired" data-error-callback="aklovCaptchaError"></div>
+      <p class="field-note">Complete the spam check before sending.</p>
+      <p class="field-error" data-captcha-error tabindex="-1" aria-live="polite"></p>
+    </div>
     <noscript><p class="availability">Online submission requires JavaScript. Please <a href={links.email}>contact me by email</a>.</p></noscript>
     <div class="submit-row">
-      <button class="btn btn-dark" type="submit" disabled aria-describedby={!inquiryDelivery.enabled ? 'inquiry-availability' : undefined}>{contact.submitLabel}</button>
+      <button class="btn btn-dark" type="submit" disabled>{contact.submitLabel}</button>
       <p class="field-note" data-loading role="status" hidden>Sending inquiry…</p>
     </div>
     <div class="feedback" data-feedback tabindex="-1" aria-live="polite" hidden>
@@ -73,7 +79,10 @@ import { inquiryLimits, inquiryServices } from '../../lib/inquiry';
   .field-note { margin: 8px 0 0; color: var(--body); font-size: 11px; line-height: 1.7; }
   .field-error { margin: 6px 0 0; color: #8a3023; font-size: 12px; line-height: 1.6; }
   .field-error:empty { margin: 0; }
-  .honey { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .honey { display: none; }
+  .captcha-region { margin-bottom: 24px; }
+  .h-captcha { min-height: 144px; max-width: 100%; }
+  [data-captcha-error]:focus { outline: 2px solid var(--charcoal); outline-offset: 4px; }
   .availability { margin: 0 0 24px; padding-block: 16px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); color: var(--body); font-size: 12px; line-height: 1.8; }
   .availability a, .feedback a { text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
   .submit-row { display: flex; align-items: center; flex-wrap: wrap; gap: 20px; }

@@ -29,9 +29,11 @@ export const contact = {
   closing: "Good projects usually begin with a conversation. You don't need to have everything figured out before getting in touch.",
 };
 
-// Enable only after a deployed handler has passed a real delivery test.
+// Web3Forms access keys are public form identifiers, not private API credentials.
 export const inquiryDelivery = {
-  enabled: false,
-  endpoint: '/api/contact',
-  unavailableMessage: 'Online inquiries are not available yet. Please contact me directly by email.',
+  endpoint: 'https://api.web3forms.com/submit',
+  accessKey: 'd2d6a71e-9816-4b45-93a1-b891c6e225a8',
+  subject: 'Aklov website inquiry',
+  fromName: 'Aklov website',
+  productionUrl: 'https://aklov.pages.dev/contact/',
 };

@@ -15,18 +15,33 @@ const fillValid = async (page) => {
   await page.getByLabel('Email address', { exact: false }).fill('ada@example.com');
   await page.locator('#inquiry-message').fill('I would like to discuss a business website.');
 };
-// Isolated browser fixtures exercise future delivery states. No fixture is deployed,
-// no email is sent, and these checks are not evidence of real inbox delivery.
+// Captcha/API fixtures are isolated to tests. No real token is fabricated or sent.
+async function protectTestContext(context) {
+  await context.route('https://web3forms.com/client/script.js', (route) => route.fulfill({
+    contentType: 'application/javascript',
+    body: `const widget = document.querySelector('.h-captcha');
+      widget.textContent = 'hCaptcha — isolated browser fixture';
+      widget.style.cssText = 'width:164px;height:144px;border:1px solid #77766f;padding:16px;font-size:12px;';
+      window.hcaptcha = {reset: () => { const token = document.querySelector('[name="h-captcha-response"]'); if(token)token.value=''; }};`,
+  }));
+  await context.route(inquiryDelivery.endpoint, (route) => route.abort());
+}
 async function deliveryFixture() {
   const context = await browser.newContext();
-  await context.route('**/contact/', async (route) => {
-    const response = await route.fetch();
-    await route.fulfill({ response, body: (await response.text()).replace('data-delivery-enabled="false"', 'data-delivery-enabled="true"') });
-  });
+  await protectTestContext(context);
   const page = await context.newPage();
   await page.goto(base + '/contact/');
   return { context, page };
 }
+async function solveFixtureCaptcha(page) {
+  await page.locator('[data-inquiry-form]').evaluate((form) => {
+    let token = form.querySelector('[name="h-captcha-response"]');
+    if (!token) { token = document.createElement('textarea'); token.name = 'h-captcha-response'; token.hidden = true; form.append(token); }
+    token.value = 'isolated-test-token';
+    window.aklovCaptchaVerified();
+  });
+}
+
 try {
   for (let i = 0; i < 100; i++) {
     try { if ((await fetch(base + '/contact/')).ok) break; } catch {}
@@ -36,11 +51,12 @@ try {
   await mkdir(output, { recursive: true });
   browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1100 } });
+  await protectTestContext(context);
   const page = await context.newPage();
   const errors = [];
   let submissions = 0;
   page.on('pageerror', (error) => errors.push(error.message));
-  page.on('request', (request) => { if (request.url().includes('/api/contact')) submissions++; });
+  page.on('request', (request) => { if (request.url() === inquiryDelivery.endpoint) submissions++; });
   await page.goto(base + '/contact/');
   assert.equal(await page.title(), contact.metadata.title);
   assert.equal(await page.locator('meta[name="description"]').getAttribute('content'), contact.metadata.description);
@@ -57,13 +73,16 @@ try {
   assert.equal(await page.locator('[data-success] p').textContent(), contact.success.body);
   assert.equal(await page.locator('[data-failure] h3').textContent(), contact.failure.heading);
   assert.equal(normalize(await page.locator('[data-failure] p').textContent()), contact.failure.body);
-  assert.equal(inquiryDelivery.enabled, false);
+  assert.equal(await page.locator('[data-inquiry-form]').getAttribute('action'), inquiryDelivery.endpoint);
+  assert.equal(await page.locator('[name="access_key"]').inputValue(), inquiryDelivery.accessKey);
   assert.ok(await page.getByRole('button', { name: contact.submitLabel }).isDisabled());
-  assert.ok(await page.locator('.availability').first().isVisible());
+  assert.equal(await page.locator('#inquiry-availability').count(), 0);
+  assert.equal(await page.locator('[name="botcheck"]').getAttribute('type'), 'checkbox');
+  assert.ok(!(await page.locator('[name="botcheck"]').isVisible()));
   assert.ok(!(await page.locator('[data-success]').isVisible()));
   assert.ok(!(await page.locator('[data-failure]').isVisible()));
   await page.locator('[data-inquiry-form]').evaluate((form) => form.requestSubmit());
-  assert.equal(submissions, 0, 'Unavailable form attempted to discard an inquiry.');
+  assert.equal(submissions, 0, 'Invalid form made an API request.');
   // Check actual foreground/background contrast, including functional text.
 
   const lowContrast = await page.evaluate(() => {
@@ -153,14 +172,14 @@ try {
 
   const validation = await deliveryFixture();
   let sentRequests = 0;
-  validation.page.on('request', (request) => { if (request.url().endsWith('/api/contact')) sentRequests++; });
-  await validation.page.getByRole('button', { name: contact.submitLabel }).click();
+  validation.page.on('request', (request) => { if (request.url() === inquiryDelivery.endpoint) sentRequests++; });
+  await validation.page.locator('[data-inquiry-form]').evaluate((form) => form.requestSubmit());
   assert.equal(await validation.page.locator('#inquiry-name').getAttribute('aria-invalid'), 'true');
   assert.ok(await validation.page.locator('#inquiry-name').evaluate((element) => document.activeElement === element));
   await validation.page.locator('#inquiry-name').fill('Ada');
   await validation.page.locator('#inquiry-email').fill('not-an-email');
   await validation.page.locator('#inquiry-message').fill('A project');
-  await validation.page.getByRole('button', { name: contact.submitLabel }).click();
+  await validation.page.locator('[data-inquiry-form]').evaluate((form) => form.requestSubmit());
   assert.equal(await validation.page.locator('#inquiry-email').getAttribute('aria-invalid'), 'true');
   assert.equal(sentRequests, 0);
   await validation.context.close();
@@ -169,14 +188,31 @@ try {
   let requests = 0;
   let release;
   const responseGate = new Promise((resolve) => { release = resolve; });
-  await pending.page.route('**/api/contact', async (route) => {
+  await pending.page.route(inquiryDelivery.endpoint, async (route) => {
     requests++;
     assert.equal(route.request().method(), 'POST');
-    assert.equal(route.request().postDataJSON().name, 'Ada Example');
+    const payload = route.request().postDataJSON();
+    assert.equal(payload.name, 'Ada Example');
+    assert.equal(payload.email, 'ada@example.com');
+    assert.equal(payload.replyto, payload.email);
+    assert.equal(payload.project_category, 'Website');
+    assert.equal(payload.message, 'I would like to discuss a business website.');
+    assert.equal(payload.access_key, inquiryDelivery.accessKey);
+    assert.equal(payload.subject, inquiryDelivery.subject);
+    assert.equal(payload.botcheck, false);
+    assert.equal(payload['h-captcha-response'], 'isolated-test-token');
+    assert.equal('service' in payload, false);
+    assert.equal('website' in payload, false);
     await responseGate;
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true }) });
   });
   await fillValid(pending.page);
+  await pending.page.locator('#inquiry-service').selectOption('Website');
+  assert.ok(await pending.page.getByRole('button', { name: contact.submitLabel }).isEnabled());
+  await pending.page.getByRole('button', { name: contact.submitLabel }).click();
+  assert.ok(await pending.page.locator('[data-captcha-error]').isVisible());
+  assert.equal(requests, 0, 'Missing captcha was submitted.');
+  await solveFixtureCaptcha(pending.page);
   await pending.page.getByRole('button', { name: contact.submitLabel }).click();
   await pending.page.locator('[data-loading]').waitFor({ state: 'visible' });
   assert.ok(await pending.page.getByRole('button', { name: contact.submitLabel }).isDisabled());
@@ -190,13 +226,25 @@ try {
   assert.ok(await pending.page.locator('[data-feedback]').evaluate((element) => document.activeElement === element));
   await pending.context.close();
 
+  const spam = await deliveryFixture();
+  let spamRequests = 0;
+  spam.page.on('request', (request) => { if (request.url() === inquiryDelivery.endpoint) spamRequests++; });
+  await fillValid(spam.page);
+  await spam.page.locator('[name="botcheck"]').evaluate((checkbox) => { checkbox.checked = true; });
+  await spam.page.getByRole('button', { name: contact.submitLabel }).click();
+  await spam.page.locator('[data-failure]').waitFor({ state: 'visible' });
+  assert.equal(spamRequests, 0);
+  assert.ok(!(await spam.page.locator('[data-success]').isVisible()));
+  await spam.context.close();
+
   for (const failure of ['http-error', 'unconfirmed', 'malformed', 'network']) {
     const fixture = await deliveryFixture();
-    await fixture.page.route('**/api/contact', async (route) => {
+    await fixture.page.route(inquiryDelivery.endpoint, async (route) => {
       if (failure === 'network') return route.abort();
       await route.fulfill({ status: failure === 'http-error' ? 503 : 200, contentType: 'application/json', body: failure === 'malformed' ? 'invalid json' : JSON.stringify({ success: false }) });
     });
     await fillValid(fixture.page);
+    await solveFixtureCaptcha(fixture.page);
     await fixture.page.getByRole('button', { name: contact.submitLabel }).click();
     await fixture.page.locator('[data-failure]').waitFor({ state: 'visible' });
     assert.ok(!(await fixture.page.locator('[data-success]').isVisible()));
@@ -204,7 +252,7 @@ try {
     assert.equal(await fixture.page.locator('#inquiry-message').inputValue(), 'I would like to discuss a business website.');
     await fixture.context.close();
   }
-  console.log('Passed: approved copy and contact links; disabled real delivery; validation; keyboard/reduced motion/no-JS; ten widths; mock-only loading, success, failure and duplicate-submission states. No real email delivery tested.');
+  console.log('Passed: approved copy/contact links; validation and valid-form enablement; Web3Forms field mapping and strict acceptance; captcha/honeypot behavior; loading, success, rejection, network/malformed failure, reset and duplicate prevention; keyboard/contrast/reduced motion/no-JS and ten widths. API/captcha fixtures only; no real email sent by CI.');
 } finally {
   await browser?.close();
   server.kill('SIGTERM');
