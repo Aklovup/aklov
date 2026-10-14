@@ -75,7 +75,7 @@ try {
   await page.locator('[data-filter="all"]').click();
   assert.equal(new URL(page.url()).searchParams.has('category'), false);
   assert.equal(await page.locator('[data-media-id]').count(), 10);
-  assert.equal(await page.locator('.media-placeholder').count(), 10);
+  assert.equal(await page.locator('.media-placeholder').count(), projects.filter((project) => !project.cover.url).length);
   assert.equal(await page.locator('.project-media img, .project-media video').count(), 0);
   assert.equal(await page.locator('[data-project] a[target="_blank"]').count(), 2);
   assert.equal(await page.locator('[data-project-open]').count(), 10);
@@ -136,7 +136,7 @@ try {
     assert.equal(new URL(page.url()).hash, '#projects');
     assert.equal(await page.evaluate(() => document.documentElement.style.overflow), 'hidden');
     assert.equal(await dialog.locator('img, video').count(), 0, 'Missing media created an empty or broken element.');
-    if (project.slug === 'moving-company-crm') assert.equal(await dialog.locator('.media-placeholder').count(), 0);
+    if (project.slug === 'moving-company-crm' || project.media.some((item) => item.url)) assert.equal(await dialog.locator('.media-placeholder').count(), 0);
     else assert.equal(await dialog.locator('.media-placeholder').count(), 1);
     assert.equal(await dialog.locator('.detail-type').innerText(), project.projectType);
     assert.equal(await dialog.locator('.external-links a').count(), (project.externalUrl ? 1 : 0) + (project.externalLinks?.length || 0));

@@ -24,7 +24,7 @@ The approved Moving Company CRM copy adds Integrations & Reporting. Filter count
 
 ## Media
 
-All 21 approved media identifiers and descriptions are retained. No final media sources or concept screenshots were available in the repository.
+All 21 approved media identifiers and descriptions are retained. The Impex portal-homepage GIF is supplied as a local repository asset and reused for its card cover and first detail item. Its other two media items and the other projects' sources remain pending.
 
 Upload approved media to `public/images/projects/<project-slug>/`, then add its root-relative `url` in project frontmatter to replace the placeholder, such as `/images/projects/impex-automotive/homepage.gif`. Assign a URL only after the actual file exists. Include accurate `alt`, `caption`, `width` and `height`. Optional fields are `poster`, `order` and `placeholder`. Existing components accept these local paths without a hosting or component change.
 
@@ -50,4 +50,4 @@ No standalone project routes, new runtime dependencies, Home/Solutions changes o
 
 The existing GitHub workflow runs `npm run build`, 11 content/filter/URL logic tests and Chromium checks for all ten complete bodies, categories, direct links and aliases, history, keyboard and pointer interactions, focus, scrolling, missing media, external link metadata and seven viewport widths.
 
-Actual asset rendering and video playback against final sources remain pending those assets. The external links are checked for their approved destinations and opening behavior; current client websites are not used as proof of the delivered work.
+The supplied Impex GIF is checked for actual loading/playback and responsive fit; other final assets and video playback remain pending those assets. The external links are checked for their approved destinations and opening behavior; current client websites are not used as proof of the delivered work.

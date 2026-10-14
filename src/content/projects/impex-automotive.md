@@ -13,9 +13,10 @@
   "cover": {
     "id": "impex-cover",
     "type": "gif",
-    "alt": "",
+    "alt": "Impex Automotive B2B ordering portal homepage and product discovery.",
     "width": 1600,
-    "height": 1000
+    "height": 1000,
+    "url": "/images/projects/impex-automotive/Impex_Homepage.gif"
   },
   "media": [
     {
@@ -25,7 +26,8 @@
       "caption": "GIF demonstrating the portal homepage and product discovery.",
       "order": 1,
       "width": 1600,
-      "height": 1000
+      "height": 1000,
+      "url": "/images/projects/impex-automotive/Impex_Homepage.gif"
     },
     {
       "id": "impex-product-cart",
