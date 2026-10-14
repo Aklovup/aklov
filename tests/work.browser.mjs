@@ -153,7 +153,7 @@ try {
   await dialog.waitFor({ state: 'visible' });
   assert.equal(await dialog.locator('h2').innerText(), 'Divine Health & Wellness / Black Onyx');
   await page.keyboard.press('Shift+Tab');
-  assert.ok(await dialog.locator('.external-links a').last().evaluate((el) => el === document.activeElement));
+  assert.ok(await dialog.locator('.inspect-link').last().evaluate((el) => el === document.activeElement), 'Focus must wrap to the final full-size media link.');
   await page.keyboard.press('Tab');
   assert.ok(await close.evaluate((el) => el === document.activeElement));
   await dialog.locator('h2').click();
