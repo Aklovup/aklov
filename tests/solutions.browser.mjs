@@ -39,6 +39,10 @@ try {
   assert.ok(report.layouts.every(layout => layout.overflow.length === 0), JSON.stringify(report.layouts));
   for (const [label,width] of [['desktop',1440],['tablet',768],['mobile',390],['narrow',320]]) {
     await page.setViewportSize({width,height:1000});
+    const frame = await page.locator('.sols-figure').boundingBox();
+    const expectedRatio = width === 1440 ? .8 : width === 768 ? 4/3 : 1;
+    assert.ok(Math.abs(frame.width/frame.height - expectedRatio) < .01, 'Solutions image composition changed at ' + width);
+    await page.locator('.sols-head').screenshot({path:output+'/solutions-image-section-'+label+'.png'});
     await page.evaluate(()=>scrollTo(0,0));
     await page.screenshot({path:output+'/solutions-'+label+'.png',fullPage:true});
     await page.screenshot({path:output+'/solutions-hero-'+label+'.png'});
