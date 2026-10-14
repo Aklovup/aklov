@@ -1,14 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { links } from '../../data/links';
+import { mediaPreview } from '../../lib/media';
 
-const email = 'aklovup@gmail.com';
-
-const mail = (subject: string) =>
-  `mailto:${email}?subject=${encodeURIComponent(`Aklov enquiry — ${subject}`)}`;
-
-// Swap this for any image link. Warm, dark, architectural workspace crops work best.
-const sectionImage = 'https://unsplash.com/photos/teRVpNnlR_c/download?force=true&w=1600';
+const sectionImage = mediaPreview('/images/solutions/Solutions_img.jpg')!;
 
 const solutions = [
   {
@@ -195,7 +190,7 @@ const steps = [
           </p>
 
           <div class="hero-actions">
-            <a class="btn btn-gold" href={mail('A new project')}>
+            <a class="btn btn-gold" href={links.contact}>
               Discuss Your Project <span aria-hidden="true">↗</span>
             </a>
             <a class="btn btn-ghost" href="#solutions">
@@ -241,7 +236,7 @@ const steps = [
   <div class="sols-head" id="solutions">
     <div class="wrap sols-head-grid">
       <figure class="sols-figure">
-        <img src={sectionImage} alt="" loading="lazy" decoding="async" />
+        <img src={sectionImage.src} srcset={sectionImage.srcset} sizes="(max-width: 1000px) calc(100vw - 40px), 42vw" width={sectionImage.width} height={sectionImage.height} alt="" loading="lazy" decoding="async" />
       </figure>
 
       <div class="sols-head-text">
@@ -291,8 +286,8 @@ const steps = [
           <div class="sol-actions">
             <a
               class="btn btn-line"
-              href={mail(s.subject)}
-              aria-label={`${s.cta} (opens your email app)`}
+              href={links.contact}
+              aria-label={s.cta}
             >
               {s.cta} <span aria-hidden="true">↗</span>
             </a>
@@ -347,7 +342,7 @@ const steps = [
           </p>
 
           <div class="choose-cta">
-            <a class="btn btn-gold" href={mail('What needs to work better')}>
+            <a class="btn btn-gold" href={links.contact}>
               Tell Me What Needs to Work Better <span aria-hidden="true">↗</span>
             </a>
           </div>
@@ -369,7 +364,7 @@ const steps = [
         </div>
 
         <div class="closing-act">
-          <a class="btn btn-dark" href={mail('Start a conversation')}>
+          <a class="btn btn-dark" href={links.contact}>
             Start a Conversation <span aria-hidden="true">↗</span>
           </a>
           <p>Tell me about your project, your current challenges and the outcome you want to achieve.</p>
@@ -394,15 +389,15 @@ const steps = [
   .dark > .wrap { position: relative; z-index: 1; }
 
   .arc-hero { right: -20vw; top: -2vw; width: 74vw; max-width: 1200px; }
-  .arc-hero-2 { left: -26vw; bottom: -34vw; width: 60vw; max-width: 980px; opacity: .55; }
+  .arc-hero-2 { left: -26vw; bottom: -34vw; width: 60vw; max-width: 980px; opacity: .25; }
 
-  .hero { padding-block: 56px 0; }
+  .hero { padding-block: 44px 0; }
 
   .hero-meta {
     display: flex;
     justify-content: space-between;
     gap: 20px;
-    margin-bottom: 34px;
+    margin-bottom: 28px;
     color: var(--gold);
   }
 
@@ -412,9 +407,9 @@ const steps = [
     position: relative;
     z-index: 2;
     font-family: var(--display);
-    font-size: clamp(62px, 10.8vw, 190px);
+    font-size: clamp(62px, 9.2vw, 158px);
     font-weight: 400;
-    line-height: .86;
+    line-height: .9;
     letter-spacing: -.045em;
   }
 
@@ -428,13 +423,14 @@ const steps = [
     position: relative;
     z-index: 2;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 410px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
     gap: clamp(30px, 6vw, 100px);
     align-items: start;
-    padding-bottom: 100px;
+    margin-top: 32px;
+    padding-bottom: 72px;
   }
 
-  .hero-copy-block { max-width: 520px; padding-top: clamp(40px, 5vw, 80px); }
+  .hero-copy-block { max-width: 520px; }
   .hero-copy { color: var(--on-dark); font-size: 15px; line-height: 1.9; }
   .hero-copy + .hero-copy { margin-top: 18px; color: var(--ivory); }
   .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
@@ -442,19 +438,11 @@ const steps = [
   .idx {
     position: relative;
     width: 100%;
-    max-width: 410px;
-    margin: clamp(-175px, -9.6vw, -44px) 0 0 auto;
+    max-width: 380px;
+    margin: 0 0 0 auto;
     padding: 24px 28px 14px;
     background: var(--ivory);
     color: var(--charcoal);
-  }
-
-  .idx::before {
-    content: "";
-    position: absolute;
-    inset: 14px -14px -14px 14px;
-    z-index: -1;
-    border: 1px solid var(--gold);
   }
 
   .idx-top { padding-bottom: 16px; border-bottom: 1px solid var(--charcoal); color: var(--gold-dark); }
@@ -464,7 +452,7 @@ const steps = [
     grid-template-columns: 34px 1fr auto;
     align-items: baseline;
     gap: 10px;
-    padding: 17px 0;
+    padding: 14px 0;
     border-bottom: 1px solid var(--line);
   }
 
@@ -475,7 +463,7 @@ const steps = [
 
   /* Introduction */
 
-  .section { padding-block: clamp(80px, 10vw, 150px); }
+  .section { padding-block: clamp(56px, 6vw, 100px); }
 
   .intro h2,
   .sols-head h2,
@@ -487,15 +475,15 @@ const steps = [
     letter-spacing: -.04em;
   }
 
-  .intro h2 { max-width: 13ch; margin-top: 30px; font-size: clamp(56px, 9.8vw, 170px); line-height: .88; }
+  .intro h2 { max-width: 13ch; margin-top: 30px; font-size: clamp(50px, 7.5vw, 132px); line-height: .88; }
   .intro h2 em, .sols-head h2 em { color: var(--gold-dark); font-style: italic; }
 
   .intro-grid {
     display: grid;
     grid-template-columns: 1.15fr .85fr;
     gap: clamp(40px, 7vw, 120px);
-    margin-top: clamp(50px, 7vw, 100px);
-    padding-top: 40px;
+    margin-top: clamp(32px, 4vw, 60px);
+    padding-top: 28px;
     border-top: 1px solid var(--charcoal);
   }
 
@@ -550,7 +538,7 @@ const steps = [
   .sol {
     position: relative;
     overflow: hidden;
-    padding-block: clamp(72px, 8vw, 125px);
+    padding-block: clamp(52px, 5.5vw, 88px);
     border-bottom: 1px solid var(--charcoal);
   }
 
@@ -570,7 +558,7 @@ const steps = [
 
   .is-dark .sol-num { -webkit-text-stroke-color: var(--gold); }
 
-  .sol-title { font-family: var(--display); font-size: clamp(46px, 7.4vw, 132px); font-weight: 400; line-height: .92; letter-spacing: -.04em; }
+  .sol-title { font-family: var(--display); font-size: clamp(44px, 5.6vw, 96px); font-weight: 400; line-height: .92; letter-spacing: -.04em; }
   .sol-tag { margin-bottom: 28px; font-family: var(--display); font-size: clamp(28px, 3vw, 48px); line-height: 1.08; letter-spacing: -.025em; }
   .sol-lead p:not(.sol-tag) { max-width: 470px; color: var(--body); font-size: 14.5px; line-height: 1.95; }
   .sol-lead p + p { margin-top: 18px; }
@@ -609,14 +597,14 @@ const steps = [
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 40px;
     align-items: end;
-    margin-top: clamp(50px, 6vw, 90px);
+    margin-top: clamp(32px, 4vw, 56px);
     padding-top: 34px;
     border-top: 1px solid currentColor;
   }
 
   .sol-goal .mono { display: block; margin-bottom: 14px; color: var(--gold-dark); }
   .is-dark .sol-goal .mono { color: var(--gold); }
-  .sol-goal p { max-width: 30ch; font-family: var(--display); font-size: clamp(26px, 2.8vw, 42px); line-height: 1.12; letter-spacing: -.02em; }
+  .sol-goal p { max-width: 30ch; font-family: var(--display); font-size: clamp(24px, 2.2vw, 34px); line-height: 1.12; letter-spacing: -.02em; }
   .is-dark .sol-goal .btn-line { color: var(--gold); }
 
   /* Action group: one discussion button + one quieter project link */
@@ -637,53 +625,53 @@ const steps = [
   .is-dark .text-link { color: var(--ivory); }
 
   /* 01 */
-  .sol-1 .sol-top { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(20px, 3vw, 50px); align-items: end; margin-bottom: clamp(50px, 6vw, 90px); }
-  .sol-1 .sol-num { font-size: clamp(120px, 19vw, 320px); }
+  .sol-1 .sol-top { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(20px, 3vw, 50px); align-items: end; margin-bottom: clamp(32px, 4vw, 56px); }
+  .sol-1 .sol-num { font-size: clamp(88px, 10vw, 160px); }
   .sol-1 .sol-body { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(40px, 8vw, 130px); }
 
   /* 02 */
-  .sol-2 .sol-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 30px; margin-bottom: clamp(50px, 6vw, 90px); }
+  .sol-2 .sol-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 30px; margin-bottom: clamp(32px, 4vw, 56px); }
   .sol-2 .sol-title { max-width: 9ch; }
-  .sol-2 .sol-num { order: 2; margin-top: -.04em; font-size: clamp(150px, 24vw, 400px); }
+  .sol-2 .sol-num { order: 2; margin-top: -.04em; font-size: clamp(100px, 12vw, 190px); }
   .sol-2 .sol-body { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(40px, 8vw, 130px); }
   .sol-2 .sol-list { order: 1; }
   .sol-2 .sol-lead { order: 2; }
 
   /* 03 */
-  .sol-3 .sol-top { position: relative; margin-bottom: clamp(50px, 6vw, 90px); text-align: center; }
-  .sol-3 .sol-num { display: block; font-size: clamp(150px, 21vw, 350px); }
-  .sol-3 .sol-title { position: relative; max-width: 12ch; margin: -.36em auto 0; font-size: clamp(50px, 8.2vw, 148px); }
+  .sol-3 .sol-top { display: flex; align-items: baseline; gap: clamp(20px, 3vw, 48px); margin-bottom: clamp(32px, 4vw, 56px); }
+  .sol-3 .sol-num { display: block; font-size: clamp(100px, 11vw, 180px); }
+  .sol-3 .sol-title { max-width: 14ch; margin: 0; }
   .sol-3 .sol-body { display: grid; gap: clamp(40px, 5vw, 70px); }
   .sol-3 .sol-lead { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(30px, 6vw, 100px); align-items: start; }
   .sol-3 .sol-tag { grid-column: 1; grid-row: 1 / span 2; margin-bottom: 0; }
   .sol-3 .sol-lead p:not(.sol-tag) { grid-column: 2; max-width: none; }
   .sol-3 .sol-lead p + p { margin-top: 0; }
-  .sol-3 .sol-list ul { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--charcoal); border-left: 1px solid var(--charcoal); }
+  .sol-3 .sol-list ul { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
 
   .sol-3 .sol-list li {
     display: flex;
     flex-direction: column;
-    gap: 30px;
-    min-height: 150px;
-    padding: 22px;
-    border-right: 1px solid var(--charcoal);
-    border-bottom: 1px solid var(--charcoal);
+    gap: 18px;
+    min-height: 110px;
+    padding: 20px;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
     font-family: var(--display);
     font-size: clamp(22px, 2vw, 30px);
     line-height: 1.1;
   }
 
   /* 04 */
-  .sol-4 .sol-top { position: relative; min-height: clamp(150px, 20vw, 300px); margin-bottom: clamp(50px, 6vw, 90px); }
-  .sol-4 .sol-num { position: absolute; top: 0; left: 0; font-size: clamp(150px, 25vw, 430px); }
-  .sol-4 .sol-title { position: relative; max-width: 11ch; margin-left: clamp(0px, 22vw, 420px); padding-top: clamp(20px, 6vw, 100px); }
+  .sol-4 .sol-top { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: clamp(20px, 3vw, 48px); margin-bottom: clamp(32px, 4vw, 56px); }
+  .sol-4 .sol-num { font-size: clamp(100px, 12vw, 190px); }
+  .sol-4 .sol-title { max-width: 13ch; }
   .sol-4 .sol-body { display: grid; grid-template-columns: .8fr 1.2fr; gap: clamp(40px, 8vw, 130px); }
   .sol-4 .sol-list li { padding-block: 20px; font-family: var(--display); font-size: clamp(24px, 2.6vw, 38px); line-height: 1.08; letter-spacing: -.02em; }
   .sol-4 .sol-list li::before { padding-top: .5em; }
 
   /* 05 */
-  .sol-5 .sol-num { position: absolute; z-index: 0; top: -.12em; right: -3vw; font-size: clamp(260px, 40vw, 680px); opacity: .55; }
-  .sol-5 .sol-top { position: relative; z-index: 1; margin-bottom: clamp(50px, 6vw, 90px); }
+  .sol-5 .sol-num { position: absolute; z-index: 0; top: -.12em; right: -3vw; font-size: clamp(160px, 22vw, 360px); opacity: .28; }
+  .sol-5 .sol-top { position: relative; z-index: 1; margin-bottom: clamp(32px, 4vw, 56px); }
   .sol-5 .sol-title { max-width: 10ch; }
   .sol-5 .sol-body { display: grid; grid-template-columns: .85fr 1.15fr; gap: clamp(40px, 8vw, 130px); }
   .sol-5 .sol-list ul { display: grid; grid-template-columns: 1fr 1fr; column-gap: 36px; }
@@ -691,19 +679,19 @@ const steps = [
   /* Approach */
 
   .approach { background: var(--ivory); }
-  .approach h2 { max-width: 13ch; margin: 30px 0 clamp(50px, 7vw, 100px); font-size: clamp(52px, 8.4vw, 146px); line-height: .9; }
+  .approach h2 { max-width: 13ch; margin: 30px 0 clamp(32px, 4vw, 60px); font-size: clamp(48px, 6.5vw, 112px); line-height: .9; }
 
   .steps { display: grid; grid-template-columns: repeat(4, 1fr); align-items: start; }
   .step { padding: 30px 26px 50px 0; border-top: 1px solid var(--charcoal); }
   .step + .step { padding-left: 26px; border-left: 1px solid var(--charcoal); }
-  .st2 { margin-top: 56px; }
-  .st3 { margin-top: 112px; }
-  .st4 { margin-top: 168px; }
+  .st2 { margin-top: 28px; }
+  .st3 { margin-top: 56px; }
+  .st4 { margin-top: 84px; }
 
   .step-n {
     margin-bottom: 30px;
     font-family: var(--display);
-    font-size: clamp(110px, 13vw, 230px);
+    font-size: clamp(96px, 9vw, 148px);
     line-height: .75;
     letter-spacing: -.05em;
     color: transparent;
@@ -731,14 +719,14 @@ const steps = [
   .choose > .wrap { position: relative; z-index: 1; }
   .arc-choose { left: -18vw; top: -14vw; width: 62vw; max-width: 1000px; }
   .choose .kicker { color: var(--gold); }
-  .choose h2 { max-width: 11ch; margin-top: 30px; font-size: clamp(56px, 10.4vw, 180px); line-height: .88; }
+  .choose h2 { max-width: 17ch; margin-top: 30px; font-size: clamp(46px, 6.2vw, 108px); line-height: .88; }
   .choose h2 em { color: var(--gold); font-style: italic; }
 
   .choose-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: clamp(30px, 7vw, 120px);
-    margin-top: clamp(50px, 7vw, 100px);
+    margin-top: clamp(32px, 4vw, 60px);
     padding-top: 38px;
     border-top: 1px solid var(--line-dark);
   }
@@ -749,16 +737,16 @@ const steps = [
 
   /* Closing */
 
-  .closing { padding-block: clamp(80px, 10vw, 150px) 0; background: var(--gold); color: var(--charcoal); }
+  .closing { padding-block: clamp(56px, 6vw, 100px) 0; background: var(--gold); color: var(--charcoal); }
   .closing .kicker { color: var(--charcoal); }
-  .closing h2 { max-width: 12ch; margin-top: 30px; font-size: clamp(58px, 11.4vw, 200px); line-height: .84; letter-spacing: -.045em; }
+  .closing h2 { max-width: 12ch; margin-top: 30px; font-size: clamp(58px, 9vw, 160px); line-height: .84; letter-spacing: -.045em; }
   .closing h2 em { font-style: italic; }
 
   .closing-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: clamp(30px, 6vw, 100px);
-    margin-top: clamp(50px, 6vw, 90px);
+    margin-top: clamp(32px, 4vw, 56px);
     padding-block: 36px 60px;
     border-top: 1px solid var(--charcoal);
   }
@@ -775,16 +763,10 @@ const steps = [
     .text-link span { transition: transform .2s ease; }
     .text-link:hover span { transform: translateX(4px); }
     .is-dark .text-link:hover { color: var(--gold); }
-    .idx-row { transition: padding .25s ease; }
-    .idx-row:hover { padding-left: 8px; }
+    .idx-a { transition: transform .2s ease; }
+    .idx-row:hover .idx-a { transform: translateY(3px); }
     .idx-row:hover .idx-t { color: var(--gold-dark); }
-    .sol-list li { transition: padding .25s ease; }
-    .sol-1 .sol-list li:hover,
-    .sol-2 .sol-list li:hover,
-    .sol-4 .sol-list li:hover,
-    .sol-5 .sol-list li:hover { padding-left: 10px; }
-    .sol-3 .sol-list li { transition: background-color .25s ease; }
-    .sol-3 .sol-list li:hover { background: var(--charcoal); color: var(--ivory); }
+
   }
 
   /* Tablet */
@@ -815,7 +797,7 @@ const steps = [
     .sol-3 .sol-lead p + p { margin-top: 8px; }
     .sol-3 .sol-list ul { grid-template-columns: repeat(2, 1fr); }
     .sol-4 .sol-top { min-height: 0; }
-    .sol-4 .sol-title { margin-left: 0; padding-top: clamp(70px, 14vw, 140px); }
+    .sol-4 .sol-title { margin-left: 0; padding-top: 0; }
 
     .steps { grid-template-columns: 1fr 1fr; }
     .st2, .st3, .st4 { margin-top: 0; }
@@ -848,12 +830,13 @@ const steps = [
     .sol-1 .sol-top { grid-template-columns: 1fr; gap: 6px; }
     .sol-1 .sol-num { font-size: 110px; }
     .sol-2 .sol-top { flex-direction: column; }
-    .sol-2 .sol-num { order: 0; font-size: 150px; }
-    .sol-3 .sol-num { font-size: 150px; }
+    .sol-2 .sol-num { order: 0; font-size: 110px; }
+    .sol-3 .sol-top, .sol-4 .sol-top { display: block; }
+    .sol-3 .sol-num { font-size: 110px; margin-bottom: 18px; }
     .sol-3 .sol-list ul { grid-template-columns: 1fr; }
     .sol-3 .sol-list li { min-height: 0; gap: 14px; }
-    .sol-4 .sol-num { position: relative; display: block; font-size: 150px; }
-    .sol-4 .sol-title { margin-top: -.18em; padding-top: 0; }
+    .sol-4 .sol-num { display: block; font-size: 110px; margin-bottom: 18px; }
+    .sol-4 .sol-title { margin-top: 0; padding-top: 0; }
     .sol-5 .sol-num { right: -8vw; font-size: 220px; opacity: .4; }
     .sol-5 .sol-list ul { grid-template-columns: 1fr; }
     .sol-goal { grid-template-columns: 1fr; gap: 26px; }

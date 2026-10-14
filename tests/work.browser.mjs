@@ -75,8 +75,8 @@ try {
   await page.locator('[data-filter="all"]').click();
   assert.equal(new URL(page.url()).searchParams.has('category'), false);
   assert.equal(await page.locator('[data-media-id]').count(), 10);
-  assert.equal(await page.locator('.media-placeholder').count(), 10);
-  assert.equal(await page.locator('.project-media img, .project-media video').count(), 0);
+  assert.equal(await page.locator('.media-placeholder').count(), projects.filter((project) => !project.cover.url).length);
+  assert.equal(await page.locator('.project-media img, .project-media video, .project-media canvas[data-gif-still]').count(), projects.filter((project) => project.cover.url).length);
   assert.equal(await page.locator('[data-project] a[target="_blank"]').count(), 2);
   assert.equal(await page.locator('[data-project-open]').count(), 10);
   assert.equal(await page.locator('dialog').count(), 1);
@@ -135,8 +135,8 @@ try {
     assert.equal(new URL(page.url()).searchParams.get('source'), 'review');
     assert.equal(new URL(page.url()).hash, '#projects');
     assert.equal(await page.evaluate(() => document.documentElement.style.overflow), 'hidden');
-    assert.equal(await dialog.locator('img, video').count(), 0, 'Missing media created an empty or broken element.');
-    if (project.slug === 'moving-company-crm') assert.equal(await dialog.locator('.media-placeholder').count(), 0);
+    assert.equal(await dialog.locator('img, video, canvas[data-gif-still]').count(), project.media.filter((item) => item.url).length, 'Missing media created an empty or broken element.');
+    if (project.slug === 'moving-company-crm' || project.media.some((item) => item.url)) assert.equal(await dialog.locator('.media-placeholder').count(), 0);
     else assert.equal(await dialog.locator('.media-placeholder').count(), 1);
     assert.equal(await dialog.locator('.detail-type').innerText(), project.projectType);
     assert.equal(await dialog.locator('.external-links a').count(), (project.externalUrl ? 1 : 0) + (project.externalLinks?.length || 0));
@@ -153,7 +153,8 @@ try {
   await dialog.waitFor({ state: 'visible' });
   assert.equal(await dialog.locator('h2').innerText(), 'Divine Health & Wellness / Black Onyx');
   await page.keyboard.press('Shift+Tab');
-  assert.ok(await dialog.locator('.external-links a').last().evaluate((el) => el === document.activeElement));
+  assert.equal(await dialog.locator('.inspect-link').count(), 0);
+  assert.ok(await dialog.locator('.external-links a').last().evaluate((el) => el === document.activeElement), 'Focus must wrap to the final available website link.');
   await page.keyboard.press('Tab');
   assert.ok(await close.evaluate((el) => el === document.activeElement));
   await dialog.locator('h2').click();
@@ -223,7 +224,12 @@ try {
   await noJsPage.goto(base + '/work/');
   assert.equal(await noJsPage.locator('[data-project]:visible').count(), 10);
   assert.equal(await noJsPage.locator('[data-filters]:visible').count(), 0);
-  assert.ok(await noJsPage.locator('noscript').isVisible());
+  assert.ok(await noJsPage.locator('.no-script').isVisible());
+  for (const project of projects.filter((item) => item.cover.url && item.cover.type === 'gif')) {
+    const mediaLink = noJsPage.locator(`[data-project="${project.slug}"] noscript a`);
+    assert.ok(await mediaLink.isVisible());
+    assert.equal(await mediaLink.getAttribute('href'), project.cover.url);
+  }
   assert.equal(await noJsPage.locator('[data-project-open]:visible').count(), 0);
   await noJs.close();
   await context.close();

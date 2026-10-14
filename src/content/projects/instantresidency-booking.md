@@ -25,7 +25,7 @@
       "id": "instantresidency-workflow",
       "type": "image",
       "alt": "Screenshot of the n8n workflow showing the AI agent, calendar, Airtable, and communication tools.",
-      "caption": "Screenshot of the n8n workflow showing the AI agent, calendar, Airtable, and communication tools.",
+      "caption": "Consultation-booking workflow",
       "order": 1,
       "width": 1600,
       "height": 1000

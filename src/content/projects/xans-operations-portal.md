@@ -14,37 +14,51 @@
   "cover": {
     "id": "xans-cover",
     "type": "gif",
-    "alt": "",
-    "width": 1600,
-    "height": 1000
+    "alt": "Xans Operations Portal dashboard.",
+    "width": 1280,
+    "height": 576,
+    "url": "/images/projects/xans-operations-portal/Xans_Home.gif"
   },
   "media": [
+    {
+      "id": "xans-dashboard",
+      "type": "gif",
+      "alt": "Xans Operations Portal dashboard.",
+      "caption": "Operations dashboard",
+      "order": 1,
+      "url": "/images/projects/xans-operations-portal/Xans_Home.gif",
+      "width": 1280,
+      "height": 576
+    },
     {
       "id": "xans-order-form",
       "type": "gif",
       "alt": "GIF showing interactive order entry.",
-      "caption": "GIF showing interactive order entry.",
-      "order": 1,
-      "width": 1600,
-      "height": 1000
+      "caption": "Order entry",
+      "order": 2,
+      "width": 1280,
+      "height": 576,
+      "url": "/images/projects/xans-operations-portal/Xans_add_order.gif"
     },
     {
       "id": "xans-quality-control",
       "type": "gif",
       "alt": "GIF showing the Log QC action and popup.",
-      "caption": "GIF showing the Log QC action and popup.",
-      "order": 2,
-      "width": 1600,
-      "height": 1000
+      "caption": "Quality-control logging",
+      "order": 3,
+      "width": 1280,
+      "height": 576,
+      "url": "/images/projects/xans-operations-portal/Xans_logQC.gif"
     },
     {
       "id": "xans-invoice",
-      "type": "image",
-      "alt": "Screenshot of an invoice PDF generated through the portal.",
-      "caption": "Screenshot of an invoice PDF generated through the portal.",
-      "order": 3,
-      "width": 1600,
-      "height": 1000
+      "type": "gif",
+      "alt": "GIF showing an invoice generated through the portal.",
+      "caption": "Invoice generation",
+      "order": 4,
+      "width": 1280,
+      "height": 576,
+      "url": "/images/projects/xans-operations-portal/Xans_Invoice.gif"
     }
   ],
   "featured": false,

@@ -18,13 +18,13 @@ test('all ten projects have unique slugs, ordered entries and stable media ident
   assert.equal(new Set(projects.map((p) => p.slug)).size, 10);
   assert.equal(new Set(projects.map((p) => p.cover.id)).size, 10);
   assert.deepEqual(projects.map((p) => p.order), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-  assert.ok(projects.every((p) => !p.cover.url && p.headline && p.body));
+  assert.ok(projects.every((p) => p.headline && p.body && (!p.cover.url || (p.cover.alt.trim() && p.cover.url.startsWith('/images/')))));
   assert.equal(projects.filter((p) => p.cover.type === 'gif').length, 2);
   assert.equal(projects.filter((p) => p.projectType === 'Independent Concept').length, 2);
   assert.equal(projects.filter((p) => p.projectType === 'Client Project').length, 8);
   assert.ok(projects.every((p) => !p.classificationNote));
-  assert.equal(projects.flatMap((p) => p.media).length, 21);
-  assert.equal(new Set(projects.flatMap((p) => p.media.map((media) => media.id))).size, 21);
+  assert.equal(projects.flatMap((p) => p.media).length, 22);
+  assert.equal(new Set(projects.flatMap((p) => p.media.map((media) => media.id))).size, 22);
 });
 
 test('case-study structure distinguishes client implementations and independent concepts', () => {

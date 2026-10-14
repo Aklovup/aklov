@@ -69,6 +69,7 @@ const isContact = path === '/contact';
     font-size: 12px;
   }
 
+  .nav a { display: inline-flex; align-items: center; min-height: 44px; }
   .nav a[aria-current='page'] { color: var(--gold); }
 
   .nav a:last-child {
@@ -84,7 +85,7 @@ const isContact = path === '/contact';
 
   .menu-toggle {
     display: none;
-    min-height: 40px;
+    min-height: 44px;
     padding: 0 16px;
     border: 1px solid var(--stone);
     border-radius: 99px;
@@ -125,13 +126,13 @@ const isContact = path === '/contact';
     .brand { grid-area: 1 / 1; }
 
     .menu-toggle {
-      display: inline-flex;
+      display: none;
       align-items: center;
       grid-area: 1 / 2;
     }
 
     .nav {
-      display: none;
+      display: flex;
       grid-area: 2 / 1 / 3 / 3;
       flex-direction: column;
       align-items: stretch;
@@ -140,6 +141,8 @@ const isContact = path === '/contact';
       font-size: 14px;
     }
 
+    .top[data-menu-ready] .menu-toggle { display: inline-flex; }
+    .top[data-menu-ready] .nav { display: none; }
     .top.is-open .nav { display: flex; }
 
     .nav a:not(:last-child) {
@@ -159,15 +162,18 @@ const isContact = path === '/contact';
   const header = document.getElementById('site-header');
   const toggle = header?.querySelector('.menu-toggle');
 
-  const setOpen = (open) => {
+  if (header && toggle) header.dataset.menuReady = '';
+  const setOpen = (open, restoreFocus = false) => {
     header?.classList.toggle('is-open', open);
     toggle?.setAttribute('aria-expanded', String(open));
     if (toggle) toggle.textContent = open ? 'Close' : 'Menu';
+    if (!open && restoreFocus) toggle?.focus();
   };
 
   toggle?.addEventListener('click', () => setOpen(!header.classList.contains('is-open')));
   header?.querySelectorAll('.nav a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+  matchMedia('(max-width: 640px)').addEventListener('change', () => setOpen(false));
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') setOpen(false);
+    if (e.key === 'Escape' && header?.classList.contains('is-open')) setOpen(false, true);
   });
 </script>

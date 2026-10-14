@@ -1,40 +1,44 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { links } from '../data/links';
 
 const portrait = {
-  // Placeholder silhouette. Replace this whole string with your own image link,
-  // e.g. src: 'https://your-cdn.com/portrait.webp' (transparent PNG/WebP, about 600x780).
-  src: 'data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20600%20780%22%3E%3Cdefs%3E%3ClinearGradient%20id=%22g%22%20x1=%220%22%20y1=%220%22%20x2=%220%22%20y2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%234a463b%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%231f1e1b%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg%20fill=%22url%28%23g%29%22%20stroke=%22%23d8bd78%22%20stroke-opacity=%22.55%22%20stroke-width=%221.5%22%3E%3Cellipse%20cx=%22300%22%20cy=%22215%22%20rx=%22108%22%20ry=%22136%22/%3E%3Cpath%20d=%22M252%20330h96v70c0%2014%2012%2026%2040%2034l92%2030c70%2024%20120%2070%20120%20140v176H0V604c0-70%2050-116%20120-140l92-30c28-8%2040-20%2040-34z%22/%3E%3C/g%3E%3C/svg%3E',
-  alt: 'Illustrative founder silhouette placeholder',
+  src: '/images/portraits/Portrait_home.png',
+  alt: 'Loveth Akpochimora, the professional behind Aklov',
 };
 
 const services = [
   {
     number: '01',
+    href: links.solutionsWebsite,
     title: 'Website design & development',
     description: 'Create a clear, distinctive online presence with thoughtful design, responsive layouts and a website built around your goals.',
     detail: 'DIGITAL EXPERIENCES',
   },
   {
     number: '02',
+    href: links.solutionsCustomer,
     title: 'Customer & sales systems',
     description: 'Give enquiries, customer relationships and sales activity a clearer structure, from the first conversation to the next action.',
     detail: 'CUSTOMER OPERATIONS',
   },
   {
     number: '03',
+    href: links.solutionsAutomation,
     title: 'Workflow automation',
     description: 'Reduce repetitive work and improve handoffs by connecting the steps, people and decisions behind everyday processes.',
     detail: 'PROCESS DESIGN',
   },
   {
     number: '04',
+    href: links.solutionsApplications,
     title: 'Custom business applications',
     description: 'Build practical internal tools around the way your business actually works, from purpose-built apps to approval workflows.',
     detail: 'APPLICATIONS',
   },
   {
     number: '05',
+    href: links.solutionsIntegrations,
     title: 'Integrations & reporting',
     description: 'Connect the systems you rely on and bring useful operational information into view, without unnecessary complexity.',
     detail: 'CONNECTED SYSTEMS',
@@ -82,7 +86,7 @@ const principles = [
         </h1>
 
         <figure class="portrait">
-          <img src={portrait.src} alt={portrait.alt} width="600" height="780" />
+          <img src={portrait.src} alt={portrait.alt} width="438" height="570" />
         </figure>
 
         <div class="hero-lower">
@@ -92,7 +96,7 @@ const principles = [
             </p>
 
             <div class="hero-actions">
-              <a class="btn btn-gold" href="#contact">
+              <a class="btn btn-gold" href={links.contact}>
                 Discuss a business challenge <span aria-hidden="true">↗</span>
               </a>
               <a class="btn btn-ghost" href="#solutions">
@@ -167,15 +171,15 @@ const principles = [
 
       <div class="service-list">
         {services.map((service) => (
-          <article class="service">
+          <a class="service" href={service.href} aria-label={`Explore ${service.title}`}>
             <div class="service-number">{service.number}</div>
             <h3>{service.title}</h3>
             <div class="service-body">
               <p>{service.description}</p>
               <div class="service-detail">{service.detail}</div>
             </div>
-            <div class="service-arrow" aria-hidden="true">↗</div>
-          </article>
+            <span class="service-arrow" aria-hidden="true">↗</span>
+          </a>
         ))}
       </div>
     </div>
@@ -225,7 +229,7 @@ const principles = [
           <p>
             A useful conversation starts with understanding what is happening today and what needs to work better.
           </p>
-          <a class="btn btn-dark" href="mailto:aklovup@gmail.com">
+          <a class="btn btn-dark" href={links.contact}>
             Start a conversation <span aria-hidden="true">↗</span>
           </a>
         </div>
@@ -454,6 +458,7 @@ const principles = [
 
   /* Even rows: full-bleed charcoal band that stays aligned on wide screens */
   .service:nth-child(even) {
+    --focus-color: var(--gold);
     background: var(--charcoal);
     color: var(--ivory);
     box-shadow: 0 0 0 100vmax var(--charcoal);
@@ -468,7 +473,7 @@ const principles = [
   .service-body p { max-width: 380px; margin-top: 8px; color: var(--body); font-size: 13px; line-height: 1.9; }
   .service-detail { margin-top: 18px; color: var(--stone); font-size: 9px; font-weight: 600; letter-spacing: 1.8px; }
 
-  .service-arrow { color: var(--charcoal); font-family: var(--display); font-size: 38px; line-height: 1; text-align: right; }
+  .service-arrow { display: flex; align-items: center; justify-content: flex-end; min-height: 44px; color: var(--charcoal); font-family: var(--display); font-size: 38px; line-height: 1; text-align: right; }
 
   /* Approach */
 
@@ -550,10 +555,44 @@ const principles = [
     .service:hover .service-arrow { transform: translate(4px, -4px); }
   }
 
+  /* Desktop: the workflow supports the introduction instead of competing with it. */
+  @media (min-width: 1001px) {
+    .hero-lower {
+      grid-template-columns: minmax(0, 1fr) minmax(0, clamp(270px, 24vw, 350px));
+      min-height: 510px;
+    }
+    .hero-copy-block { max-width: clamp(250px, 26vw, 380px); }
+    .portrait { left: 36%; width: min(30%, 480px); }
+    .panel {
+      max-width: 350px;
+      padding: 16px 0 0;
+      background: transparent;
+      color: var(--ivory);
+      border-top: 1px solid var(--line-dark);
+    }
+    .panel::before { content: none; }
+    .panel-top { border-color: var(--line-dark); font-size: 8px; letter-spacing: 1.1px; }
+    .panel-top span:last-child { color: var(--on-dark-dim); }
+    .node { grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; padding-block: 22px; border-color: var(--line-dark); }
+    .node .no { color: var(--gold); font-size: 26px; }
+    .node h3 { font-size: 23px; }
+    .node p { color: var(--on-dark); font-size: 11px; }
+    .node .tag { color: var(--gold); font-size: 8px; letter-spacing: 1px; }
+    .node.main { margin-inline: 0; padding-inline: 0; background: transparent; color: var(--ivory); }
+    .node.main .no, .node.main .tag { color: var(--gold); }
+    .node.main p { color: var(--on-dark); }
+    .panel-bottom { color: var(--on-dark); }
+    .panel-bottom .st { color: var(--gold); }
+  }
+
   /* Tablet */
 
   @media (max-width: 1000px) {
-    .hero-lower { grid-template-columns: 1fr; margin-top: -30px; }
+    .portrait img {
+    -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
+    }
+    .hero-lower { grid-template-columns: 1fr; margin-top: 24px; }
     .panel { max-width: none; }
 
     .portrait {
@@ -596,7 +635,7 @@ const principles = [
     .hero-meta { font-size: 8px; letter-spacing: 1.2px; }
     .hero h1 { font-size: clamp(57px, 13vw, 78px); }
     .hero h1 .l2 { padding-left: 24px; }
-    .hero-lower { margin-top: -24px; }
+    .hero-lower { margin-top: 24px; }
 
     .hero-actions { align-items: stretch; flex-direction: column; }
     .hero-actions .btn { justify-content: space-between; width: 100%; }

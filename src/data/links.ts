@@ -1,4 +1,9 @@
 export const links = {
+  solutionsWebsite: '/solutions/#website',
+  solutionsCustomer: '/solutions/#customer',
+  solutionsAutomation: '/solutions/#workflow',
+  solutionsApplications: '/solutions/#applications',
+  solutionsIntegrations: '/solutions/#integrations',
   work: '/work/',
   contact: '/contact/',
   email: 'mailto:aklovup@gmail.com',

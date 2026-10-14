@@ -2,29 +2,25 @@
 import type { CollectionEntry } from 'astro:content';
 import ProjectMedia from './ProjectMedia.astro';
 
-interface Props { project: CollectionEntry<'projects'>; }
-const { project: { data } } = Astro.props;
+interface Props { project: CollectionEntry<'projects'>; omitId?: string; }
+const { project: { data }, omitId } = Astro.props;
 const media = [...data.media].sort((a, b) => a.order - b.order);
-const available = media.filter((item) => item.url);
+const available = media.filter((item) => item.url && item.id !== omitId);
 const pending = media.filter((item) => !item.url);
-const preview = available.length ? undefined : pending.find((item) => item.placeholder);
+const preview = media.some((item) => item.url) ? undefined : pending.find((item) => item.placeholder);
 const number = String(data.order).padStart(2, '0');
 ---
 
 <section class="media-gallery" aria-labelledby="project-media-title">
   <div class="gallery-label">
     <h3 id="project-media-title">Project media</h3>
-    <span>{String(available.length).padStart(2, '0')} / {String(media.length).padStart(2, '0')}</span>
+    <span>{String(media.filter((item) => item.url).length).padStart(2, '0')} / {String(media.length).padStart(2, '0')}</span>
   </div>
   {preview && <ProjectMedia cover={preview} number={number} title={data.title} presentation="detail" showCaption={false} />}
   {available.map((item) => (
     <div class="media-item">
       <ProjectMedia cover={item} number={number} title={data.title} presentation="detail" />
-      {item.type !== 'video' && (
-        <a class="inspect-link" href={item.url} target="_blank" rel="noopener noreferrer" aria-label={`Open full-size media for ${data.title} (opens in a new tab)`}>
-          View full size <span aria-hidden="true">↗</span>
-        </a>
-      )}
+
     </div>
   ))}
   {!!pending.length && <p class="media-status">Media pending.</p>}
@@ -45,11 +41,8 @@ const number = String(data.order).padStart(2, '0');
   h3 { margin: 0; font-family: var(--display); font-size: 32px; font-weight: 400; line-height: 1.1; letter-spacing: -.02em; }
   .gallery-label > span { color: var(--gold-dark); font-size: 11px; font-variant-numeric: tabular-nums; }
   .media-item + .media-item { margin-top: 32px; padding-top: 28px; border-top: 1px solid var(--line); }
-  .inspect-link { display: inline-flex; gap: 16px; align-items: center; min-height: 44px; margin-top: 8px; font-size: 12px; font-weight: 600; }
-  .inspect-link:focus-visible { outline-color: var(--charcoal); }
   .media-status { margin: 20px 0 0; color: var(--body); font-size: 12px; line-height: 1.7; }
   .pending-media { list-style: none; margin: 16px 0 0; padding: 0; border-top: 1px solid var(--line); }
   .pending-media li { display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 14px; padding-block: 16px; border-bottom: 1px solid var(--line); color: var(--body); font-size: 12px; line-height: 1.75; }
   .pending-type { color: var(--gold-dark); font-size: 10px; letter-spacing: .8px; text-transform: uppercase; }
-  @media (hover: hover) { .inspect-link:hover { color: var(--gold-dark); } }
 </style>

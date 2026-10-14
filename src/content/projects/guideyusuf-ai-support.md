@@ -24,7 +24,7 @@
       "id": "guideyusuf-workflow",
       "type": "image",
       "alt": "Screenshot of the n8n workflow showing the AI agent, knowledge retrieval, memory, and supporting tools.",
-      "caption": "Screenshot of the n8n workflow showing the AI agent, knowledge retrieval, memory, and supporting tools.",
+      "caption": "AI support workflow",
       "order": 1,
       "width": 1600,
       "height": 1000

@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { mediaPreview } from '../../lib/media';
 
 interface Props {
   cover: CollectionEntry<'projects'>['data']['cover'];
@@ -9,16 +10,19 @@ interface Props {
   showCaption?: boolean;
 }
 const { cover, number, title, presentation = 'card', showCaption = true } = Astro.props;
+const preview = mediaPreview(cover.url);
+const poster = cover.poster || (cover.type === 'gif' ? preview?.src : undefined);
+const sizes = presentation === 'card' ? '(max-width: 640px) calc(100vw - 40px), 55vw' : '(max-width: 1000px) calc(100vw - 80px), 45vw';
 const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'Video preview' : 'Image preview';
 ---
 
-<figure class:list={['project-media', { 'detail-presentation': presentation === 'detail' }]} data-media-id={cover.id} data-media-type={cover.type} style={presentation === 'detail' ? `--media-ratio: ${cover.width} / ${cover.height}` : undefined}>
+<figure class:list={['project-media', { 'detail-presentation': presentation === 'detail', 'card-presentation': presentation === 'card' }]} data-media-id={cover.id} data-media-type={cover.type} style={presentation === 'detail' ? `--media-ratio: ${cover.width} / ${cover.height}` : undefined}>
   {cover.url ? (
     cover.type === 'gif' ? (
       <div class="gif-preview" data-gif-preview data-src={cover.url} data-alt={cover.alt} data-width={cover.width} data-height={cover.height}>
-        {cover.poster && <img class="gif-poster" src={cover.poster} alt={cover.alt} width={cover.width} height={cover.height} loading="lazy" />}
-        <div class="gif-fallback" hidden={!!cover.poster}>GIF preview</div>
+        <img data-gif-poster={poster ? '' : undefined} data-playing-gif={poster ? undefined : ''} src={poster || cover.url} srcset={poster === preview?.src ? preview?.srcset : undefined} sizes={sizes} alt={cover.alt} width={cover.width} height={cover.height} loading="lazy" decoding="async" />
         <button class="gif-toggle" type="button" data-gif-toggle aria-pressed="false" hidden>Play GIF</button>
+        <span class="gif-status" data-gif-status role="status" aria-live="polite"></span>
         <noscript><a href={cover.url} target="_blank" rel="noopener noreferrer">Open GIF (new tab)</a></noscript>
       </div>
     ) : cover.type === 'video' ? (
@@ -36,7 +40,9 @@ const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'V
       </video>
     ) : (
       <img
-        src={cover.url}
+        src={preview?.src || cover.url}
+        srcset={preview?.srcset}
+        sizes={sizes}
         alt={cover.alt}
         width={cover.width}
         height={cover.height}
@@ -55,37 +61,82 @@ const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'V
 </figure>
 
 <script>
-  const enableControls = (root: ParentNode) => root.querySelectorAll<HTMLButtonElement>('[data-gif-toggle]').forEach((button) => { button.hidden = false; });
-  enableControls(document);
-  document.addEventListener('aklov:project-open', (event) => enableControls((event as CustomEvent<{ root: ParentNode }>).detail.root));
-  document.addEventListener('click', (event) => {
-    const button = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('[data-gif-toggle]') : null;
-    const preview = button?.closest<HTMLElement>('[data-gif-preview]');
-    if (!button || !preview) return;
-    const playing = preview.querySelector<HTMLImageElement>('[data-playing-gif]');
-    const poster = preview.querySelector<HTMLImageElement>('.gif-poster');
-    const fallback = preview.querySelector<HTMLElement>('.gif-fallback')!;
-    if (playing) {
-      playing.remove();
-      if (poster) poster.hidden = false;
-      fallback.hidden = !!poster;
-      button.textContent = 'Play GIF';
-      button.setAttribute('aria-pressed', 'false');
-    } else {
-      const image = document.createElement('img');
-      image.dataset.playingGif = 'true';
-      image.src = preview.dataset.src!;
-      image.alt = preview.dataset.alt!;
-      image.width = Number(preview.dataset.width);
-      image.height = Number(preview.dataset.height);
-      image.decoding = 'async';
-      preview.prepend(image);
-      if (poster) poster.hidden = true;
-      fallback.hidden = true;
-      button.textContent = 'Pause GIF';
-      button.setAttribute('aria-pressed', 'true');
+  const setState = (preview: HTMLElement, playing: boolean) => {
+    const button = preview.querySelector<HTMLButtonElement>('[data-gif-toggle]')!;
+    button.textContent = playing ? 'Pause GIF' : 'Play GIF';
+    button.setAttribute('aria-pressed', String(playing));
+  };
+  const pause = async (preview: HTMLElement) => {
+    const image = preview.querySelector<HTMLImageElement>('[data-playing-gif]');
+    if (!image || preview.dataset.pausing) return;
+    preview.dataset.pausing = 'true';
+    try {
+      await image.decode();
+      if (!image.isConnected) return;
+      const canvas = document.createElement('canvas');
+      canvas.dataset.gifStill = '';
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      canvas.setAttribute('role', 'img');
+      canvas.setAttribute('aria-label', image.alt);
+      const context = canvas.getContext('2d');
+      if (!context) return;
+      context.drawImage(image, 0, 0);
+      preview.querySelector('[data-gif-still]')?.remove();
+      image.replaceWith(canvas);
+      setState(preview, false);
+    } finally {
+      delete preview.dataset.pausing;
     }
+  };
+  const initialize = (root: ParentNode) => root.querySelectorAll<HTMLElement>('[data-gif-preview]').forEach((preview) => {
+    preview.querySelector<HTMLButtonElement>('[data-gif-toggle]')!.hidden = false;
+    void pause(preview).catch(() => {});
   });
+  initialize(document);
+  if (!document.documentElement.hasAttribute('data-gif-controls-ready')) {
+    document.documentElement.setAttribute('data-gif-controls-ready', '');
+    document.addEventListener('aklov:project-open', (event) => initialize((event as CustomEvent<{ root: ParentNode }>).detail.root));
+    matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', (event) => {
+      if (event.matches) document.querySelectorAll<HTMLElement>('[data-gif-preview]').forEach((preview) => void pause(preview).catch(() => {}));
+    });
+    document.addEventListener('click', async (event) => {
+      const button = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('[data-gif-toggle]') : null;
+      const preview = button?.closest<HTMLElement>('[data-gif-preview]');
+      if (!button || !preview || preview.dataset.pausing || preview.dataset.gifLoading) return;
+      if (preview.querySelector('[data-playing-gif]')) {
+        void pause(preview).catch(() => {});
+      } else {
+        const image = document.createElement('img');
+        image.dataset.playingGif = '';
+        image.dataset.userPlay = '';
+        image.src = preview.dataset.src!;
+        image.alt = preview.dataset.alt!;
+        image.width = Number(preview.dataset.width);
+        image.height = Number(preview.dataset.height);
+        image.decoding = 'async';
+        preview.dataset.gifLoading = 'true';
+        button.disabled = true;
+        const status = preview.querySelector<HTMLElement>('[data-gif-status]')!;
+        status.textContent = 'Loading GIF…';
+        try {
+          await image.decode();
+          if (!preview.isConnected) return;
+          preview.querySelector('[data-gif-still]')?.remove();
+          preview.querySelector('[data-gif-poster]')?.remove();
+          preview.prepend(image);
+          setState(preview, true);
+          status.textContent = '';
+        } catch {
+          setState(preview, false);
+          status.textContent = "GIF couldn't load. Try Play again.";
+        } finally {
+          button.disabled = false;
+          delete preview.dataset.gifLoading;
+        }
+      }
+    });
+  }
 </script>
 
 <style>
@@ -102,9 +153,17 @@ const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'V
   .detail-presentation .gif-preview { aspect-ratio: var(--media-ratio); }
   .detail-presentation img, .detail-presentation video { max-height: 75dvh; }
   .gif-preview { position: relative; overflow: hidden; background: var(--charcoal); color: var(--ivory); }
-  .gif-preview img { position: absolute; inset: 0; width: 100%; height: 100%; max-height: none; object-fit: contain; }
+  .gif-preview :global(img), .gif-preview :global(canvas) { position: absolute; inset: 0; width: 100%; height: 100%; max-height: none; object-fit: contain; }
+  .card-presentation > img,
+  .card-presentation > video,
+  .card-presentation .gif-preview :global(img),
+  .card-presentation .gif-preview :global(canvas) { object-fit: cover; object-position: center top; }
+  :global(html[data-gif-controls-ready]) .gif-preview :global(img[data-playing-gif]:not([data-user-play])) { visibility: hidden; }
   .gif-preview [hidden] { display: none !important; }
   .gif-fallback { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--display); font-size: 32px; }
+  .gif-status { position: absolute; left: 16px; bottom: 16px; max-width: 55%; padding: 4px 8px; background: var(--charcoal); color: var(--ivory); font: 12px/1.5 var(--sans); }
+  .gif-status:empty { display: none; }
+  .gif-toggle:disabled { cursor: wait; }
   .gif-toggle { position: absolute; z-index: 1; bottom: 16px; right: 16px; min-height: 44px; padding: 0 18px; border: 1px solid var(--gold); border-radius: 99px; background: var(--charcoal); color: var(--ivory); font: 600 12px var(--sans); cursor: pointer; }
   .media-placeholder {
     position: relative;

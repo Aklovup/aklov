@@ -14,25 +14,27 @@
   "cover": {
     "id": "wound-concierge-cover",
     "type": "image",
-    "alt": "",
-    "width": 1600,
-    "height": 1000
+    "alt": "Screenshot of the storefront homepage.",
+    "width": 1920,
+    "height": 1714,
+    "url": "/images/projects/wound-concierge/Woundconcierge_Home.png"
   },
   "media": [
     {
       "id": "wound-storefront",
       "type": "image",
       "alt": "Screenshot of the storefront homepage.",
-      "caption": "Screenshot of the storefront homepage.",
+      "caption": "Members-only storefront",
       "order": 1,
-      "width": 1600,
-      "height": 1000
+      "width": 1920,
+      "height": 1714,
+      "url": "/images/projects/wound-concierge/Woundconcierge_Home.png"
     },
     {
       "id": "wound-customer-workflow",
       "type": "image",
       "alt": "Screenshot of the implemented customer-processing workflow.",
-      "caption": "Screenshot of the implemented customer-processing workflow.",
+      "caption": "Customer-processing workflow",
       "order": 2,
       "width": 1600,
       "height": 1000
@@ -41,10 +43,11 @@
       "id": "wound-loyalty-widget",
       "type": "image",
       "alt": "Screenshot of the Zoho Thrive widget displayed on the storefront.",
-      "caption": "Screenshot of the Zoho Thrive widget displayed on the storefront.",
+      "caption": "Referral and loyalty widget",
       "order": 3,
-      "width": 1600,
-      "height": 1000
+      "width": 1920,
+      "height": 1080,
+      "url": "/images/projects/wound-concierge/Woundconcierge_thrive.png"
     }
   ],
   "featured": false,

@@ -5,6 +5,10 @@ on:
     paths:
       - '.github/workflows/work-phase-1.yml'
       - 'src/**'
+      - 'scripts/**'
+      - '.gitignore'
+      - 'public/**'
+      - 'AGENTS.md'
       - 'tests/**'
       - 'package.json'
       - 'astro.config.mjs'
@@ -29,8 +33,16 @@ jobs:
         run: node --test --test-isolation=none tests/work.test.mjs tests/contact.test.mjs
       - name: Install the test browser
         run: npx playwright install --with-deps chromium
+      - name: Verify uploaded static media
+        run: node tests/media-assets.browser.mjs
+      - name: Verify uploaded Impex media and playback
+        run: node tests/impex.browser.mjs
       - name: Review rendered page and browser interactions
         run: node tests/work.browser.mjs
+      - name: Audit the rendered Solutions page
+        run: node tests/solutions.browser.mjs
+      - name: Validate sitewide refinements
+        run: node tests/site-polish.browser.mjs
       - name: Validate the About page
         run: node tests/about.browser.mjs
       - name: Validate the Contact page and form states
@@ -65,4 +77,32 @@ jobs:
         with:
           name: contact-preview-review
           path: artifacts/contact-preview-review/
+          if-no-files-found: ignore
+      - name: Save Impex media review screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: impex-media-review
+          path: artifacts/impex-review/
+          if-no-files-found: ignore
+      - name: Save uploaded media review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: uploaded-media-review
+          path: artifacts/media-review/
+          if-no-files-found: ignore
+      - name: Save Solutions audit screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: solutions-page-review
+          path: artifacts/solutions-review/
+          if-no-files-found: ignore
+      - name: Save sitewide review screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sitewide-polish-review
+          path: artifacts/site-polish-review/
           if-no-files-found: ignore

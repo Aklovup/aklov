@@ -22,7 +22,7 @@
       "id": "vera-concept-overview",
       "type": "image",
       "alt": "Full-page website design image showing the hero, product collection, and editorial storytelling sections.",
-      "caption": "Full-page website design image showing the hero, product collection, and editorial storytelling sections.",
+      "caption": "VÉRA skincare design concept",
       "order": 1,
       "width": 1600,
       "height": 1000
