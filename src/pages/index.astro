@@ -312,8 +312,6 @@ const principles = [
     height: 100%;
     object-fit: contain;
     object-position: center bottom;
-    -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
   }
 
   /* Workflow panel */
@@ -553,6 +551,10 @@ const principles = [
   /* Tablet */
 
   @media (max-width: 1000px) {
+    .portrait img {
+    -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
+    }
     .hero-lower { grid-template-columns: 1fr; margin-top: 24px; }
     .panel { max-width: none; }
 

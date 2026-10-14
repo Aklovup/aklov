@@ -92,7 +92,7 @@ try {
     const portrait = page.locator(route === '/' ? '.portrait img' : '[data-about-portrait] img');
     await portrait.evaluate(img => img.decode());
     assert.ok((await portrait.getAttribute('src')).startsWith('/images/portraits/'));
-    for (const width of [1440,768,390,320]) {
+    for (const width of [1440,1001,1000,768,390,320]) {
       await page.setViewportSize({width,height:1000});
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), route + ' at ' + width);
       if (route === '/' && width <= 1000) {
@@ -100,7 +100,11 @@ try {
         const copyBox = await page.locator('.hero-copy').boundingBox();
         assert.ok(copyBox.y >= portraitBox.y + portraitBox.height, 'Portrait overlaps Home copy at ' + width);
       }
-      if (route === '/') assert.match(await portrait.evaluate(el => getComputedStyle(el).maskImage), /linear-gradient/);
+      if (route === '/') {
+        const mask = await portrait.evaluate(el => getComputedStyle(el).maskImage);
+        if (width <= 1000) assert.match(mask, /linear-gradient/);
+        else assert.equal(mask, 'none', 'Desktop portrait must remain crisp.');
+      }
       else {
         const frame = page.locator('.portrait-frame');
         assert.equal(await frame.evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(216, 189, 120)');
