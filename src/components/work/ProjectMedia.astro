@@ -57,6 +57,10 @@ const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'V
 <script>
   const enableControls = (root: ParentNode) => root.querySelectorAll<HTMLButtonElement>('[data-gif-toggle]').forEach((button) => { button.hidden = false; });
   enableControls(document);
+  // Popup templates can reintroduce component scripts. Keep delegated playback
+  // listeners unique so one click cannot both start and stop the same GIF.
+  if (!document.documentElement.hasAttribute('data-gif-controls-ready')) {
+  document.documentElement.setAttribute('data-gif-controls-ready', '');
   document.addEventListener('aklov:project-open', (event) => enableControls((event as CustomEvent<{ root: ParentNode }>).detail.root));
   document.addEventListener('click', (event) => {
     const button = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('[data-gif-toggle]') : null;
@@ -86,6 +90,7 @@ const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'V
       button.setAttribute('aria-pressed', 'true');
     }
   });
+  }
 </script>
 
 <style>

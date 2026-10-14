@@ -55,6 +55,7 @@ try {
   assert.equal(await dialog.locator('[data-media-id="impex-homepage"]').count(), 1);
   assert.equal(await dialog.locator('.pending-media li').count(), 2);
   await dialog.getByRole('button', { name: 'Play GIF', exact: true }).click();
+  assert.equal(await dialog.locator('[data-gif-toggle]').innerText(), 'Pause GIF', 'Popup GIF did not stay playing.');
   await dialog.locator('[data-playing-gif]').evaluate((img) => img.decode());
   assert.equal(await dialog.locator('[data-playing-gif]').evaluate((img) => img.naturalWidth), width);
   await dialog.screenshot({ path: 'artifacts/impex-review/popup-desktop.png' });
