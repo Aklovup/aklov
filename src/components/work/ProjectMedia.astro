@@ -16,9 +16,8 @@ const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'V
   {cover.url ? (
     cover.type === 'gif' ? (
       <div class="gif-preview" data-gif-preview data-src={cover.url} data-alt={cover.alt} data-width={cover.width} data-height={cover.height}>
-        {cover.poster && <img class="gif-poster" src={cover.poster} alt={cover.alt} width={cover.width} height={cover.height} loading="lazy" />}
-        <div class="gif-fallback" hidden={!!cover.poster}>GIF preview</div>
-        <button class="gif-toggle" type="button" data-gif-toggle aria-pressed="false" hidden>Play GIF</button>
+        <img data-playing-gif src={cover.url} alt={cover.alt} width={cover.width} height={cover.height} loading="lazy" decoding="async" />
+        <button class="gif-toggle" type="button" data-gif-toggle aria-pressed="true" hidden>Pause GIF</button>
         <noscript><a href={cover.url} target="_blank" rel="noopener noreferrer">Open GIF (new tab)</a></noscript>
       </div>
     ) : cover.type === 'video' ? (
@@ -55,39 +54,62 @@ const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'V
 </figure>
 
 <script>
-  const enableControls = (root: ParentNode) => root.querySelectorAll<HTMLButtonElement>('[data-gif-toggle]').forEach((button) => { button.hidden = false; });
-  enableControls(document);
-  // Popup templates can reintroduce component scripts. Keep delegated playback
-  // listeners unique so one click cannot both start and stop the same GIF.
+  const setState = (preview: HTMLElement, playing: boolean) => {
+    const button = preview.querySelector<HTMLButtonElement>('[data-gif-toggle]')!;
+    button.textContent = playing ? 'Pause GIF' : 'Play GIF';
+    button.setAttribute('aria-pressed', String(playing));
+  };
+  const pause = async (preview: HTMLElement) => {
+    const image = preview.querySelector<HTMLImageElement>('[data-playing-gif]');
+    if (!image || preview.dataset.pausing) return;
+    preview.dataset.pausing = 'true';
+    try {
+      await image.decode();
+      if (!image.isConnected) return;
+      const canvas = document.createElement('canvas');
+      canvas.dataset.gifStill = '';
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      canvas.setAttribute('role', 'img');
+      canvas.setAttribute('aria-label', image.alt);
+      const context = canvas.getContext('2d');
+      if (!context) return;
+      context.drawImage(image, 0, 0);
+      preview.querySelector('[data-gif-still]')?.remove();
+      image.replaceWith(canvas);
+      setState(preview, false);
+    } finally {
+      delete preview.dataset.pausing;
+    }
+  };
+  const initialize = (root: ParentNode) => root.querySelectorAll<HTMLElement>('[data-gif-preview]').forEach((preview) => {
+    preview.querySelector<HTMLButtonElement>('[data-gif-toggle]')!.hidden = false;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) void pause(preview).catch(() => {});
+  });
+  initialize(document);
   if (!document.documentElement.hasAttribute('data-gif-controls-ready')) {
     document.documentElement.setAttribute('data-gif-controls-ready', '');
-    document.addEventListener('aklov:project-open', (event) => enableControls((event as CustomEvent<{ root: ParentNode }>).detail.root));
+    document.addEventListener('aklov:project-open', (event) => initialize((event as CustomEvent<{ root: ParentNode }>).detail.root));
+    matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', (event) => {
+      if (event.matches) document.querySelectorAll<HTMLElement>('[data-gif-preview]').forEach((preview) => void pause(preview).catch(() => {}));
+    });
     document.addEventListener('click', (event) => {
       const button = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('[data-gif-toggle]') : null;
       const preview = button?.closest<HTMLElement>('[data-gif-preview]');
-      if (!button || !preview) return;
-      const playing = preview.querySelector<HTMLImageElement>('[data-playing-gif]');
-      const poster = preview.querySelector<HTMLImageElement>('.gif-poster');
-      const fallback = preview.querySelector<HTMLElement>('.gif-fallback')!;
-      if (playing) {
-        playing.remove();
-        if (poster) poster.hidden = false;
-        fallback.hidden = !!poster;
-        button.textContent = 'Play GIF';
-        button.setAttribute('aria-pressed', 'false');
+      if (!button || !preview || preview.dataset.pausing) return;
+      if (preview.querySelector('[data-playing-gif]')) {
+        void pause(preview).catch(() => {});
       } else {
         const image = document.createElement('img');
-        image.dataset.playingGif = 'true';
+        image.dataset.playingGif = '';
         image.src = preview.dataset.src!;
         image.alt = preview.dataset.alt!;
         image.width = Number(preview.dataset.width);
         image.height = Number(preview.dataset.height);
         image.decoding = 'async';
+        preview.querySelector('[data-gif-still]')?.remove();
         preview.prepend(image);
-        if (poster) poster.hidden = true;
-        fallback.hidden = true;
-        button.textContent = 'Pause GIF';
-        button.setAttribute('aria-pressed', 'true');
+        setState(preview, true);
       }
     });
   }
@@ -107,7 +129,7 @@ const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'V
   .detail-presentation .gif-preview { aspect-ratio: var(--media-ratio); }
   .detail-presentation img, .detail-presentation video { max-height: 75dvh; }
   .gif-preview { position: relative; overflow: hidden; background: var(--charcoal); color: var(--ivory); }
-  .gif-preview :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; max-height: none; object-fit: contain; }
+  .gif-preview :global(img), .gif-preview :global(canvas) { position: absolute; inset: 0; width: 100%; height: 100%; max-height: none; object-fit: contain; }
   .gif-preview [hidden] { display: none !important; }
   .gif-fallback { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--display); font-size: 32px; }
   .gif-toggle { position: absolute; z-index: 1; bottom: 16px; right: 16px; min-height: 44px; padding: 0 18px; border: 1px solid var(--gold); border-radius: 99px; background: var(--charcoal); color: var(--ivory); font: 600 12px var(--sans); cursor: pointer; }

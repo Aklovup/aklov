@@ -36,4 +36,4 @@ The current Solutions photo remains its existing external source until an approv
 
 The existing GitHub workflow now includes `public/**` and `AGENTS.md` in its PR triggers, so future media-only changes receive build and regression checks. It runs the static Astro build, existing Work/Contact logic tests, and Work/About/Contact browser suites. These checks exercise portfolio popups, responsive layouts and Contact API/captcha handling using isolated fixtures. They do not send real inquiries.
 
-The new Impex browser check verifies the actual uploaded GIF header/dimensions, served bytes and MIME type, card and popup playback, reduced-motion behavior, and desktop/mobile fit. The product/cart and checkout images remain pending. No R2 delivery or binding is used.
+The new Impex browser check verifies the actual uploaded GIF header/dimensions, served bytes and MIME type, card and popup playback, immediate display, visible paused/reduced-motion frames, and desktop/mobile fit. The product/cart and checkout images remain pending. No R2 delivery or binding is used.

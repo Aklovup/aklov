@@ -32,7 +32,7 @@ The same source schema applies to `cover` for card previews. Replacing a source 
 
 Available items form an editorial sequence. Pending items are labeled separately. With no available items, at most one intentional preview placeholder is shown, followed by the planned media list. Moving Company CRM uses `placeholder: false` for its two detail slots, so no empty screenshot elements are displayed.
 
-Images retain their aspect ratio and have an explicit full-size link. GIFs load and play only after the user chooses **Play GIF**, and can be paused. Videos use native controls and do not autoplay. Detailed media lives in inert templates until a project is opened and is removed when the popup closes.
+Images retain their aspect ratio and have an explicit full-size link. GIFs display and animate immediately when their media is shown. A pause control freezes a visible frame; reduced-motion visitors receive a still frame with optional playback. Videos use native controls and do not autoplay. Detailed media lives in inert templates until a project is opened and is removed when the popup closes.
 
 Redact sensitive Xans data before adding publication-ready media. Do not substitute proposal diagrams for the Moving Company CRM's implemented screens.
 
