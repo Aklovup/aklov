@@ -23,7 +23,7 @@ Alternatively, an actual static cover image can be uploaded as `cover.webp`; do 
 
 Once the file is uploaded, set the existing Impex `cover.url` and `impex-homepage` media item's `url` in `src/content/projects/impex-automotive.md` to the matching local URL. Supply descriptive cover alternative text and the file's actual width/height. Keep the media type consistent with the file. This reuses one source for the card and project popup.
 
-The uploaded `Impex_Homepage.gif` is now used by the existing Impex card and `impex-homepage` popup slot. The product/cart and checkout media remain pending: one of the three planned Impex items is supplied. Existing Play/Pause controls prevent automatic motion. A static poster is optional and has not been supplied. The `.gitkeep` files preserve upload folders; they are not image assets.
+The uploaded `Impex_Homepage.gif` is 1280 × 610 pixels and is now used by the existing Impex card and `impex-homepage` popup slot. The product/cart and checkout media remain pending: one of the three planned Impex items is supplied. Existing Play/Pause controls prevent automatic motion. A static poster is optional and has not been supplied. The `.gitkeep` files preserve upload folders; they are not image assets.
 
 ## General rules
 

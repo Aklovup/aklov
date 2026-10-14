@@ -76,7 +76,7 @@ try {
   assert.equal(new URL(page.url()).searchParams.has('category'), false);
   assert.equal(await page.locator('[data-media-id]').count(), 10);
   assert.equal(await page.locator('.media-placeholder').count(), projects.filter((project) => !project.cover.url).length);
-  assert.equal(await page.locator('.project-media img, .project-media video').count(), 0);
+  assert.equal(await page.locator('.project-media img, .project-media video').count(), projects.filter((project) => project.cover.url && (project.cover.type !== 'gif' || project.cover.poster)).length);
   assert.equal(await page.locator('[data-project] a[target="_blank"]').count(), 2);
   assert.equal(await page.locator('[data-project-open]').count(), 10);
   assert.equal(await page.locator('dialog').count(), 1);
@@ -135,7 +135,7 @@ try {
     assert.equal(new URL(page.url()).searchParams.get('source'), 'review');
     assert.equal(new URL(page.url()).hash, '#projects');
     assert.equal(await page.evaluate(() => document.documentElement.style.overflow), 'hidden');
-    assert.equal(await dialog.locator('img, video').count(), 0, 'Missing media created an empty or broken element.');
+    assert.equal(await dialog.locator('img, video').count(), project.media.filter((item) => item.url && (item.type !== 'gif' || item.poster)).length, 'Missing media created an empty or broken element.');
     if (project.slug === 'moving-company-crm' || project.media.some((item) => item.url)) assert.equal(await dialog.locator('.media-placeholder').count(), 0);
     else assert.equal(await dialog.locator('.media-placeholder').count(), 1);
     assert.equal(await dialog.locator('.detail-type').innerText(), project.projectType);
