@@ -20,42 +20,6 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Retrieve existing Solutions photograph for local hosting
-        run: |
-          node --input-type=module <<'JS'
-          import { mkdirSync, writeFileSync } from 'node:fs';
-          mkdirSync('artifacts/solutions-source', {recursive:true});
-          const attempts=[];
-          const original='https://unsplash.com/photos/teRVpNnlR_c/download?force=true&w=1600';
-          let source;
-          for (const url of [original,'https://unsplash.com/napi/photos/teRVpNnlR_c','https://unsplash.com/photos/teRVpNnlR_c']) {
-            try {
-              const r=await fetch(url,{signal:AbortSignal.timeout(15000)});
-              const type=r.headers.get('content-type')||'';
-              attempts.push({url,status:r.status,type});
-              if(!r.ok)continue;
-              if(type.startsWith('image/')){source={url:r.url,type,bytes:Buffer.from(await r.arrayBuffer())};break;}
-              const text=await r.text();
-              let candidate;
-              if(type.includes('json')){const data=JSON.parse(text);candidate=data.urls?.regular||data.urls?.full;}
-              else { const match=text.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i)||text.match(/<meta[^>]*content="([^"]+)"[^>]*property="og:image"/i);candidate=match?.[1]?.replaceAll('&amp;','&');}
-              if(candidate?.startsWith('https://images.unsplash.com/')){
-                const asset=await fetch(candidate,{signal:AbortSignal.timeout(15000)});
-                const assetType=asset.headers.get('content-type')||'';
-                attempts.push({url:candidate,status:asset.status,type:assetType});
-                if(asset.ok&&assetType.startsWith('image/')){source={url:candidate,type:assetType,bytes:Buffer.from(await asset.arrayBuffer())};break;}
-              }
-            } catch(e){attempts.push({url,error:e.message});}
-          }
-          if(source){writeFileSync('artifacts/solutions-source/photograph',source.bytes);delete source.bytes;}
-          writeFileSync('artifacts/solutions-source/source.json',JSON.stringify({photoId:'teRVpNnlR_c',original,attempts,download:source||null},null,2));
-          console.log('SOLUTIONS_DOWNLOAD',JSON.stringify({attempts,download:source||null}));
-          JS
-      - name: Save retrieved Solutions photograph
-        uses: actions/upload-artifact@v4
-        with:
-          name: solutions-source-image
-          path: artifacts/solutions-source/
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
