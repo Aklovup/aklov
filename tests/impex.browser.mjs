@@ -43,7 +43,7 @@ try {
   for (const [name, viewportWidth] of [['desktop', 1440], ['mobile', 390], ['narrow-mobile', 320]]) {
     await page.setViewportSize({ width: viewportWidth, height: 1000 });
     const box = await card.locator('[data-playing-gif]').boundingBox();
-    assert.ok(box.x >= 0 && box.x + box.width <= viewportWidth + 1);
+    assert.ok(box.x >= 0 && box.x + box.width <= viewportWidth + 1, 'GIF exceeds viewport at ' + viewportWidth + 'px: ' + JSON.stringify(box));
     await card.screenshot({ path: 'artifacts/impex-review/card-' + name + '.png' });
   }
   await card.getByRole('button', { name: 'Pause GIF', exact: true }).click();
