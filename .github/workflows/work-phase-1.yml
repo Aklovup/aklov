@@ -31,6 +31,8 @@ jobs:
         run: node --test --test-isolation=none tests/work.test.mjs tests/contact.test.mjs
       - name: Install the test browser
         run: npx playwright install --with-deps chromium
+      - name: Verify uploaded static media
+        run: node tests/media-assets.browser.mjs
       - name: Verify uploaded Impex media and playback
         run: node tests/impex.browser.mjs
       - name: Review rendered page and browser interactions
@@ -76,4 +78,11 @@ jobs:
         with:
           name: impex-media-review
           path: artifacts/impex-review/
+          if-no-files-found: ignore
+      - name: Save uploaded media review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: uploaded-media-review
+          path: artifacts/media-review/
           if-no-files-found: ignore
