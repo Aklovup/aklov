@@ -14,7 +14,7 @@ assert.equal(project.cover.width, width, 'Cover width must match uploaded GIF.')
 assert.equal(project.cover.height, height, 'Cover height must match uploaded GIF.');
 assert.equal(homepage.width, width);
 assert.equal(homepage.height, height);
-assert.equal(project.media.filter((item) => item.url).length, 1);
+assert.equal(project.media.filter((item) => item.url).length, 3);
 const base = 'http://127.0.0.1:4331';
 const server = spawn('npm', ['run', 'preview', '--', '--host', '127.0.0.1', '--port', '4331'], { stdio: 'inherit' });
 let browser;
@@ -63,13 +63,13 @@ try {
   const dialog = page.locator('dialog');
   await dialog.waitFor({ state: 'visible' });
   assert.equal(await dialog.locator('[data-media-id="impex-homepage"]').count(), 1);
-  assert.equal(await dialog.locator('.pending-media li').count(), 2);
-  await dialog.locator('[data-gif-still]').waitFor({ state: 'visible' });
-  assert.equal(await dialog.locator('[data-playing-gif]').count(), 0, 'Popup GIF played automatically.');
-  assert.equal(await dialog.locator('[data-gif-toggle]').innerText(), 'Play GIF');
-  await dialog.getByRole('button', { name: 'Play GIF', exact: true }).click();
-  await dialog.locator('[data-playing-gif]').evaluate((img) => img.decode());
-  assert.equal(await dialog.locator('[data-playing-gif]').evaluate((img) => img.naturalWidth), width);
+  assert.equal(await dialog.locator('.pending-media li').count(), 0);
+  await dialog.locator('[data-media-id="impex-homepage"] [data-gif-still]').waitFor({ state: 'visible' });
+  assert.equal(await dialog.locator('[data-media-id="impex-homepage"] [data-playing-gif]').count(), 0, 'Popup GIF played automatically.');
+  assert.equal(await dialog.locator('[data-media-id="impex-homepage"] [data-gif-toggle]').innerText(), 'Play GIF');
+  await dialog.locator('[data-media-id="impex-homepage"]').getByRole('button', { name: 'Play GIF', exact: true }).click();
+  await dialog.locator('[data-media-id="impex-homepage"] [data-playing-gif]').evaluate((img) => img.decode());
+  assert.equal(await dialog.locator('[data-media-id="impex-homepage"] [data-playing-gif]').evaluate((img) => img.naturalWidth), width);
   await dialog.screenshot({ path: 'artifacts/impex-review/popup-desktop.png' });
   await page.setViewportSize({ width: 390, height: 844 });
   await dialog.screenshot({ path: 'artifacts/impex-review/popup-mobile.png' });
@@ -80,7 +80,7 @@ try {
   await card.scrollIntoViewIfNeeded();
   await card.locator('[data-gif-still]').waitFor({ state: 'visible' });
   assert.equal(await card.locator('[data-playing-gif]').count(), 0);
-  console.log('Passed: original local GIF bytes/MIME/dimensions, shared card/popup source, visible and stable initial frame without autoplay, explicit play/pause, reduced-motion still frame, responsive fit and two remaining pending media items.');
+  console.log('Passed: original local GIF bytes/MIME/dimensions, shared card/popup source, visible and stable initial frame without autoplay, explicit play/pause, reduced-motion still frame, responsive fit and all three supplied media items.');
 } finally {
   await browser?.close();
   server.kill('SIGTERM');

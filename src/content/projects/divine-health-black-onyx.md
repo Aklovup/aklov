@@ -15,9 +15,10 @@
   "cover": {
     "id": "divine-black-onyx-cover",
     "type": "image",
-    "alt": "",
-    "width": 1600,
-    "height": 1000
+    "alt": "Screenshot of the brand gateway.",
+    "width": 1920,
+    "height": 1521,
+    "url": "/images/projects/divine-health-black-onyx/Gateway.png"
   },
   "media": [
     {
@@ -26,8 +27,9 @@
       "alt": "Screenshot of the brand gateway.",
       "caption": "Screenshot of the brand gateway.",
       "order": 1,
-      "width": 1600,
-      "height": 1000
+      "width": 1920,
+      "height": 1521,
+      "url": "/images/projects/divine-health-black-onyx/Gateway.png"
     },
     {
       "id": "divine-storefront",
@@ -35,8 +37,9 @@
       "alt": "Screenshot of the Divine Health & Wellness shop.",
       "caption": "Screenshot of the Divine Health & Wellness shop.",
       "order": 2,
-      "width": 1600,
-      "height": 1000
+      "width": 1920,
+      "height": 1959,
+      "url": "/images/projects/divine-health-black-onyx/Dhw_shop.png"
     },
     {
       "id": "black-onyx-storefront",
@@ -44,8 +47,9 @@
       "alt": "Screenshot of the Black Onyx shopping experience.",
       "caption": "Screenshot of the Black Onyx shopping experience.",
       "order": 3,
-      "width": 1600,
-      "height": 1000
+      "width": 1920,
+      "height": 2010,
+      "url": "/images/projects/divine-health-black-onyx/BO_shop.png"
     },
     {
       "id": "divine-shared-checkout",
@@ -53,8 +57,9 @@
       "alt": "Screenshot of the shared cart or checkout environment.",
       "caption": "Screenshot of the shared cart or checkout environment.",
       "order": 4,
-      "width": 1600,
-      "height": 1000
+      "width": 1920,
+      "height": 1752,
+      "url": "/images/projects/divine-health-black-onyx/shared_cart.png"
     }
   ],
   "externalUrl": "https://www.divinehealthwellness.co.za/",

@@ -14,9 +14,10 @@
   "cover": {
     "id": "wound-concierge-cover",
     "type": "image",
-    "alt": "",
-    "width": 1600,
-    "height": 1000
+    "alt": "Screenshot of the storefront homepage.",
+    "width": 1920,
+    "height": 1714,
+    "url": "/images/projects/wound-concierge/Woundconcierge_Home.png"
   },
   "media": [
     {
@@ -25,8 +26,9 @@
       "alt": "Screenshot of the storefront homepage.",
       "caption": "Screenshot of the storefront homepage.",
       "order": 1,
-      "width": 1600,
-      "height": 1000
+      "width": 1920,
+      "height": 1714,
+      "url": "/images/projects/wound-concierge/Woundconcierge_Home.png"
     },
     {
       "id": "wound-customer-workflow",
@@ -43,8 +45,9 @@
       "alt": "Screenshot of the Zoho Thrive widget displayed on the storefront.",
       "caption": "Screenshot of the Zoho Thrive widget displayed on the storefront.",
       "order": 3,
-      "width": 1600,
-      "height": 1000
+      "width": 1920,
+      "height": 1080,
+      "url": "/images/projects/wound-concierge/Woundconcierge_thrive.png"
     }
   ],
   "featured": false,

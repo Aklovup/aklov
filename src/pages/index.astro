@@ -2,10 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const portrait = {
-  // Placeholder silhouette. Replace this whole string with your own image link,
-  // e.g. src: 'https://your-cdn.com/portrait.webp' (transparent PNG/WebP, about 600x780).
-  src: 'data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20600%20780%22%3E%3Cdefs%3E%3ClinearGradient%20id=%22g%22%20x1=%220%22%20y1=%220%22%20x2=%220%22%20y2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%234a463b%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%231f1e1b%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg%20fill=%22url%28%23g%29%22%20stroke=%22%23d8bd78%22%20stroke-opacity=%22.55%22%20stroke-width=%221.5%22%3E%3Cellipse%20cx=%22300%22%20cy=%22215%22%20rx=%22108%22%20ry=%22136%22/%3E%3Cpath%20d=%22M252%20330h96v70c0%2014%2012%2026%2040%2034l92%2030c70%2024%20120%2070%20120%20140v176H0V604c0-70%2050-116%20120-140l92-30c28-8%2040-20%2040-34z%22/%3E%3C/g%3E%3C/svg%3E',
-  alt: 'Illustrative founder silhouette placeholder',
+  src: '/images/portraits/Portrait_home.png',
+  alt: 'Loveth Akpochimora, the professional behind Aklov',
 };
 
 const services = [
@@ -82,7 +80,7 @@ const principles = [
         </h1>
 
         <figure class="portrait">
-          <img src={portrait.src} alt={portrait.alt} width="600" height="780" />
+          <img src={portrait.src} alt={portrait.alt} width="438" height="570" />
         </figure>
 
         <div class="hero-lower">

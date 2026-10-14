@@ -13,7 +13,7 @@
   "cover": {
     "id": "impex-cover",
     "type": "gif",
-    "alt": "Impex Automotive B2B ordering portal homepage and product discovery.",
+    "alt": "GIF demonstrating the portal homepage and product discovery.",
     "width": 1280,
     "height": 610,
     "url": "/images/projects/impex-automotive/Impex_Homepage.gif"
@@ -35,8 +35,9 @@
       "alt": "GIF demonstrating product selection and cart interactions.",
       "caption": "GIF demonstrating product selection and cart interactions.",
       "order": 2,
-      "width": 1600,
-      "height": 1000
+      "width": 1280,
+      "height": 610,
+      "url": "/images/projects/impex-automotive/Impex_Product_Cart.gif"
     },
     {
       "id": "impex-checkout",
@@ -44,8 +45,9 @@
       "alt": "GIF demonstrating the Stripe checkout experience.",
       "caption": "GIF demonstrating the Stripe checkout experience.",
       "order": 3,
-      "width": 1600,
-      "height": 1000
+      "width": 1280,
+      "height": 610,
+      "url": "/images/projects/impex-automotive/Impex_Review_Payment.gif"
     }
   ],
   "featured": false,

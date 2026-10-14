@@ -72,9 +72,12 @@ try {
   assert.deepEqual(await page.locator('.stage-list h3').allInnerTexts(), about.approach.stages.map((stage) => stage.title));
   assert.equal(await page.locator('.stage-list li').count(), 4);
   assert.equal(await page.locator('.designation').innerText(), profile.designation);
-  assert.equal(await page.locator('.fallback-name').innerText(), profile.name);
-  assert.equal(await page.locator('.portrait-fallback').count(), 1);
-  assert.equal(await page.locator('[data-about-portrait] img').count(), 0);
+  assert.equal(await page.locator('.portrait-name').innerText(), profile.name);
+  assert.equal(await page.locator('.portrait-fallback').count(), 0);
+  const portraitImage = page.locator('[data-about-portrait] img');
+  assert.equal(await portraitImage.getAttribute('src'), profile.portrait.src);
+  await portraitImage.evaluate(img => img.decode());
+  assert.ok(await portraitImage.evaluate(img => img.naturalWidth > 0));
   assert.equal(await page.locator('[data-about-contact]').getAttribute('href'), links.contact);
   assert.equal(await page.locator('[data-about-contact]').innerText(), about.closing.primaryCta);
   assert.equal(await page.locator('[data-about-work-link]').getAttribute('href'), links.work);
@@ -163,9 +166,10 @@ try {
   const noJsPage = await noJs.newPage();
   await noJsPage.goto(base + '/about/');
   assert.equal(await noJsPage.locator('[data-approved-copy]').count(), 39);
-  assert.ok(await noJsPage.locator('.portrait-fallback').isVisible());
+  assert.ok(await noJsPage.locator('[data-about-portrait] img').isVisible());
+  await noJsPage.locator('[data-about-portrait] img').evaluate(img => img.decode());
   await noJs.close();
-  console.log('Passed: all 39 approved paragraphs, metadata, heading hierarchy, portrait fallback, CTAs, navigation, keyboard focus, reduced motion, text contrast, no-JS rendering and nine viewport widths.');
+  console.log('Passed: all 39 approved paragraphs, metadata, heading hierarchy, uploaded portrait, CTAs, navigation, keyboard focus, reduced motion, text contrast, no-JS rendering and nine viewport widths.');
 } finally {
   await browser?.close();
   server.kill('SIGTERM');

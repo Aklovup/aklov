@@ -30,10 +30,26 @@ Then reference `/images/projects/impex-automotive/Impex_Homepage.gif` from its e
 
 Existing media components already accept root-relative public URLs, so no runtime, schema, component, routing or dependency change is needed. Files in `public` are served as supplied; optimize them before uploading, provide actual dimensions, and check their crop/loading behavior when wiring them in.
 
-The current Solutions photo remains its existing external source until an approved replacement is uploaded. The inline Home silhouette and About fallback are likewise preserved. This task establishes the local-media standard without replacing existing visual assets with missing URLs.
+The current Solutions photo remains its existing external source until an approved replacement is uploaded. The owner subsequently supplied Home and About portraits; their existing portrait areas now reference the actual repository files without changing page copy or layout.
 
 ## Validation
 
 The existing GitHub workflow now includes `public/**` and `AGENTS.md` in its PR triggers, so future media-only changes receive build and regression checks. It runs the static Astro build, existing Work/Contact logic tests, and Work/About/Contact browser suites. These checks exercise portfolio popups, responsive layouts and Contact API/captcha handling using isolated fixtures. They do not send real inquiries.
 
-The new Impex browser check verifies the actual uploaded GIF header/dimensions, served bytes and MIME type, card and popup playback, immediate display, visible paused/reduced-motion frames, and desktop/mobile fit. The product/cart and checkout images remain pending. No R2 delivery or binding is used.
+The new Impex browser check verifies the actual uploaded GIF header/dimensions, served bytes and MIME type, card and popup playback, immediate display, visible paused/reduced-motion frames, and desktop/mobile fit. All three Impex media items are now supplied. No R2 delivery or binding is used.
+
+## Uploaded media integration
+
+The Home and About pages use `public/images/portraits/Portrait_home.png` and `Portrait_about.png` respectively. Original files are preserved.
+
+Project media is mapped in the individual Markdown entries, with dimensions read from the actual GIF/PNG headers:
+
+- Impex: `Impex_Homepage.gif`, `Impex_Product_Cart.gif`, `Impex_Review_Payment.gif` (3/3).
+- XANS: `Xans_Home.gif`, `Xans_add_order.gif`, `Xans_logQC.gif`, `Xans_Invoice.gif` (4/4). Dashboard comes first and is the card cover. Invoice media is a GIF, not a static screenshot.
+- Divine/Black Onyx: `Gateway.png`, `Dhw_shop.png`, `BO_shop.png`, `shared_cart.png` (4/4). Gateway is the card cover.
+- JAYCOR: `Jaycor_shop.png`, `Jaycor_PDP.png` (2/2).
+- Wound Concierge: `Woundconcierge_Home.png`, `Woundconcierge_thrive.png` (2/3). Customer-workflow media is still pending.
+
+All GIFs remain paused with a visible frame until Play is activated. No schema changes, image-hosting changes, generated imagery or new dependencies are needed. Media for Moving Company CRM, GuideYusuf, InstantResidency, VÉRA and Vortex is not yet uploaded; retain their existing pending states.
+
+`tests/media-assets.browser.mjs` verifies file availability, actual dimensions, card/detail data, all sourced project galleries, play/pause and portrait rendering. The existing build and regression suites continue to cover filtering, popup history/accessibility, approved About copy, and Contact form behavior without sending inquiries.

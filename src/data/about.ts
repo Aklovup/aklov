@@ -4,11 +4,11 @@ export const profile = {
   name: 'Loveth Akpochimora',
   designation: 'Business Systems & Automation Specialist',
   portrait: {
-    // Add an imported local image or approved remote URL here.
-    src: undefined as ImageMetadata | string | undefined,
+    // Repository-hosted portrait; replace this path when an updated photograph is supplied.
+    src: '/images/portraits/Portrait_about.png' as ImageMetadata | string | undefined,
     alt: 'Portrait of Loveth Akpochimora',
-    width: 1200,
-    height: 1500,
+    width: 438,
+    height: 570,
   },
 };
 

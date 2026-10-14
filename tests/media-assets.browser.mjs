@@ -2,12 +2,28 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, mkdirSync, writeFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
+import { readProjects } from './project-content.mjs';
+import { profile } from '../src/data/about.ts';
 const files = readdirSync('public/images', { recursive: true }).filter((p) => /\.(png|gif)$/i.test(p));
 const metadata = files.map((file) => {
   const bytes = readFileSync('public/images/' + file);
   const gif = /^GIF8[79]a$/.test(bytes.subarray(0, 6).toString());
   return { url: '/images/' + file, width: gif ? bytes.readUInt16LE(6) : bytes.readUInt32BE(16), height: gif ? bytes.readUInt16LE(8) : bytes.readUInt32BE(20), type: gif ? 'gif' : 'image', bytes: bytes.length };
 });
+const projects = readProjects();
+const indexed = new Map(metadata.map(item => [item.url, item]));
+for (const project of projects) {
+  for (const item of [project.cover, ...project.media].filter(item => item.url)) {
+    const actual = indexed.get(item.url);
+    assert.ok(actual, 'Missing local file: ' + item.url);
+    assert.deepEqual([item.width, item.height, item.type], [actual.width, actual.height, actual.type], item.id);
+    assert.ok(item.alt.trim(), item.id);
+  }
+}
+assert.equal(projects.find(p => p.slug === 'xans-operations-portal').media.length, 4);
+assert.equal(projects.flatMap(p => p.media).filter(item => item.url).length, 15);
+assert.equal(indexed.size, 17);
+assert.ok(indexed.has(profile.portrait.src));
 console.log('ASSET_METADATA', JSON.stringify(metadata));
 mkdirSync('artifacts/media-review', { recursive: true });
 writeFileSync('artifacts/media-review/metadata.json', JSON.stringify(metadata, null, 2));
@@ -30,4 +46,41 @@ try {
     assert.deepEqual(await image.evaluate(img => [img.naturalWidth, img.naturalHeight]), [item.width, item.height]);
     await page.screenshot({path: 'artifacts/media-review/' + item.url.split('/').pop() + '.png', fullPage: true});
   }
+  for (const project of projects.filter(p => p.cover.url)) {
+    await page.goto(base + '/work/?project=' + project.slug);
+    const dialog = page.locator('dialog');
+    await dialog.waitFor({state: 'visible'});
+    assert.equal(await dialog.locator('.media-item').count(), project.media.filter(item => item.url).length);
+    for (const item of project.media.filter(item => item.url)) {
+      const figure = dialog.locator('[data-media-id="' + item.id + '"]');
+      await figure.scrollIntoViewIfNeeded();
+      if (item.type === 'gif') {
+        await figure.locator('canvas[data-gif-still]').waitFor({state: 'visible'});
+        assert.equal(await figure.locator('[data-playing-gif]').count(), 0);
+        await figure.getByRole('button', {name:'Play GIF',exact:true}).click();
+        await figure.locator('[data-playing-gif]').evaluate(img => img.decode());
+        await figure.getByRole('button', {name:'Pause GIF',exact:true}).click();
+        await figure.locator('canvas[data-gif-still]').waitFor({state:'visible'});
+      } else await figure.locator('img').evaluate(img => img.decode());
+    }
+    for (const width of [1440,390]) {
+      await page.setViewportSize({width,height:1000});
+      await dialog.locator('.media-gallery').scrollIntoViewIfNeeded();
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), project.slug);
+      await dialog.screenshot({path:'artifacts/media-review/' + project.slug + '-' + width + '.png'});
+    }
+    await page.keyboard.press('Escape');
+  }
+  for (const route of ['/', '/about/']) {
+    await page.goto(base + route);
+    const portrait = page.locator(route === '/' ? '.portrait img' : '[data-about-portrait] img');
+    await portrait.evaluate(img => img.decode());
+    assert.ok((await portrait.getAttribute('src')).startsWith('/images/portraits/'));
+    for (const width of [1440,768,390,320]) {
+      await page.setViewportSize({width,height:1000});
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), route + ' at ' + width);
+      if (width === 1440 || width === 390) await page.screenshot({path:'artifacts/media-review/' + (route === '/' ? 'home' : 'about') + '-' + width + '.png'});
+    }
+  }
+  console.log('Passed: 17 uploaded files, exact dimensions/types, 15 project media items, XANS four-item gallery, paused GIF playback, both portraits and responsive media.');
 } finally { await browser?.close(); server.kill('SIGTERM'); }
