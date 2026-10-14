@@ -52,8 +52,9 @@ try {
     assert.ok(box.x >= 0 && box.x + box.width <= viewportWidth + 1, 'GIF exceeds viewport at ' + viewportWidth + 'px: ' + JSON.stringify(box));
     await card.screenshot({ path: 'artifacts/impex-review/card-' + name + '.png' });
   }
-  await card.getByRole('button', { name: 'Play GIF', exact: true }).click();
+  await card.getByRole('button', { name: 'Play GIF', exact: true }).evaluate(button => {button.click(); button.click();});
   await card.locator('[data-playing-gif]').evaluate((img) => img.decode());
+  assert.equal(gifRequests.length, 1, 'Duplicate Play created multiple animation requests.');
   await card.getByRole('button', { name: 'Pause GIF', exact: true }).click();
   await card.locator('[data-gif-still]').waitFor({ state: 'visible' });
   assert.equal(await card.locator('[data-playing-gif]').count(), 0);

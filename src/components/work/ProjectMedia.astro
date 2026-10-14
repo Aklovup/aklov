@@ -22,6 +22,7 @@ const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'V
       <div class="gif-preview" data-gif-preview data-src={cover.url} data-alt={cover.alt} data-width={cover.width} data-height={cover.height}>
         <img data-gif-poster={poster ? '' : undefined} data-playing-gif={poster ? undefined : ''} src={poster || cover.url} srcset={poster === preview?.src ? preview?.srcset : undefined} sizes={sizes} alt={cover.alt} width={cover.width} height={cover.height} loading="lazy" decoding="async" />
         <button class="gif-toggle" type="button" data-gif-toggle aria-pressed="false" hidden>Play GIF</button>
+        <span class="gif-status" data-gif-status role="status" aria-live="polite"></span>
         <noscript><a href={cover.url} target="_blank" rel="noopener noreferrer">Open GIF (new tab)</a></noscript>
       </div>
     ) : cover.type === 'video' ? (
@@ -99,10 +100,10 @@ const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'V
     matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', (event) => {
       if (event.matches) document.querySelectorAll<HTMLElement>('[data-gif-preview]').forEach((preview) => void pause(preview).catch(() => {}));
     });
-    document.addEventListener('click', (event) => {
+    document.addEventListener('click', async (event) => {
       const button = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('[data-gif-toggle]') : null;
       const preview = button?.closest<HTMLElement>('[data-gif-preview]');
-      if (!button || !preview || preview.dataset.pausing) return;
+      if (!button || !preview || preview.dataset.pausing || preview.dataset.gifLoading) return;
       if (preview.querySelector('[data-playing-gif]')) {
         void pause(preview).catch(() => {});
       } else {
@@ -114,10 +115,25 @@ const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'V
         image.width = Number(preview.dataset.width);
         image.height = Number(preview.dataset.height);
         image.decoding = 'async';
-        preview.querySelector('[data-gif-still]')?.remove();
-        preview.querySelector('[data-gif-poster]')?.remove();
-        preview.prepend(image);
-        setState(preview, true);
+        preview.dataset.gifLoading = 'true';
+        button.disabled = true;
+        const status = preview.querySelector<HTMLElement>('[data-gif-status]')!;
+        status.textContent = 'Loading GIF…';
+        try {
+          await image.decode();
+          if (!preview.isConnected) return;
+          preview.querySelector('[data-gif-still]')?.remove();
+          preview.querySelector('[data-gif-poster]')?.remove();
+          preview.prepend(image);
+          setState(preview, true);
+          status.textContent = '';
+        } catch {
+          setState(preview, false);
+          status.textContent = "GIF couldn't load. Try Play again.";
+        } finally {
+          button.disabled = false;
+          delete preview.dataset.gifLoading;
+        }
       }
     });
   }
@@ -145,6 +161,9 @@ const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'V
   :global(html[data-gif-controls-ready]) .gif-preview :global(img[data-playing-gif]:not([data-user-play])) { visibility: hidden; }
   .gif-preview [hidden] { display: none !important; }
   .gif-fallback { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--display); font-size: 32px; }
+  .gif-status { position: absolute; left: 16px; bottom: 16px; max-width: 55%; padding: 4px 8px; background: var(--charcoal); color: var(--ivory); font: 12px/1.5 var(--sans); }
+  .gif-status:empty { display: none; }
+  .gif-toggle:disabled { cursor: wait; }
   .gif-toggle { position: absolute; z-index: 1; bottom: 16px; right: 16px; min-height: 44px; padding: 0 18px; border: 1px solid var(--gold); border-radius: 99px; background: var(--charcoal); color: var(--ivory); font: 600 12px var(--sans); cursor: pointer; }
   .media-placeholder {
     position: relative;
