@@ -39,6 +39,8 @@ jobs:
         run: node tests/work.browser.mjs
       - name: Audit the rendered Solutions page
         run: node tests/solutions.browser.mjs
+      - name: Validate sitewide refinements
+        run: node tests/site-polish.browser.mjs
       - name: Validate the About page
         run: node tests/about.browser.mjs
       - name: Validate the Contact page and form states
@@ -94,4 +96,11 @@ jobs:
         with:
           name: solutions-page-review
           path: artifacts/solutions-review/
+          if-no-files-found: ignore
+      - name: Save sitewide review screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sitewide-polish-review
+          path: artifacts/site-polish-review/
           if-no-files-found: ignore

@@ -25,6 +25,7 @@ try {
   assert.equal(await page.locator('.sol-list li').count(),30);
   assert.equal(await page.locator('.step').count(),4);
   report.links=await page.locator('.hero-actions a, .sol-actions a, .choose-cta a, .closing-act a').evaluateAll(links=>links.map(a=>({text:a.textContent.trim(),href:a.getAttribute('href')})));
+  assert.equal(report.links.filter(link => link.href === '/contact/').length, 8);
   for(const width of [320,390,640,768,1000,1001,1280,1440,1920]) {
     await page.setViewportSize({width,height:1000});
     report.layouts.push(await page.evaluate(()=>({width:innerWidth,height:document.documentElement.scrollHeight,overflow:[...document.querySelectorAll('.hero h1,.idx,.sol-title,.sol-goal,.sol-actions a,.sol-list,.steps,.closing-grid,.nav,.foot-links')].filter(el=>{if(!el.getClientRects().length)return false;const b=el.getBoundingClientRect();return b.left < -1 || b.right > innerWidth+1 || el.scrollWidth > el.clientWidth+1;}).map(el=>({class:el.className,text:el.textContent.trim().slice(0,90)}))})));
@@ -33,6 +34,9 @@ try {
   await image.scrollIntoViewIfNeeded();
   await image.evaluate(img=>img.decode()).catch(()=>{});
   report.image=await image.evaluate(img=>({src:img.src,loaded:img.complete&&img.naturalWidth>0,width:img.naturalWidth,height:img.naturalHeight,alt:img.alt,explicitDimensions:img.hasAttribute('width')&&img.hasAttribute('height')}));
+  assert.ok(report.image.loaded && report.image.explicitDimensions);
+  assert.ok(report.image.src.includes('/images/generated/solutions/'));
+  assert.ok(report.layouts.every(layout => layout.overflow.length === 0), JSON.stringify(report.layouts));
   for (const [label,width] of [['desktop',1440],['tablet',768],['mobile',390],['narrow',320]]) {
     await page.setViewportSize({width,height:1000});
     await page.evaluate(()=>scrollTo(0,0));
@@ -51,6 +55,8 @@ try {
   const fallback=await noJS.newPage();
   await fallback.goto(base+'/solutions/');
   report.mobileMenu.noJSNavigationVisible=await fallback.locator('#site-nav').isVisible();
+  assert.ok(report.mobileMenu.escapeReturnsFocus);
+  assert.ok(report.mobileMenu.noJSNavigationVisible);
   await noJS.close();
   assert.deepEqual(report.pageErrors,[]);
   console.log('SOLUTIONS_AUDIT',JSON.stringify(report));

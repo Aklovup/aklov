@@ -2,19 +2,19 @@
 import type { CollectionEntry } from 'astro:content';
 import ProjectMedia from './ProjectMedia.astro';
 
-interface Props { project: CollectionEntry<'projects'>; }
-const { project: { data } } = Astro.props;
+interface Props { project: CollectionEntry<'projects'>; omitId?: string; }
+const { project: { data }, omitId } = Astro.props;
 const media = [...data.media].sort((a, b) => a.order - b.order);
-const available = media.filter((item) => item.url);
+const available = media.filter((item) => item.url && item.id !== omitId);
 const pending = media.filter((item) => !item.url);
-const preview = available.length ? undefined : pending.find((item) => item.placeholder);
+const preview = media.some((item) => item.url) ? undefined : pending.find((item) => item.placeholder);
 const number = String(data.order).padStart(2, '0');
 ---
 
 <section class="media-gallery" aria-labelledby="project-media-title">
   <div class="gallery-label">
     <h3 id="project-media-title">Project media</h3>
-    <span>{String(available.length).padStart(2, '0')} / {String(media.length).padStart(2, '0')}</span>
+    <span>{String(media.filter((item) => item.url).length).padStart(2, '0')} / {String(media.length).padStart(2, '0')}</span>
   </div>
   {preview && <ProjectMedia cover={preview} number={number} title={data.title} presentation="detail" showCaption={false} />}
   {available.map((item) => (

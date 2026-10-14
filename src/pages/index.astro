@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { links } from '../data/links';
 
 const portrait = {
   src: '/images/portraits/Portrait_home.png',
@@ -9,30 +10,35 @@ const portrait = {
 const services = [
   {
     number: '01',
+    href: links.solutionsWebsite,
     title: 'Website design & development',
     description: 'Create a clear, distinctive online presence with thoughtful design, responsive layouts and a website built around your goals.',
     detail: 'DIGITAL EXPERIENCES',
   },
   {
     number: '02',
+    href: links.solutionsCustomer,
     title: 'Customer & sales systems',
     description: 'Give enquiries, customer relationships and sales activity a clearer structure, from the first conversation to the next action.',
     detail: 'CUSTOMER OPERATIONS',
   },
   {
     number: '03',
+    href: links.solutionsAutomation,
     title: 'Workflow automation',
     description: 'Reduce repetitive work and improve handoffs by connecting the steps, people and decisions behind everyday processes.',
     detail: 'PROCESS DESIGN',
   },
   {
     number: '04',
+    href: links.solutionsApplications,
     title: 'Custom business applications',
     description: 'Build practical internal tools around the way your business actually works, from purpose-built apps to approval workflows.',
     detail: 'APPLICATIONS',
   },
   {
     number: '05',
+    href: links.solutionsIntegrations,
     title: 'Integrations & reporting',
     description: 'Connect the systems you rely on and bring useful operational information into view, without unnecessary complexity.',
     detail: 'CONNECTED SYSTEMS',
@@ -90,7 +96,7 @@ const principles = [
             </p>
 
             <div class="hero-actions">
-              <a class="btn btn-gold" href="#contact">
+              <a class="btn btn-gold" href={links.contact}>
                 Discuss a business challenge <span aria-hidden="true">↗</span>
               </a>
               <a class="btn btn-ghost" href="#solutions">
@@ -165,15 +171,15 @@ const principles = [
 
       <div class="service-list">
         {services.map((service) => (
-          <article class="service">
+          <a class="service" href={service.href} aria-label={`Explore ${service.title}`}>
             <div class="service-number">{service.number}</div>
             <h3>{service.title}</h3>
             <div class="service-body">
               <p>{service.description}</p>
               <div class="service-detail">{service.detail}</div>
             </div>
-            <div class="service-arrow" aria-hidden="true">↗</div>
-          </article>
+            <span class="service-arrow" aria-hidden="true">↗</span>
+          </a>
         ))}
       </div>
     </div>
@@ -223,7 +229,7 @@ const principles = [
           <p>
             A useful conversation starts with understanding what is happening today and what needs to work better.
           </p>
-          <a class="btn btn-dark" href="mailto:aklovup@gmail.com">
+          <a class="btn btn-dark" href={links.contact}>
             Start a conversation <span aria-hidden="true">↗</span>
           </a>
         </div>
@@ -452,6 +458,7 @@ const principles = [
 
   /* Even rows: full-bleed charcoal band that stays aligned on wide screens */
   .service:nth-child(even) {
+    --focus-color: var(--gold);
     background: var(--charcoal);
     color: var(--ivory);
     box-shadow: 0 0 0 100vmax var(--charcoal);
@@ -466,7 +473,7 @@ const principles = [
   .service-body p { max-width: 380px; margin-top: 8px; color: var(--body); font-size: 13px; line-height: 1.9; }
   .service-detail { margin-top: 18px; color: var(--stone); font-size: 9px; font-weight: 600; letter-spacing: 1.8px; }
 
-  .service-arrow { color: var(--charcoal); font-family: var(--display); font-size: 38px; line-height: 1; text-align: right; }
+  .service-arrow { display: flex; align-items: center; justify-content: flex-end; min-height: 44px; color: var(--charcoal); font-family: var(--display); font-size: 38px; line-height: 1; text-align: right; }
 
   /* Approach */
 

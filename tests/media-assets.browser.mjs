@@ -50,7 +50,7 @@ try {
   for (const project of projects.filter(p => p.cover.url)) {
     const card = page.locator('[data-project="' + project.slug + '"]');
     await card.scrollIntoViewIfNeeded();
-    const media = card.locator(project.cover.type === 'gif' ? 'canvas[data-gif-still]' : '.project-media > img');
+    const media = card.locator(project.cover.type === 'gif' ? '[data-gif-poster]' : '.project-media > img');
     await media.waitFor({state:'visible'});
     assert.deepEqual(await media.evaluate(el => [getComputedStyle(el).objectFit, getComputedStyle(el).objectPosition]), ['cover','50% 0%']);
     for (const width of [1440,390]) {
@@ -67,9 +67,9 @@ try {
       const figure = dialog.locator('[data-media-id="' + item.id + '"]');
       await figure.scrollIntoViewIfNeeded();
       if (item.type === 'gif') {
-        await figure.locator('canvas[data-gif-still]').waitFor({state: 'visible'});
+        await figure.locator('[data-gif-poster]').waitFor({state: 'visible'});
         assert.equal(await figure.locator('[data-playing-gif]').count(), 0);
-        assert.equal(await figure.locator('canvas').evaluate(el => getComputedStyle(el).objectFit), 'contain');
+        assert.equal(await figure.locator('[data-gif-poster]').evaluate(el => getComputedStyle(el).objectFit), 'contain');
         await figure.getByRole('button', {name:'Play GIF',exact:true}).click();
         await figure.locator('[data-playing-gif]').evaluate(img => img.decode());
         await figure.getByRole('button', {name:'Pause GIF',exact:true}).click();
@@ -81,7 +81,7 @@ try {
     }
     for (const width of [1440,390]) {
       await page.setViewportSize({width,height:1000});
-      await dialog.locator('.media-gallery').scrollIntoViewIfNeeded();
+      await dialog.locator('.detail-layout').scrollIntoViewIfNeeded();
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), project.slug);
       await dialog.screenshot({path:'artifacts/media-review/' + project.slug + '-' + width + '.png'});
     }

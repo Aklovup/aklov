@@ -22,7 +22,7 @@
       "id": "vortex-gym-overview",
       "type": "image",
       "alt": "Full-page website design image showing the hero, training programs, and gym-benefits sections.",
-      "caption": "Full-page website design image showing the hero, training programs, and gym-benefits sections.",
+      "caption": "Vortex Gym design concept",
       "order": 1,
       "width": 1600,
       "height": 1000
