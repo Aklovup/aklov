@@ -135,7 +135,7 @@ try {
     assert.equal(new URL(page.url()).searchParams.get('source'), 'review');
     assert.equal(new URL(page.url()).hash, '#projects');
     assert.equal(await page.evaluate(() => document.documentElement.style.overflow), 'hidden');
-    assert.equal(await dialog.locator('img, video').count(), project.media.filter((item) => item.url).length, 'Missing media created an empty or broken element.');
+    assert.equal(await dialog.locator('img, video, canvas[data-gif-still]').count(), project.media.filter((item) => item.url).length, 'Missing media created an empty or broken element.');
     if (project.slug === 'moving-company-crm' || project.media.some((item) => item.url)) assert.equal(await dialog.locator('.media-placeholder').count(), 0);
     else assert.equal(await dialog.locator('.media-placeholder').count(), 1);
     assert.equal(await dialog.locator('.detail-type').innerText(), project.projectType);

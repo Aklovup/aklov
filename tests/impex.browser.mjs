@@ -49,6 +49,9 @@ try {
   await card.locator('[data-gif-still]').waitFor({ state: 'visible' });
   assert.equal(await card.locator('[data-playing-gif]').count(), 0);
   assert.ok(await card.locator('[data-gif-still]').evaluate((canvas) => canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data.some((value, index) => index % 4 === 3 && value > 0)));
+  await card.getByRole('button', { name: 'Resume GIF', exact: true }).click();
+  await card.locator('[data-playing-gif]').evaluate((img) => img.decode());
+  assert.equal(await card.locator('[data-gif-still]').count(), 0);
   await page.setViewportSize({ width: 1440, height: 1000 });
   await card.locator('[data-project-open]').click();
   const dialog = page.locator('dialog');

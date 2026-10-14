@@ -56,7 +56,7 @@ const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'V
 <script>
   const setState = (preview: HTMLElement, playing: boolean) => {
     const button = preview.querySelector<HTMLButtonElement>('[data-gif-toggle]')!;
-    button.textContent = playing ? 'Pause GIF' : 'Play GIF';
+    button.textContent = playing ? 'Pause GIF' : 'Resume GIF';
     button.setAttribute('aria-pressed', String(playing));
   };
   const pause = async (preview: HTMLElement) => {
