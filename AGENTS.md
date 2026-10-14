@@ -311,7 +311,7 @@ Do not implement the popup before its assigned development phase.
 
 9. Portfolio Media Management
 
-Project media may be hosted externally using Cloudflare infrastructure.
+Store website images and portfolio media in `public/images/` in this repository and serve them through the existing Astro static build on Cloudflare Pages. Organize project media in `public/images/projects/<project-slug>/`, portraits in `public/images/portraits/`, and Solutions imagery in `public/images/solutions/`. Use browser paths beginning with `/images/`; do not include `public` in the URL. Add a media reference only after its actual file exists. Preserve existing working references and placeholders until approved replacements are uploaded. Do not introduce R2-specific routes, bindings or hosting configuration for website images unless explicitly requested in a later brief.
 
 The media system should support:
 

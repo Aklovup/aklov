@@ -26,7 +26,7 @@ The approved Moving Company CRM copy adds Integrations & Reporting. Filter count
 
 All 21 approved media identifiers and descriptions are retained. No final media sources or concept screenshots were available in the repository.
 
-Add a media item's `url` in its project frontmatter to replace the placeholder. Sources may be absolute HTTP(S) URLs or root-relative public asset paths, such as `/media/impex-homepage.gif`. Include accurate `alt`, `caption`, `width` and `height`. Optional fields are `poster`, `order` and `placeholder`.
+Upload approved media to `public/images/projects/<project-slug>/`, then add its root-relative `url` in project frontmatter to replace the placeholder, such as `/images/projects/impex-automotive/homepage.gif`. Assign a URL only after the actual file exists. Include accurate `alt`, `caption`, `width` and `height`. Optional fields are `poster`, `order` and `placeholder`. Existing components accept these local paths without a hosting or component change.
 
 The same source schema applies to `cover` for card previews. Replacing a source does not require component changes.
 

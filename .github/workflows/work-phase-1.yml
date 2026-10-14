@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/work-phase-1.yml'
       - 'src/**'
+      - 'public/**'
+      - 'AGENTS.md'
       - 'tests/**'
       - 'package.json'
       - 'astro.config.mjs'

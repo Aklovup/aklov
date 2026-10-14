@@ -12,7 +12,7 @@ All six approved sections, 39 body paragraphs/statements, four process stages an
 
 The photograph has not been supplied. The current fallback is a typographic monogram and name, rather than an invented likeness or unrelated photograph.
 
-Set `profile.portrait.src` in `src/data/about.ts` when the approved image arrives. For optimized local imagery, import an image from `src/assets/` and use the imported value. The component also accepts an approved remote URL; any remote optimization configuration should be assessed once its host is known.
+Upload the approved image to `public/images/portraits/`, then set `profile.portrait.src` in `src/data/about.ts` to its actual root-relative path, such as `/images/portraits/about.webp`. Do not assign a URL before the file exists. Files in `public` are served as supplied, so optimize the uploaded asset and set accurate dimensions. Preserve the existing fallback until the portrait is available.
 
 Update the actual width, height and alternative text as necessary. The portrait component uses Astro Image, responsive widths, explicit dimensions and a reserved 4:5 frame. Check the crop at desktop and mobile widths when the photograph is supplied.
 
