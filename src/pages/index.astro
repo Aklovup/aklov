@@ -548,6 +548,36 @@ const principles = [
     .service:hover .service-arrow { transform: translate(4px, -4px); }
   }
 
+  /* Desktop: the workflow supports the introduction instead of competing with it. */
+  @media (min-width: 1001px) {
+    .hero-lower {
+      grid-template-columns: minmax(0, 1fr) minmax(0, clamp(270px, 24vw, 350px));
+      min-height: 510px;
+    }
+    .hero-copy-block { max-width: clamp(250px, 26vw, 380px); }
+    .portrait { left: 36%; width: min(30%, 480px); }
+    .panel {
+      max-width: 350px;
+      padding: 16px 0 0;
+      background: transparent;
+      color: var(--ivory);
+      border-top: 1px solid var(--line-dark);
+    }
+    .panel::before { content: none; }
+    .panel-top { border-color: var(--line-dark); font-size: 8px; letter-spacing: 1.1px; }
+    .panel-top span:last-child { color: var(--on-dark-dim); }
+    .node { grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; padding-block: 22px; border-color: var(--line-dark); }
+    .node .no { color: var(--gold); font-size: 26px; }
+    .node h3 { font-size: 23px; }
+    .node p { color: var(--on-dark); font-size: 11px; }
+    .node .tag { color: var(--gold); font-size: 8px; letter-spacing: 1px; }
+    .node.main { margin-inline: 0; padding-inline: 0; background: transparent; color: var(--ivory); }
+    .node.main .no, .node.main .tag { color: var(--gold); }
+    .node.main p { color: var(--on-dark); }
+    .panel-bottom { color: var(--on-dark); }
+    .panel-bottom .st { color: var(--gold); }
+  }
+
   /* Tablet */
 
   @media (max-width: 1000px) {

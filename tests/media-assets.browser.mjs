@@ -103,7 +103,14 @@ try {
       if (route === '/') {
         const mask = await portrait.evaluate(el => getComputedStyle(el).maskImage);
         if (width <= 1000) assert.match(mask, /linear-gradient/);
-        else assert.equal(mask, 'none', 'Desktop portrait must remain crisp.');
+        else {
+          assert.equal(mask, 'none', 'Desktop portrait must remain crisp.');
+          const panel = page.locator('.panel'), copy = page.locator('.hero-copy-block');
+          const imageBox = await portrait.boundingBox(), panelBox = await panel.boundingBox(), copyBox = await copy.boundingBox();
+          assert.ok(copyBox.x + copyBox.width <= imageBox.x, 'Desktop copy overlaps the portrait.');
+          assert.ok(imageBox.x + imageBox.width <= panelBox.x, 'Desktop workflow overlaps the portrait.');
+          assert.equal(await panel.evaluate(el => getComputedStyle(el).backgroundColor), 'rgba(0, 0, 0, 0)');
+        }
       }
       else {
         const frame = page.locator('.portrait-frame');
