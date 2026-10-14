@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/work-phase-1.yml'
       - 'src/**'
+      - 'scripts/**'
+      - '.gitignore'
       - 'public/**'
       - 'AGENTS.md'
       - 'tests/**'

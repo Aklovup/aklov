@@ -1,6 +1,7 @@
 import sharp from 'sharp';
-import { mkdir, readdir, writeFile, stat } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 const root = path.resolve('public/images');
 const output = path.join(root,'generated');
 const manifest = {};
@@ -15,7 +16,8 @@ async function walk(folder) {
       const width=info.width, height=info.pageHeight||info.height;
       const directory=path.join(output,path.dirname(relative));
       await mkdir(directory,{recursive:true});
-      const stem=path.basename(file,path.extname(file));
+      const digest=createHash('sha256').update(await readFile(file)).digest('hex').slice(0,10);
+      const stem=path.basename(file,path.extname(file))+'-'+digest;
       const sizes=[...new Set([640,1280,1600].map(n=>Math.min(n,width)))].sort((a,b)=>a-b);
       const variants=[];
       for(const size of sizes) {

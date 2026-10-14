@@ -35,3 +35,13 @@ The uploaded `Impex_Homepage.gif` is 1280 × 610 pixels and is now used by the e
 - Use optimized WebP/JPEG/PNG for static images and transparent WebP/PNG for cutout portraits. Existing GIF/video controls remain supported.
 - Redact private information before uploading client screenshots.
 - Use the feature-branch workflow for review; do not merge media changes without owner approval.
+
+## Build-generated previews
+
+Upload originals to the existing project, portraits or Solutions folders. Do not upload to `public/images/generated/`.
+
+`npm run media` uses Sharp (Astro's image engine) to create 640/1280/1600px WebP derivatives without upscaling, including first-frame GIF posters. Output goes to ignored `public/images/generated/` and `.cache/media-manifest.json`. Both `npm run build` and `npm run dev` run this step automatically. Derived filenames include a source-content hash so replacing an original refreshes its previews.
+
+Original uploads remain unchanged. The existing project entries still hold original source references; components select responsive previews from the build manifest. GIF animation is requested only after Play, with the poster retained during loading and Pause retaining the current frame. Case-study images remain contained; card previews remain top-center covers. Full-size media links have been removed by owner request.
+
+The Solutions source is `public/images/solutions/Solutions_img.jpg`. The Home/About portraits remain their supplied PNGs; higher-resolution originals can be supplied later. Final missing portfolio screenshots remain pending rather than being substituted.
