@@ -33,23 +33,29 @@ try {
   await page.goto(base + '/work/');
   const card = page.locator('[data-project="impex-automotive"]');
   assert.equal(await card.locator('.media-placeholder').count(), 0);
-  assert.equal(await card.locator('[data-playing-gif]').count(), 1, 'GIF was not immediately visible.');
-  await card.locator('[data-playing-gif]').evaluate((img) => img.decode());
-  assert.equal(await card.locator('[data-playing-gif]').evaluate((img) => img.naturalWidth), width);
-  assert.equal(await card.locator('[data-playing-gif]').evaluate((img) => img.naturalHeight), height);
+  await card.scrollIntoViewIfNeeded();
+  await card.locator('[data-gif-still]').waitFor({ state: 'visible' });
+  assert.equal(await card.locator('[data-playing-gif]').count(), 0, 'GIF played automatically.');
+  assert.equal(await card.locator('[data-gif-toggle]').innerText(), 'Play GIF');
+  assert.deepEqual(await card.locator('[data-gif-still]').evaluate((canvas) => [canvas.width, canvas.height]), [width, height]);
+  const initialFrame = await card.locator('[data-gif-still]').evaluate((canvas) => canvas.toDataURL());
+  await page.waitForTimeout(250);
+  assert.equal(await card.locator('[data-gif-still]').evaluate((canvas) => canvas.toDataURL()), initialFrame, 'Initial frame was moving.');
   assert.equal(await page.locator('dialog').isVisible(), false, 'GIF control opened the popup.');
   mkdirSync('artifacts/impex-review', { recursive: true });
   for (const [name, viewportWidth] of [['desktop', 1440], ['mobile', 390], ['narrow-mobile', 320]]) {
     await page.setViewportSize({ width: viewportWidth, height: 1000 });
-    const box = await card.locator('[data-playing-gif]').boundingBox();
+    const box = await card.locator('[data-gif-still]').boundingBox();
     assert.ok(box.x >= 0 && box.x + box.width <= viewportWidth + 1, 'GIF exceeds viewport at ' + viewportWidth + 'px: ' + JSON.stringify(box));
     await card.screenshot({ path: 'artifacts/impex-review/card-' + name + '.png' });
   }
+  await card.getByRole('button', { name: 'Play GIF', exact: true }).click();
+  await card.locator('[data-playing-gif]').evaluate((img) => img.decode());
   await card.getByRole('button', { name: 'Pause GIF', exact: true }).click();
   await card.locator('[data-gif-still]').waitFor({ state: 'visible' });
   assert.equal(await card.locator('[data-playing-gif]').count(), 0);
   assert.ok(await card.locator('[data-gif-still]').evaluate((canvas) => canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data.some((value, index) => index % 4 === 3 && value > 0)));
-  await card.getByRole('button', { name: 'Resume GIF', exact: true }).click();
+  await card.getByRole('button', { name: 'Play GIF', exact: true }).click();
   await card.locator('[data-playing-gif]').evaluate((img) => img.decode());
   assert.equal(await card.locator('[data-gif-still]').count(), 0);
   await page.setViewportSize({ width: 1440, height: 1000 });
@@ -58,8 +64,10 @@ try {
   await dialog.waitFor({ state: 'visible' });
   assert.equal(await dialog.locator('[data-media-id="impex-homepage"]').count(), 1);
   assert.equal(await dialog.locator('.pending-media li').count(), 2);
-  assert.equal(await dialog.locator('[data-playing-gif]').count(), 1, 'Popup GIF was not immediately visible.');
-  assert.equal(await dialog.locator('[data-gif-toggle]').innerText(), 'Pause GIF', 'Popup GIF did not stay playing.');
+  await dialog.locator('[data-gif-still]').waitFor({ state: 'visible' });
+  assert.equal(await dialog.locator('[data-playing-gif]').count(), 0, 'Popup GIF played automatically.');
+  assert.equal(await dialog.locator('[data-gif-toggle]').innerText(), 'Play GIF');
+  await dialog.getByRole('button', { name: 'Play GIF', exact: true }).click();
   await dialog.locator('[data-playing-gif]').evaluate((img) => img.decode());
   assert.equal(await dialog.locator('[data-playing-gif]').evaluate((img) => img.naturalWidth), width);
   await dialog.screenshot({ path: 'artifacts/impex-review/popup-desktop.png' });
@@ -72,7 +80,7 @@ try {
   await card.scrollIntoViewIfNeeded();
   await card.locator('[data-gif-still]').waitFor({ state: 'visible' });
   assert.equal(await card.locator('[data-playing-gif]').count(), 0);
-  console.log('Passed: original local GIF bytes/MIME/dimensions, shared card/popup source, immediate visibility, visible paused frame under reduced motion, pause/resume, responsive fit and two remaining pending media items.');
+  console.log('Passed: original local GIF bytes/MIME/dimensions, shared card/popup source, visible and stable initial frame without autoplay, explicit play/pause, reduced-motion still frame, responsive fit and two remaining pending media items.');
 } finally {
   await browser?.close();
   server.kill('SIGTERM');

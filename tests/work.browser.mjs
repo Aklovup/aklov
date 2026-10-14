@@ -76,7 +76,7 @@ try {
   assert.equal(new URL(page.url()).searchParams.has('category'), false);
   assert.equal(await page.locator('[data-media-id]').count(), 10);
   assert.equal(await page.locator('.media-placeholder').count(), projects.filter((project) => !project.cover.url).length);
-  assert.equal(await page.locator('.project-media img, .project-media video').count(), projects.filter((project) => project.cover.url).length);
+  assert.equal(await page.locator('.project-media img, .project-media video, .project-media canvas[data-gif-still]').count(), projects.filter((project) => project.cover.url).length);
   assert.equal(await page.locator('[data-project] a[target="_blank"]').count(), 2);
   assert.equal(await page.locator('[data-project-open]').count(), 10);
   assert.equal(await page.locator('dialog').count(), 1);
