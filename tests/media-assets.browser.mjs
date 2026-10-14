@@ -46,6 +46,18 @@ try {
     assert.deepEqual(await image.evaluate(img => [img.naturalWidth, img.naturalHeight]), [item.width, item.height]);
     await page.screenshot({path: 'artifacts/media-review/' + item.url.split('/').pop() + '.png', fullPage: true});
   }
+  await page.goto(base + '/work/');
+  for (const project of projects.filter(p => p.cover.url)) {
+    const card = page.locator('[data-project="' + project.slug + '"]');
+    await card.scrollIntoViewIfNeeded();
+    const media = card.locator(project.cover.type === 'gif' ? 'canvas[data-gif-still]' : '.project-media > img');
+    await media.waitFor({state:'visible'});
+    assert.deepEqual(await media.evaluate(el => [getComputedStyle(el).objectFit, getComputedStyle(el).objectPosition]), ['cover','50% 0%']);
+    for (const width of [1440,390]) {
+      await page.setViewportSize({width,height:1000});
+      await card.screenshot({path:'artifacts/media-review/card-' + project.slug + '-' + width + '.png'});
+    }
+  }
   for (const project of projects.filter(p => p.cover.url)) {
     await page.goto(base + '/work/?project=' + project.slug);
     const dialog = page.locator('dialog');
@@ -57,11 +69,15 @@ try {
       if (item.type === 'gif') {
         await figure.locator('canvas[data-gif-still]').waitFor({state: 'visible'});
         assert.equal(await figure.locator('[data-playing-gif]').count(), 0);
+        assert.equal(await figure.locator('canvas').evaluate(el => getComputedStyle(el).objectFit), 'contain');
         await figure.getByRole('button', {name:'Play GIF',exact:true}).click();
         await figure.locator('[data-playing-gif]').evaluate(img => img.decode());
         await figure.getByRole('button', {name:'Pause GIF',exact:true}).click();
         await figure.locator('canvas[data-gif-still]').waitFor({state:'visible'});
-      } else await figure.locator('img').evaluate(img => img.decode());
+      } else {
+        await figure.locator('img').evaluate(img => img.decode());
+        assert.equal(await figure.locator('img').evaluate(el => getComputedStyle(el).objectFit), 'contain');
+      }
     }
     for (const width of [1440,390]) {
       await page.setViewportSize({width,height:1000});
@@ -83,6 +99,19 @@ try {
         const portraitBox = await portrait.boundingBox();
         const copyBox = await page.locator('.hero-copy').boundingBox();
         assert.ok(copyBox.y >= portraitBox.y + portraitBox.height, 'Portrait overlaps Home copy at ' + width);
+      }
+      if (route === '/') assert.match(await portrait.evaluate(el => getComputedStyle(el).maskImage), /linear-gradient/);
+      else {
+        const frame = page.locator('.portrait-frame');
+        assert.equal(await frame.evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(216, 189, 120)');
+        assert.equal(await portrait.evaluate(el => getComputedStyle(el).maskImage), 'none');
+        const name = page.locator('.portrait-frame .portrait-name');
+        const frameBox = await frame.boundingBox(), nameBox = await name.boundingBox();
+        assert.ok(nameBox.x >= frameBox.x && nameBox.x + nameBox.width <= frameBox.x + frameBox.width + 1);
+        assert.ok(nameBox.y >= frameBox.y && nameBox.y + nameBox.height <= frameBox.y + frameBox.height + 1);
+        const fillContour = await page.locator('.signature-fill').getAttribute('d');
+        const edgeContour = await page.locator('.signature-edge').getAttribute('d');
+        assert.ok(fillContour.startsWith(edgeContour), 'Gold edge must follow the same continuous ivory contour.');
       }
       if (width === 1440 || width === 390) await page.screenshot({path:'artifacts/media-review/' + (route === '/' ? 'home' : 'about') + '-' + width + '.png'});
     }

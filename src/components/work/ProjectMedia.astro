@@ -12,7 +12,7 @@ const { cover, number, title, presentation = 'card', showCaption = true } = Astr
 const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'Video preview' : 'Image preview';
 ---
 
-<figure class:list={['project-media', { 'detail-presentation': presentation === 'detail' }]} data-media-id={cover.id} data-media-type={cover.type} style={presentation === 'detail' ? `--media-ratio: ${cover.width} / ${cover.height}` : undefined}>
+<figure class:list={['project-media', { 'detail-presentation': presentation === 'detail', 'card-presentation': presentation === 'card' }]} data-media-id={cover.id} data-media-type={cover.type} style={presentation === 'detail' ? `--media-ratio: ${cover.width} / ${cover.height}` : undefined}>
   {cover.url ? (
     cover.type === 'gif' ? (
       <div class="gif-preview" data-gif-preview data-src={cover.url} data-alt={cover.alt} data-width={cover.width} data-height={cover.height}>
@@ -131,6 +131,10 @@ const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'V
   .detail-presentation img, .detail-presentation video { max-height: 75dvh; }
   .gif-preview { position: relative; overflow: hidden; background: var(--charcoal); color: var(--ivory); }
   .gif-preview :global(img), .gif-preview :global(canvas) { position: absolute; inset: 0; width: 100%; height: 100%; max-height: none; object-fit: contain; }
+  .card-presentation > img,
+  .card-presentation > video,
+  .card-presentation .gif-preview :global(img),
+  .card-presentation .gif-preview :global(canvas) { object-fit: cover; object-position: center top; }
   :global(html[data-gif-controls-ready]) .gif-preview :global(img[data-playing-gif]:not([data-user-play])) { visibility: hidden; }
   .gif-preview [hidden] { display: none !important; }
   .gif-fallback { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--display); font-size: 32px; }

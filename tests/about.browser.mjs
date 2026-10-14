@@ -72,7 +72,9 @@ try {
   assert.deepEqual(await page.locator('.stage-list h3').allInnerTexts(), about.approach.stages.map((stage) => stage.title));
   assert.equal(await page.locator('.stage-list li').count(), 4);
   assert.equal(await page.locator('.designation').innerText(), profile.designation);
-  assert.equal(await page.locator('.portrait-name').innerText(), profile.name);
+  assert.equal(normalize(await page.locator('.portrait-name').innerText()), profile.name);
+  assert.equal(await page.locator('.portrait-frame .portrait-name').count(), 1);
+  assert.equal(await page.locator('figcaption .portrait-name').count(), 0);
   assert.equal(await page.locator('.portrait-fallback').count(), 0);
   const portraitImage = page.locator('[data-about-portrait] img');
   assert.equal(await portraitImage.getAttribute('src'), profile.portrait.src);
@@ -102,12 +104,12 @@ try {
       const value = channel / 255;
       return value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4;
     }).reduce((sum, value, index) => sum + value * [.2126, .7152, .0722][index], 0);
-    return [...document.querySelectorAll('[data-approved-copy], .about-page h1, .about-page h2, .about-page h3, .designation, .fallback-name, .about-page a')].flatMap((element) => {
+    return [...document.querySelectorAll('[data-approved-copy], .about-page h1, .about-page h2, .about-page h3, .designation, .portrait-name, .fallback-name, .about-page a')].flatMap((element) => {
       const style = getComputedStyle(element);
       let background = element;
       while (background && rgba(getComputedStyle(background).backgroundColor)[3] === 0) background = background.parentElement;
       const text = luminance(rgba(style.color));
-      const backdrop = luminance(rgba(getComputedStyle(background || document.body).backgroundColor));
+      const backdrop = luminance(rgba(element.matches('.portrait-name') ? getComputedStyle(document.querySelector('.signature-fill')).fill : getComputedStyle(background || document.body).backgroundColor));
       const ratio = (Math.max(text, backdrop) + .05) / (Math.min(text, backdrop) + .05);
       const large = parseFloat(style.fontSize) >= 24 || (parseFloat(style.fontSize) >= 18.66 && parseFloat(style.fontWeight) >= 700);
       return ratio + .01 < (large ? 3 : 4.5) ? [{ text: element.textContent.slice(0, 70), ratio }] : [];
