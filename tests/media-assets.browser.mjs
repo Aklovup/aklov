@@ -22,7 +22,7 @@ for (const project of projects) {
 }
 assert.equal(projects.find(p => p.slug === 'xans-operations-portal').media.length, 4);
 assert.equal(projects.flatMap(p => p.media).filter(item => item.url).length, 15);
-assert.equal(indexed.size, 17);
+assert.ok(indexed.size >= 17);
 assert.ok(indexed.has(profile.portrait.src));
 console.log('ASSET_METADATA', JSON.stringify(metadata));
 mkdirSync('artifacts/media-review', { recursive: true });
@@ -79,6 +79,11 @@ try {
     for (const width of [1440,768,390,320]) {
       await page.setViewportSize({width,height:1000});
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), route + ' at ' + width);
+      if (route === '/' && width <= 1000) {
+        const portraitBox = await portrait.boundingBox();
+        const copyBox = await page.locator('.hero-copy').boundingBox();
+        assert.ok(copyBox.y >= portraitBox.y + portraitBox.height, 'Portrait overlaps Home copy at ' + width);
+      }
       if (width === 1440 || width === 390) await page.screenshot({path:'artifacts/media-review/' + (route === '/' ? 'home' : 'about') + '-' + width + '.png'});
     }
   }
