@@ -223,7 +223,12 @@ try {
   await noJsPage.goto(base + '/work/');
   assert.equal(await noJsPage.locator('[data-project]:visible').count(), 10);
   assert.equal(await noJsPage.locator('[data-filters]:visible').count(), 0);
-  assert.ok(await noJsPage.locator('noscript').isVisible());
+  assert.ok(await noJsPage.locator('.no-script').isVisible());
+  for (const project of projects.filter((item) => item.cover.url && item.cover.type === 'gif')) {
+    const mediaLink = noJsPage.locator(`[data-project="${project.slug}"] noscript a`);
+    assert.ok(await mediaLink.isVisible());
+    assert.equal(await mediaLink.getAttribute('href'), project.cover.url);
+  }
   assert.equal(await noJsPage.locator('[data-project-open]:visible').count(), 0);
   await noJs.close();
   await context.close();

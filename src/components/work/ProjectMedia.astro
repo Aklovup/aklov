@@ -60,36 +60,36 @@ const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'V
   // Popup templates can reintroduce component scripts. Keep delegated playback
   // listeners unique so one click cannot both start and stop the same GIF.
   if (!document.documentElement.hasAttribute('data-gif-controls-ready')) {
-  document.documentElement.setAttribute('data-gif-controls-ready', '');
-  document.addEventListener('aklov:project-open', (event) => enableControls((event as CustomEvent<{ root: ParentNode }>).detail.root));
-  document.addEventListener('click', (event) => {
-    const button = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('[data-gif-toggle]') : null;
-    const preview = button?.closest<HTMLElement>('[data-gif-preview]');
-    if (!button || !preview) return;
-    const playing = preview.querySelector<HTMLImageElement>('[data-playing-gif]');
-    const poster = preview.querySelector<HTMLImageElement>('.gif-poster');
-    const fallback = preview.querySelector<HTMLElement>('.gif-fallback')!;
-    if (playing) {
-      playing.remove();
-      if (poster) poster.hidden = false;
-      fallback.hidden = !!poster;
-      button.textContent = 'Play GIF';
-      button.setAttribute('aria-pressed', 'false');
-    } else {
-      const image = document.createElement('img');
-      image.dataset.playingGif = 'true';
-      image.src = preview.dataset.src!;
-      image.alt = preview.dataset.alt!;
-      image.width = Number(preview.dataset.width);
-      image.height = Number(preview.dataset.height);
-      image.decoding = 'async';
-      preview.prepend(image);
-      if (poster) poster.hidden = true;
-      fallback.hidden = true;
-      button.textContent = 'Pause GIF';
-      button.setAttribute('aria-pressed', 'true');
-    }
-  });
+    document.documentElement.setAttribute('data-gif-controls-ready', '');
+    document.addEventListener('aklov:project-open', (event) => enableControls((event as CustomEvent<{ root: ParentNode }>).detail.root));
+    document.addEventListener('click', (event) => {
+      const button = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('[data-gif-toggle]') : null;
+      const preview = button?.closest<HTMLElement>('[data-gif-preview]');
+      if (!button || !preview) return;
+      const playing = preview.querySelector<HTMLImageElement>('[data-playing-gif]');
+      const poster = preview.querySelector<HTMLImageElement>('.gif-poster');
+      const fallback = preview.querySelector<HTMLElement>('.gif-fallback')!;
+      if (playing) {
+        playing.remove();
+        if (poster) poster.hidden = false;
+        fallback.hidden = !!poster;
+        button.textContent = 'Play GIF';
+        button.setAttribute('aria-pressed', 'false');
+      } else {
+        const image = document.createElement('img');
+        image.dataset.playingGif = 'true';
+        image.src = preview.dataset.src!;
+        image.alt = preview.dataset.alt!;
+        image.width = Number(preview.dataset.width);
+        image.height = Number(preview.dataset.height);
+        image.decoding = 'async';
+        preview.prepend(image);
+        if (poster) poster.hidden = true;
+        fallback.hidden = true;
+        button.textContent = 'Pause GIF';
+        button.setAttribute('aria-pressed', 'true');
+      }
+    });
   }
 </script>
 
