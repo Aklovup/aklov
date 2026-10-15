@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vortex Gym — Train Hard. Live Strong.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,900;1,700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#0a0a0a;
+  --dark:#111111;
+  --dark-2:#1a1a1a;
+  --dark-3:#242424;
+  --lime:#b8ff3c;
+  --lime-2:#a0e832;
+  --white:#ffffff;
+  --grey:#888888;
+  --grey-2:#555555;
+  --divider:rgba(255,255,255,.08);
+  --serif:'Barlow Condensed',sans-serif;
+  --sans:'Barlow',sans-serif;
+  --t:220ms ease;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--sans);background:var(--black);color:var(--white);overflow-x:hidden;line-height:1.6}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit;text-decoration:none}
+ul{list-style:none}
+
+/* ── NAV ── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 clamp(20px,4vw,60px);height:72px;display:flex;align-items:center;justify-content:space-between;background:rgba(10,10,10,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--divider)}
+.nav__logo img{height:32px;width:auto}
+.nav__links{display:flex;align-items:center;gap:32px}
+.nav__links a{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);transition:color var(--t)}
+.nav__links a:hover,.nav__links a.active{color:var(--white)}
+.nav__cta{background:var(--lime);color:var(--black);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:10px 24px;transition:background var(--t),transform var(--t)}
+.nav__cta:hover{background:var(--lime-2);transform:translateY(-1px)}
+
+/* ── HERO ── */
+.hero{position:relative;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;overflow:hidden;padding-top:72px}
+.hero__left{display:flex;flex-direction:column;justify-content:center;padding:clamp(48px,7vw,100px) clamp(24px,5vw,80px);background:var(--dark);position:relative;z-index:2}
+.hero__eyebrow{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--lime);margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.hero__eyebrow::before{content:'';width:28px;height:2px;background:var(--lime)}
+.hero__h1{font-family:var(--serif);font-size:clamp(3.8rem,7vw,7.5rem);font-weight:900;line-height:.92;text-transform:uppercase;letter-spacing:-.02em;margin-bottom:24px}
+.hero__h1 span{color:var(--lime);display:block}
+.hero__p{font-size:15px;font-weight:300;color:rgba(255,255,255,.5);max-width:38ch;line-height:1.8;margin-bottom:40px}
+.hero__actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.btn-lime{background:var(--lime);color:var(--black);font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:14px 32px;display:inline-flex;align-items:center;gap:8px;transition:background var(--t),transform var(--t)}
+.btn-lime:hover{background:var(--lime-2);transform:translateY(-1px)}
+.btn-outline{border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:13px 28px;display:inline-flex;align-items:center;gap:8px;transition:border-color var(--t),color var(--t)}
+.btn-outline:hover{border-color:var(--lime);color:var(--lime)}
+.hero__stats{display:flex;gap:32px;margin-top:52px;padding-top:32px;border-top:1px solid var(--divider)}
+.hero__stat-n{font-family:var(--serif);font-size:2.4rem;font-weight:900;color:var(--lime);line-height:1}
+.hero__stat-l{font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.06em;margin-top:4px;text-transform:uppercase}
+.hero__right{position:relative;overflow:hidden}
+.hero__right img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.hero__right-overlay{position:absolute;inset:0;background:linear-gradient(to right,var(--dark) 0%,transparent 40%)}
+.hero__badge{position:absolute;bottom:40px;left:40px;background:var(--lime);color:var(--black);padding:16px 22px;min-width:160px}
+.hero__badge-label{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px;opacity:.6}
+.hero__badge-val{font-family:var(--serif);font-size:1.5rem;font-weight:900;line-height:1;text-transform:uppercase}
+
+/* ── BRAND BAR ── */
+.brand-bar{background:var(--dark-2);border-block:1px solid var(--divider);padding:20px clamp(24px,4vw,60px);display:flex;align-items:center;gap:48px;overflow:hidden}
+.brand-bar__label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--grey-2);white-space:nowrap;flex-shrink:0}
+.brand-bar__logos{display:flex;align-items:center;gap:40px;flex-wrap:wrap}
+.brand-bar__logo{font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.18);transition:color var(--t)}
+.brand-bar__logo:hover{color:rgba(255,255,255,.4)}
+
+/* ── PROGRAMS ── */
+.programs{background:var(--black);padding:clamp(72px,8vw,120px) clamp(24px,4vw,60px)}
+.programs__head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:56px;flex-wrap:wrap;gap:16px}
+.section-eyebrow{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--lime);margin-bottom:12px}
+.section-h{font-family:var(--serif);font-size:clamp(2.4rem,4vw,4.5rem);font-weight:900;text-transform:uppercase;line-height:.95;letter-spacing:-.01em}
+.section-p{font-size:14px;font-weight:300;color:rgba(255,255,255,.45);line-height:1.8;max-width:46ch;margin-top:10px}
+.see-all{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--lime);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:gap var(--t)}
+.see-all:hover{gap:10px}
+.prog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.prog-card{position:relative;aspect-ratio:3/4;overflow:hidden;cursor:pointer}
+.prog-card img{width:100%;height:100%;object-fit:cover;object-position:center top;transition:transform .6s ease}
+.prog-card:hover img{transform:scale(1.05)}
+.prog-card__ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.1) 60%,transparent 100%)}
+.prog-card__tag{position:absolute;top:20px;left:20px;background:var(--lime);color:var(--black);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px}
+.prog-card__body{position:absolute;bottom:0;left:0;right:0;padding:28px}
+.prog-card__name{font-family:var(--serif);font-size:1.6rem;font-weight:900;text-transform:uppercase;line-height:1;margin-bottom:8px}
+.prog-card__meta{font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.06em}
+.prog-card__arrow{position:absolute;bottom:28px;right:24px;width:36px;height:36px;border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);transition:var(--t)}
+.prog-card:hover .prog-card__arrow{background:var(--lime);border-color:var(--lime);color:var(--black)}
+
+/* ── ABOUT SPLIT ── */
+.about{display:grid;grid-template-columns:1fr 1fr;min-height:620px}
+.about__img{position:relative;overflow:hidden}
+.about__img img{width:100%;height:100%;object-fit:cover;object-position:center}
+.about__img-accent{position:absolute;top:40px;right:-1px;width:6px;height:120px;background:var(--lime)}
+.about__body{background:var(--dark-2);display:flex;flex-direction:column;justify-content:center;padding:clamp(48px,6vw,96px)}
+.about__list{margin-top:32px;display:flex;flex-direction:column;gap:0}
+.about__item{padding:18px 0;border-bottom:1px solid var(--divider);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:color var(--t)}
+.about__item:first-child{border-top:1px solid var(--divider)}
+.about__item:hover{color:var(--lime)}
+.about__item-text{font-family:var(--serif);font-size:1.25rem;font-weight:700;text-transform:uppercase;letter-spacing:.02em}
+.about__item-sub{font-size:12px;color:rgba(255,255,255,.3);margin-top:2px}
+.about__item-n{font-family:var(--serif);font-size:2rem;font-weight:900;color:rgba(255,255,255,.1);flex-shrink:0}
+
+/* ── TRAINERS ── */
+.trainers{background:var(--dark);padding:clamp(72px,8vw,120px) clamp(24px,4vw,60px)}
+.trainers__head{text-align:center;margin-bottom:56px}
+.trainer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.trainer-card{background:var(--dark-2);overflow:hidden;cursor:pointer;transition:transform var(--t)}
+.trainer-card:hover{transform:translateY(-4px)}
+.trainer-card__img{position:relative;aspect-ratio:3/4;overflow:hidden}
+.trainer-card__img img{width:100%;height:100%;object-fit:cover;object-position:center top;transition:transform .5s ease}
+.trainer-card:hover .trainer-card__img img{transform:scale(1.04)}
+.trainer-card__spec{position:absolute;bottom:0;left:0;background:var(--lime);color:var(--black);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px}
+.trainer-card__body{padding:20px 22px 24px}
+.trainer-card__name{font-family:var(--serif);font-size:1.35rem;font-weight:900;text-transform:uppercase;letter-spacing:.02em;margin-bottom:4px}
+.trainer-card__title{font-size:12px;color:rgba(255,255,255,.35);margin-bottom:14px}
+.trainer-card__stats{display:flex;gap:20px}
+.trainer-card__stat-n{font-family:var(--serif);font-size:1.1rem;font-weight:700;color:var(--lime)}
+.trainer-card__stat-l{font-size:10px;color:rgba(255,255,255,.3);margin-top:2px}
+
+/* ── TESTIMONIALS ── */
+.testi{background:var(--black);padding:clamp(72px,8vw,120px) clamp(24px,4vw,60px)}
+.testi__head{margin-bottom:56px}
+.testi-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.testi-card{background:var(--dark-2);padding:40px;position:relative;overflow:hidden}
+.testi-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:var(--dark-3)}
+.testi-card.featured{background:var(--lime);color:var(--black)}
+.testi-card.featured::before{background:var(--lime-2)}
+.testi-card__quote{font-family:var(--serif);font-size:clamp(1.2rem,1.8vw,1.5rem);font-weight:600;line-height:1.5;margin-bottom:32px}
+.testi-card.featured .testi-card__quote{color:var(--black)}
+.testi-card__author{display:flex;align-items:center;gap:14px}
+.testi-card__av{width:48px;height:48px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--dark-3)}
+.testi-card__av img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.testi-card.featured .testi-card__av{border:2px solid var(--black)}
+.testi-card__name{font-weight:700;font-size:14px;line-height:1.3}
+.testi-card__meta{font-size:12px;color:rgba(255,255,255,.35);margin-top:2px}
+.testi-card.featured .testi-card__meta{color:rgba(0,0,0,.5)}
+.testi-card__rating{margin-bottom:16px;font-size:14px;color:var(--lime)}
+.testi-card.featured .testi-card__rating{color:var(--black)}
+.testi-card__tag{position:absolute;top:40px;right:40px;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.25}
+
+/* ── MEMBERSHIP CTA ── */
+.membership{background:var(--dark-2);padding:clamp(72px,8vw,120px) clamp(24px,4vw,60px)}
+.membership__inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.plan-grid{display:flex;flex-direction:column;gap:2px}
+.plan{background:var(--dark-3);padding:24px 28px;display:flex;align-items:center;justify-content:space-between;border-left:3px solid transparent;transition:var(--t);cursor:pointer}
+.plan:hover,.plan.active{border-left-color:var(--lime);background:rgba(184,255,60,.04)}
+.plan__name{font-family:var(--serif);font-size:1.4rem;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
+.plan__desc{font-size:12px;color:rgba(255,255,255,.3);margin-top:3px}
+.plan__price{text-align:right;flex-shrink:0}
+.plan__price-n{font-family:var(--serif);font-size:1.6rem;font-weight:900;color:var(--lime);line-height:1}
+.plan__price-l{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em}
+
+/* ── FOOTER ── */
+footer{background:var(--dark);border-top:1px solid var(--divider);padding:clamp(56px,7vw,96px) clamp(24px,4vw,60px) 0}
+.footer__top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:56px;border-bottom:1px solid var(--divider)}
+.footer__brand-logo img{height:30px;margin-bottom:16px}
+.footer__brand-p{font-size:13px;color:rgba(255,255,255,.3);line-height:1.8;max-width:28ch;margin-bottom:24px}
+.footer__social{display:flex;gap:8px}
+.footer__soc{width:36px;height:36px;border:1px solid var(--divider);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.3);transition:var(--t)}
+.footer__soc:hover{border-color:var(--lime);color:var(--lime)}
+.footer__col-title{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-bottom:18px}
+.footer__links{display:flex;flex-direction:column;gap:10px}
+.footer__links a{font-size:13px;color:rgba(255,255,255,.35);transition:color var(--t)}
+.footer__links a:hover{color:var(--lime)}
+.footer__bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding-block:20px}
+.footer__copy{font-size:12px;color:rgba(255,255,255,.18)}
+.footer__legal{display:flex;gap:20px}
+.footer__legal a{font-size:12px;color:rgba(255,255,255,.18);transition:color var(--t)}
+.footer__legal a:hover{color:rgba(255,255,255,.5)}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .hero{grid-template-columns:1fr}
+  .hero__right{min-height:50vw}
+  .about{grid-template-columns:1fr}
+  .about__img{min-height:360px}
+  .prog-grid{grid-template-columns:1fr 1fr}
+  .trainer-grid{grid-template-columns:1fr 1fr}
+  .testi-grid{grid-template-columns:1fr}
+  .membership__inner{grid-template-columns:1fr;gap:40px}
+  .footer__top{grid-template-columns:1fr 1fr;gap:32px}
+  .footer__brand{grid-column:1/-1}
+  .nav__links{display:none}
+}
+@media(max-width:640px){
+  .prog-grid{grid-template-columns:1fr}
+  .trainer-grid{grid-template-columns:1fr}
+  .footer__top{grid-template-columns:1fr}
+}
+</style>
+<meta name="description" content="Vortex Gym — an independent fitness website design concept by Aklov.">
+<meta name="robots" content="noindex, follow">
+<link rel="stylesheet" href="/demo.css">
+<script src="/demo.js" defer></script>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="#home"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNjAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAxNjAgNDAiPgogIDxwb2x5Z29uIHBvaW50cz0iMTgsNiAyNiw2IDE0LDM0IDYsMzQiIGZpbGw9IiNiOGZmM2MiLz4KICA8dGV4dCB4PSIzMiIgeT0iMjgiIGZvbnQtZmFtaWx5PSJBcmlhbCBCbGFjaywgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjAiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiNmZmZmZmYiIGxldHRlci1zcGFjaW5nPSItMSI+Vk9SVEVYPC90ZXh0PgogIDx0ZXh0IHg9IjExMiIgeT0iMjgiIGZvbnQtZmFtaWx5PSJBcmlhbCBCbGFjaywgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjAiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiNiOGZmM2MiIGxldHRlci1zcGFjaW5nPSItMSI+R1lNPC90ZXh0Pgo8L3N2Zz4=" alt="Vortex Gym"></a>
+  <div class="nav__links">
+    <a href="#home" class="active">Home</a>
+    <a href="#programs">Programs</a>
+    <a href="#trainers">Trainers</a>
+    <a href="#membership">Membership</a>
+    <a href="#demo-notice" data-demo-action="Contact">Contact</a>
+  </div>
+  <a href="#membership" class="nav__cta">Join Today</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero__left">
+    <div class="hero__eyebrow">Train Smarter. Live Stronger.</div>
+    <h1 class="hero__h1">Forge<br>Your<br><span>Best Self</span></h1>
+    <p class="hero__p">Vortex Gym is built for people who take their training seriously. Elite equipment, certified coaches, and a community that pushes you past every limit.</p>
+    <div class="hero__actions">
+      <a href="#demo-notice" data-demo-action="Start Free Trial" class="btn-lime">Start Free Trial <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      <a href="#programs" class="btn-outline">View Programs</a>
+    </div>
+    <div class="hero__stats">
+      <div><div class="hero__stat-n">2,400+</div><div class="hero__stat-l">Active Members</div></div>
+      <div><div class="hero__stat-n">18</div><div class="hero__stat-l">Expert Trainers</div></div>
+      <div><div class="hero__stat-n">96%</div><div class="hero__stat-l">Goal Achievement</div></div>
+    </div>
+  </div>
+  <div class="hero__right">
+    <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=85" alt="Athlete training at Vortex Gym" loading="eager">
+    <div class="hero__right-overlay"></div>
+    <div class="hero__badge">
+      <div class="hero__badge-label">New Members</div>
+      <div class="hero__badge-val">First Month Free</div>
+    </div>
+  </div>
+</section>
+
+<!-- BRAND BAR -->
+<div class="brand-bar">
+  <span class="brand-bar__label">Featured In</span>
+  <div class="brand-bar__logos">
+    <span class="brand-bar__logo">Men's Health</span>
+    <span class="brand-bar__logo">Shape</span>
+    <span class="brand-bar__logo">Runner's World</span>
+    <span class="brand-bar__logo">Muscle & Fitness</span>
+    <span class="brand-bar__logo">Self</span>
+    <span class="brand-bar__logo">Bodybuilding.com</span>
+  </div>
+</div>
+
+<!-- PROGRAMS -->
+<section class="programs" id="programs">
+  <div class="programs__head">
+    <div>
+      <div class="section-eyebrow">What We Offer</div>
+      <h2 class="section-h">Train Like<br>You Mean It</h2>
+      <p class="section-p">Every program is designed by certified coaches to match your goals — whether you're building strength, cutting fat, or improving performance.</p>
+    </div>
+    <a href="#programs" class="see-all">All Programs <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+  </div>
+  <div class="prog-grid">
+    <div class="prog-card" role="button" tabindex="0" data-demo-action="Program details">
+      <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=700&q=80" alt="Strength Training program at Vortex Gym" loading="lazy">
+      <div class="prog-card__ov"></div>
+      <span class="prog-card__tag">Popular</span>
+      <div class="prog-card__body">
+        <div class="prog-card__name">Strength<br>Building</div>
+        <div class="prog-card__meta">4× / week &nbsp;·&nbsp; All levels</div>
+      </div>
+      <div class="prog-card__arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </div>
+    <div class="prog-card" role="button" tabindex="0" data-demo-action="Program details">
+      <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=700&q=80" alt="HIIT and cardio training program" loading="lazy">
+      <div class="prog-card__ov"></div>
+      <span class="prog-card__tag">High Intensity</span>
+      <div class="prog-card__body">
+        <div class="prog-card__name">HIIT &<br>Cardio Burn</div>
+        <div class="prog-card__meta">3× / week &nbsp;·&nbsp; Intermediate</div>
+      </div>
+      <div class="prog-card__arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </div>
+    <div class="prog-card" role="button" tabindex="0" data-demo-action="Program details">
+      <img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=700&q=80" alt="Functional fitness and mobility training" loading="lazy">
+      <div class="prog-card__ov"></div>
+      <span class="prog-card__tag">New</span>
+      <div class="prog-card__body">
+        <div class="prog-card__name">Functional<br>Fitness</div>
+        <div class="prog-card__meta">3× / week &nbsp;·&nbsp; Beginner–Advanced</div>
+      </div>
+      <div class="prog-card__arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT SPLIT -->
+<section class="about" id="about">
+  <div class="about__img">
+    <img src="https://images.unsplash.com/photo-1605296867304-46d5465a13f1?w=900&q=80" alt="State-of-the-art gym floor at Vortex Gym" loading="lazy">
+    <div class="about__img-accent"></div>
+  </div>
+  <div class="about__body">
+    <div class="section-eyebrow">Why Vortex</div>
+    <h2 class="section-h">A Gym That<br>Earns Its<br>Reputation</h2>
+    <p class="section-p" style="margin-top:16px">We built Vortex for people who've outgrown average gyms. Everything — the equipment, the coaches, the programming — is here to help you become exceptional.</p>
+    <div class="about__list">
+      <div class="about__item" role="button" tabindex="0" data-demo-action="Facility details">
+        <div>
+          <div class="about__item-text">Elite Equipment</div>
+          <div class="about__item-sub">5,000 sq ft of premium machines & free weights</div>
+        </div>
+        <div class="about__item-n">01</div>
+      </div>
+      <div class="about__item" role="button" tabindex="0" data-demo-action="Facility details">
+        <div>
+          <div class="about__item-text">Certified Coaches</div>
+          <div class="about__item-sub">NSCA & ACE certified personal trainers</div>
+        </div>
+        <div class="about__item-n">02</div>
+      </div>
+      <div class="about__item" role="button" tabindex="0" data-demo-action="Facility details">
+        <div>
+          <div class="about__item-text">Recovery Zone</div>
+          <div class="about__item-sub">Sauna, ice bath, and stretch studio</div>
+        </div>
+        <div class="about__item-n">03</div>
+      </div>
+      <div class="about__item" role="button" tabindex="0" data-demo-action="Facility details">
+        <div>
+          <div class="about__item-text">Open 24 / 7</div>
+          <div class="about__item-sub">Train on your schedule, any time</div>
+        </div>
+        <div class="about__item-n">04</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRAINERS -->
+<section class="trainers" id="trainers">
+  <div class="trainers__head">
+    <div class="section-eyebrow" style="justify-content:center;display:flex;align-items:center;gap:8px"><span style="width:20px;height:2px;background:var(--lime);display:inline-block"></span>Our Trainers</div>
+    <h2 class="section-h" style="text-align:center;margin-top:8px">The Team<br>Behind Your Results</h2>
+    <p class="section-p" style="text-align:center;margin-inline:auto;margin-top:12px">Each coach brings competition-level experience and a genuine commitment to your progress.</p>
+  </div>
+  <div class="trainer-grid">
+    <div class="trainer-card" role="button" tabindex="0" data-demo-action="Trainer profile">
+      <div class="trainer-card__img">
+        <img src="https://images.unsplash.com/photo-1567013127542-490d757e51fc?w=600&q=80" alt="Marcus Cole — Strength & Powerlifting Coach" loading="lazy">
+        <div class="trainer-card__spec">Strength & Power</div>
+      </div>
+      <div class="trainer-card__body">
+        <div class="trainer-card__name">Marcus Cole</div>
+        <div class="trainer-card__title">Head Strength Coach — NSCA-CSCS</div>
+        <div class="trainer-card__stats">
+          <div><div class="trainer-card__stat-n">12yr</div><div class="trainer-card__stat-l">Experience</div></div>
+          <div><div class="trainer-card__stat-n">340+</div><div class="trainer-card__stat-l">Clients</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="trainer-card" role="button" tabindex="0" data-demo-action="Trainer profile">
+      <div class="trainer-card__img">
+        <img src="https://images.unsplash.com/photo-1594381898411-846e7d193883?w=600&q=80" alt="Jade Rivera — HIIT and Conditioning Coach" loading="lazy">
+        <div class="trainer-card__spec">HIIT & Conditioning</div>
+      </div>
+      <div class="trainer-card__body">
+        <div class="trainer-card__name">Jade Rivera</div>
+        <div class="trainer-card__title">Conditioning Coach — ACE Certified</div>
+        <div class="trainer-card__stats">
+          <div><div class="trainer-card__stat-n">8yr</div><div class="trainer-card__stat-l">Experience</div></div>
+          <div><div class="trainer-card__stat-n">210+</div><div class="trainer-card__stat-l">Clients</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="trainer-card" role="button" tabindex="0" data-demo-action="Trainer profile">
+      <div class="trainer-card__img">
+        <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80" alt="Devon Nash — Functional Fitness Coach" loading="lazy">
+        <div class="trainer-card__spec">Functional Fitness</div>
+      </div>
+      <div class="trainer-card__body">
+        <div class="trainer-card__name">Devon Nash</div>
+        <div class="trainer-card__title">Functional Coach — NASM Certified</div>
+        <div class="trainer-card__stats">
+          <div><div class="trainer-card__stat-n">6yr</div><div class="trainer-card__stat-l">Experience</div></div>
+          <div><div class="trainer-card__stat-n">180+</div><div class="trainer-card__stat-l">Clients</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS (2 cards — one featured) -->
+<section class="testi" id="reviews">
+  <div class="testi__head">
+    <div class="section-eyebrow">Member Stories</div>
+    <h2 class="section-h">Real Results,<br>Real People</h2>
+  </div>
+  <div class="testi-grid">
+    <div class="testi-card featured">
+      <div class="testi-card__tag">Featured</div>
+      <div class="testi-card__rating">★★★★★</div>
+      <p class="testi-card__quote">"I've been to six gyms in this city. Vortex is the only one where the coaches actually watch your form, adjust your programme, and hold you accountable. I dropped 22 lbs and hit a 315 lb deadlift in eight months."</p>
+      <div class="testi-card__author">
+        <div class="testi-card__av"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80" alt="James O. member photo"></div>
+        <div>
+          <div class="testi-card__name" style="color:var(--black)">James O.</div>
+          <div class="testi-card__meta">Member since 2023 &nbsp;·&nbsp; Strength Program</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-card__tag">Member</div>
+      <div class="testi-card__rating">★★★★★</div>
+      <p class="testi-card__quote">"The HIIT classes at Vortex are unlike anything I've tried. Coach Jade doesn't let you coast — every session leaves you wrecked in the best way. I'm faster, leaner, and my energy levels are completely different."</p>
+      <div class="testi-card__author">
+        <div class="testi-card__av"><img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100&q=80" alt="Aisha M. member photo"></div>
+        <div>
+          <div class="testi-card__name">Aisha M.</div>
+          <div class="testi-card__meta">Member since 2024 &nbsp;·&nbsp; HIIT Program</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MEMBERSHIP PLANS + CTA -->
+<section class="membership" id="membership">
+  <div class="membership__inner">
+    <div>
+      <div class="section-eyebrow">Membership</div>
+      <h2 class="section-h">Flexible Plans<br>for Every<br>Commitment</h2>
+      <p class="section-p" style="margin-top:16px">No hidden fees. No lock-in. Just transparent pricing built around how you train.</p>
+      <a href="#demo-notice" data-demo-action="Get Started Today" class="btn-lime" style="margin-top:36px;display:inline-flex">Get Started Today <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+    </div>
+    <div class="plan-grid">
+      <div class="plan" role="button" tabindex="0" data-demo-action="Membership selection">
+        <div>
+          <div class="plan__name">Basic</div>
+          <div class="plan__desc">Gym access · Locker room · App tracking</div>
+        </div>
+        <div class="plan__price">
+          <div class="plan__price-n">$29</div>
+          <div class="plan__price-l">/ month</div>
+        </div>
+      </div>
+      <div class="plan active" role="button" tabindex="0" data-demo-action="Membership selection">
+        <div>
+          <div class="plan__name">Elite</div>
+          <div class="plan__desc">All Basic + 4 PT sessions + recovery zone</div>
+        </div>
+        <div class="plan__price">
+          <div class="plan__price-n">$79</div>
+          <div class="plan__price-l">/ month</div>
+        </div>
+      </div>
+      <div class="plan" role="button" tabindex="0" data-demo-action="Membership selection">
+        <div>
+          <div class="plan__name">Unlimited</div>
+          <div class="plan__desc">Unlimited PT + all classes + nutrition coaching</div>
+        </div>
+        <div class="plan__price">
+          <div class="plan__price-n">$149</div>
+          <div class="plan__price-l">/ month</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer__top">
+    <div class="footer__brand">
+      <a href="#home" class="footer__brand-logo"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNjAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAxNjAgNDAiPgogIDxwb2x5Z29uIHBvaW50cz0iMTgsNiAyNiw2IDE0LDM0IDYsMzQiIGZpbGw9IiNiOGZmM2MiLz4KICA8dGV4dCB4PSIzMiIgeT0iMjgiIGZvbnQtZmFtaWx5PSJBcmlhbCBCbGFjaywgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjAiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiNmZmZmZmYiIGxldHRlci1zcGFjaW5nPSItMSI+Vk9SVEVYPC90ZXh0PgogIDx0ZXh0IHg9IjExMiIgeT0iMjgiIGZvbnQtZmFtaWx5PSJBcmlhbCBCbGFjaywgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjAiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiNiOGZmM2MiIGxldHRlci1zcGFjaW5nPSItMSI+R1lNPC90ZXh0Pgo8L3N2Zz4=" alt="Vortex Gym"></a>
+      <p class="footer__brand-p">Elite training, certified coaches, and a community that won't let you quit.</p>
+      <div class="footer__social">
+        <a href="#demo-notice" data-demo-action="Instagram" class="footer__soc" aria-label="Instagram"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+        <a href="#demo-notice" data-demo-action="YouTube" class="footer__soc" aria-label="YouTube"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" stroke="none" fill="currentColor"/></svg></a>
+        <a href="#demo-notice" data-demo-action="TikTok" class="footer__soc" aria-label="TikTok"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg></a>
+      </div>
+    </div>
+    <div>
+      <div class="footer__col-title">Train</div>
+      <div class="footer__links">
+        <a href="#programs">All Programs</a>
+        <a href="#programs">Strength Building</a>
+        <a href="#programs">HIIT & Cardio</a>
+        <a href="#programs">Functional Fitness</a>
+        <a href="#demo-notice" data-demo-action="Class Schedule">Class Schedule</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer__col-title">Gym</div>
+      <div class="footer__links">
+        <a href="#about">About Vortex</a>
+        <a href="#trainers">Our Trainers</a>
+        <a href="#about">Facilities</a>
+        <a href="#demo-notice" data-demo-action="Recovery Zone">Recovery Zone</a>
+        <a href="#demo-notice" data-demo-action="Careers">Careers</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer__col-title">Help</div>
+      <div class="footer__links">
+        <a href="#demo-notice" data-demo-action="Membership FAQ">Membership FAQ</a>
+        <a href="#demo-notice" data-demo-action="Contact Us">Contact Us</a>
+        <a href="#demo-notice" data-demo-action="Book a Tour">Book a Tour</a>
+        <a href="#demo-notice" data-demo-action="Cancel / Pause">Cancel / Pause</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer__bottom">
+    <span class="footer__copy">&copy; 2026 Vortex Gym. All rights reserved.</span>
+    <div class="footer__legal">
+      <a href="#demo-notice" data-demo-action="Privacy Policy">Privacy Policy</a>
+      <a href="#demo-notice" data-demo-action="Terms of Use">Terms of Use</a>
+    </div>
+  </div>
+</footer>
+
+<aside class="demo-notice" id="demo-notice" aria-label="About this design concept"><span>Independent design concept · Demo only</span><a href="#demo-notice" data-demo-action="About this concept">About this demo</a><a href="https://aklov.pages.dev/work/?project=vortex-gym-concept">Aklov portfolio ↗</a><p class="demo-context">Independent design concept by Aklov. Products, prices, people, testimonials and results are illustrative. No purchases, bookings, memberships or subscriptions are processed.</p></aside>
+<dialog class="demo-dialog" aria-labelledby="demo-title" aria-describedby="demo-description"><h2 id="demo-title">Design concept only</h2><p id="demo-description">Independent design concept by Aklov. Products, prices, people, testimonials and results are illustrative. No purchases, bookings, memberships or subscriptions are processed.</p><button type="button" data-demo-close autofocus>Continue exploring</button></dialog>
+</body>
+</html>

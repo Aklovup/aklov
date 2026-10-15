@@ -1,0 +1,18 @@
+/* Deployment-only additions. The supplied design stylesheet is unchanged. */
+:root { --demo-accent: var(--gold, var(--lime, #c9a84c)); }
+[id] { scroll-margin-top: 88px; }
+:focus-visible { outline: 2px solid var(--demo-accent); outline-offset: 5px; }
+.demo-notice { position: relative; z-index: 101; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 24px; padding: 18px 24px; background: #111; color: #eee; border-top: 1px solid #ffffff26; font: 12px/1.6 var(--sans, sans-serif); }
+.demo-notice > span { color: var(--demo-accent); }
+.demo-notice > a { text-decoration: underline; text-underline-offset: 4px; }
+.demo-context { flex-basis: 100%; max-width: 85ch; text-align: center; color: #aaa; font-size: 11px; }
+/* Keep the demo status visible on arrival without covering the supplied hero. */
+body::before { content: 'AKLOV · INDEPENDENT DESIGN CONCEPT · DEMO ONLY'; display: block; position: relative; z-index: 101; background: #111; color: var(--demo-accent); text-align: center; font: 10px/1.5 var(--sans, sans-serif); letter-spacing: .08em; padding: 8px 12px; }
+body:has(.hero__left) .nav { top: 31px; }
+.demo-dialog { position: fixed; inset: 0; margin: auto; width: min(520px, calc(100% - 40px)); max-height: calc(100dvh - 40px); overflow: auto; padding: 32px; border: 1px solid var(--demo-accent); background: #111; color: #eee; font: 15px/1.8 var(--sans, sans-serif); }
+.demo-dialog::backdrop { background: #000b; }
+.demo-dialog h2 { font: 400 32px/1.2 var(--serif, sans-serif); margin-bottom: 20px; color: var(--demo-accent); }
+.demo-dialog button { margin-top: 24px; padding: 12px 20px; border: 1px solid var(--demo-accent); background: transparent; color: var(--demo-accent); cursor: pointer; font: inherit; }
+html:has(.demo-dialog[open]) { overflow: hidden; }
+@media (max-width: 360px) { .demo-notice { gap: 12px; padding-inline: 16px; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; } }
