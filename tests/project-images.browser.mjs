@@ -23,7 +23,7 @@ try {
       const image = dialog.locator('.project-media img'); await image.evaluate(img=>img.decode());
       assert.equal(await dialog.locator('[data-crop-preview]').count(),0);
       assert.equal(await dialog.locator('[data-full-page-image]').count(),0);
-      const dimensions = await image.evaluate(img=>({width:img.getBoundingClientRect().width,height:img.getBoundingClientRect().height,ratio:img.naturalHeight/img.naturalWidth,max:getComputedStyle(img).maxHeight}));
+      const dimensions = await image.evaluate(img=>({width:img.getBoundingClientRect().width,height:img.getBoundingClientRect().height,ratio:Number(img.getAttribute('height'))/Number(img.getAttribute('width')),max:getComputedStyle(img).maxHeight}));
       assert(Math.abs(dimensions.height-dimensions.width*dimensions.ratio)<2,'Single image is clipped or shrunk into a fixed frame: '+JSON.stringify(dimensions));
       assert.equal(dimensions.max,'none');
       await page.keyboard.press('Escape');

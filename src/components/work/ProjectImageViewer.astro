@@ -93,7 +93,10 @@
       const target = link;
       current.remove();
       if (viewer === current) viewer = undefined;
-      if (!viewer?.open && projectDialog.open && target.isConnected) target.focus({ preventScroll: true });
+      if (!viewer?.open && projectDialog.open) {
+        if (target.isConnected && target.getClientRects().length) target.focus({ preventScroll: true });
+        else projectDialog.querySelector<HTMLButtonElement>('[data-dialog-close]')?.focus({ preventScroll: true });
+      }
     }, { once: true });
     document.body.append(fragment);
     current.showModal();
