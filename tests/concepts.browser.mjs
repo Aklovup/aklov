@@ -43,7 +43,7 @@ try {
       assert(await page.locator('body').evaluate(el => getComputedStyle(el, '::before').content.includes('DEMO ONLY')));
       await page.evaluate(async () => { for(let y=0;y<document.body.scrollHeight;y+=600){scrollTo(0,y);await new Promise(r=>setTimeout(r,30));} });
       await page.waitForTimeout(2000);
-      const layout = await page.evaluate(() => ({ width:innerWidth, scrollWidth:document.documentElement.scrollWidth, brokenImages:[...document.images].filter(i=>!i.complete||!i.naturalWidth).map(i=>i.src), badAnchors:[...document.querySelectorAll('a[href^="#"]')].filter(a=>a.hash && !document.getElementById(decodeURIComponent(a.hash.slice(1)))).map(a=>a.outerHTML), heading:document.querySelector('h1').textContent, fonts:document.fonts.status }));
+      const layout = await page.evaluate(() => ({ width:innerWidth, scrollWidth:document.documentElement.scrollWidth, brokenImages:[...document.images].filter(i=>!i.complete||!i.naturalWidth).map(i=>i.src), badAnchors:[...document.querySelectorAll('a[href^="#"]')].filter(a=>a.hash && !document.getElementById(decodeURIComponent(a.hash.slice(1)))).map(a=>a.outerHTML), heading:document.querySelector('h1').textContent, clippedControls:[...document.querySelectorAll('.hero__stats > div, .hero__actions a, .footer__legal a')].filter(el=>{const r=el.getBoundingClientRect();return r.width && (r.left < -1 || r.right > innerWidth+1);}).map(el=>el.textContent), fonts:document.fonts.status }));
       report.layouts.push({ site:site.concept,...layout });
       await page.evaluate(()=>scrollTo(0,0));
       await page.screenshot({ path:`${out}/${site.concept}-${width}.jpg`, fullPage:true, quality:80 });
@@ -66,7 +66,7 @@ try {
 finally { await writeFile(`${out}/report.json`,JSON.stringify(report,null,2)); await browser.close();server.close(); }
 console.log(JSON.stringify(report,null,2));
 assert.equal(report.errors.length,0);
-assert(report.layouts.every(l=>l.scrollWidth<=l.width+1),'Horizontal overflow');
+assert(report.layouts.every(l=>l.scrollWidth<=l.width+1 && l.clippedControls.length===0),'Horizontal overflow or clipped controls');
 assert(report.layouts.every(l=>l.badAnchors.length===0),'Broken section anchors');
 assert(report.layouts.every(l=>l.brokenImages.length===0),'Unavailable source images');
 assert(report.assets.every(a=>a.status===200),'Unavailable external dependency');

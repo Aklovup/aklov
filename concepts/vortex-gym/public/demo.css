@@ -16,3 +16,6 @@ body:has(.hero__left) .nav { top: 31px; }
 html:has(.demo-dialog[open]) { overflow: hidden; }
 @media (max-width: 360px) { .demo-notice { gap: 12px; padding-inline: 16px; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; } }
+/* Keep the original fixed navigation beneath the explicit demo label. */
+body:has(.hero__left)::before { position: fixed; inset: 0 0 auto; }
+@media (max-width: 480px) { .hero__stats { flex-wrap: wrap; gap: 24px; } }
