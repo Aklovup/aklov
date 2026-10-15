@@ -46,8 +46,9 @@ try {
       const layout = await page.evaluate(() => ({ width:innerWidth, scrollWidth:document.documentElement.scrollWidth, brokenImages:[...document.images].filter(i=>!i.complete||!i.naturalWidth).map(i=>i.src), badAnchors:[...document.querySelectorAll('a[href^="#"]')].filter(a=>a.hash && !document.getElementById(decodeURIComponent(a.hash.slice(1)))).map(a=>a.outerHTML), heading:document.querySelector('h1').textContent, fonts:document.fonts.status }));
       report.layouts.push({ site:site.concept,...layout });
       await page.evaluate(()=>scrollTo(0,0));
-      await page.screenshot({ path:`${out}/${site.concept}-${width}.png`, fullPage:true });
-      const control = page.locator('[data-demo-action]').first();
+      await page.screenshot({ path:`${out}/${site.concept}-${width}.jpg`, fullPage:true, quality:80 });
+      await page.screenshot({ path:`${out}/${site.concept}-${width}-hero.png` });
+      const control = page.locator('[data-demo-action]:visible').first();
       await control.click();assert(await page.locator('dialog').evaluate(d=>d.open));
       await page.keyboard.press('Escape');assert(!(await page.locator('dialog').evaluate(d=>d.open)));
       assert(await control.evaluate(c=>c===document.activeElement));
