@@ -38,8 +38,8 @@
       "caption": "Divine Health & Wellness storefront",
       "order": 2,
       "width": 1920,
-      "height": 1959,
-      "url": "/images/projects/divine-health-black-onyx/Dhw_shop.png"
+      "height": 4168,
+      "url": "/images/projects/divine-health-black-onyx/divine-health-shop.png"
     },
     {
       "id": "black-onyx-storefront",

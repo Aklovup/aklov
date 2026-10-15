@@ -13,8 +13,8 @@
     "type": "image",
     "alt": "Screenshot of the customized product category page.",
     "width": 1920,
-    "height": 3113,
-    "url": "/images/projects/jaycor-commerce/Jaycor_shop.png"
+    "height": 7081,
+    "url": "/images/projects/jaycor-commerce/jaycor-shop.png"
   },
   "media": [
     {
@@ -24,8 +24,8 @@
       "caption": "Product category page",
       "order": 1,
       "width": 1920,
-      "height": 3113,
-      "url": "/images/projects/jaycor-commerce/Jaycor_shop.png"
+      "height": 7081,
+      "url": "/images/projects/jaycor-commerce/jaycor-shop.png"
     },
     {
       "id": "jaycor-product",
@@ -34,8 +34,8 @@
       "caption": "Product details",
       "order": 2,
       "width": 1920,
-      "height": 3330,
-      "url": "/images/projects/jaycor-commerce/Jaycor_PDP.png"
+      "height": 2651,
+      "url": "/images/projects/jaycor-commerce/jaycor-product.png"
     }
   ],
   "externalUrl": "https://www.jaycor.co.za/",
