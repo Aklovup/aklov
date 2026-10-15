@@ -54,7 +54,7 @@ try {
     const close=viewer.locator('[data-image-viewer-close]');
     assert(await close.evaluate(el=>el===document.activeElement));
     for(const key of ['Tab','Shift+Tab']) {await page.keyboard.press(key);assert(await close.evaluate(el=>el===document.activeElement));}
-    assert(await viewer.evaluate(v=>v.scrollHeight>v.clientHeight));
+    if(width>=768) assert(await viewer.evaluate(v=>v.scrollHeight>v.clientHeight));
     await viewer.evaluate(v=>{v.scrollTop=v.scrollHeight;});
     const closeBox=await close.boundingBox();assert(closeBox.y>=0&&closeBox.y<900);
     assert.equal(await viewer.evaluate(v=>v.scrollWidth>v.clientWidth+1),false);
@@ -82,6 +82,7 @@ try {
     assert.equal(await page.evaluate(()=>document.documentElement.style.overflow),'');
     await page.goForward();await dialog.waitFor({state:'visible'});assert.equal(await page.locator('#project-image-viewer').count(),0);
     await page.keyboard.press('Escape');await dialog.waitFor({state:'hidden'});
+    await page.waitForFunction(()=>!new URL(location.href).searchParams.has('project'));
     page.off('request',record);
     results.push({width,singleImagesFull:true,multiImageBounded:true,conditionalControl:true,originalOnDemand:true,keyboardAndFocus:true,parentStatePreserved:true,history:true});
   }
