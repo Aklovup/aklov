@@ -53,6 +53,7 @@ try {
       await page.keyboard.press('Escape');assert(!(await page.locator('dialog').evaluate(d=>d.open)));
       assert(await control.evaluate(c=>c===document.activeElement));
       if(site.concept==='vera-skincare') {
+        if (width <= 600) assert.equal(await page.locator('.hero__scroll').isVisible(), false);
         await page.locator('.nl__input').fill('demo@example.invalid');
         const requests=[];page.on('request',r=>{if(r.method()==='POST')requests.push(r.url());});
         await page.locator('.nl__submit').click();assert(await page.locator('dialog').evaluate(d=>d.open));assert.equal(requests.length,0);

@@ -7,7 +7,7 @@ These are the supplied completed HTML designs, not Astro pages. Each `public/` d
 | VÉRA Skincare | aklov-vera-skincare | https://aklov-vera-skincare.pages.dev/ | concepts/vera-skincare/public |
 | Vortex Gym | aklov-vortex-gym | https://aklov-vortex-gym.pages.dev/ | concepts/vortex-gym/public |
 
-The original embedded CSS and marketing/design copy are preserved. `demo.css` adds only deployment accessibility, the explicit concept disclosure and a small explanatory dialog. `demo.js` connects unavailable actions to that explanation; it never simulates purchases, subscriptions, bookings or memberships. No customer information is stored or sent. Existing section links are real anchors. The original embedded SVG logos remain in place.
+The original embedded CSS and marketing/design copy are preserved. `demo.css` adds deployment accessibility, the explicit concept disclosure and a small explanatory dialog. Narrow-screen fixes wrap the gym statistics and skincare footer links, and hide a decorative scroll cue that overlapped the skincare CTA row. `demo.js` connects unavailable actions to that explanation; it never simulates purchases, subscriptions, bookings or memberships. No customer information is stored or sent. Existing section links are real anchors. The original embedded SVG logos remain in place.
 
 The photos and fonts are the exact external Unsplash and Google Fonts resources already present in the supplied files. No local asset files were attached. `audit.json` records the source hashes and dependency inventory. Tests verify the actual resources rather than replacing them with unrelated photography. These external services remain dependencies; no licenses or availability guarantees beyond the supplied material are inferred.
 

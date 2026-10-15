@@ -17,3 +17,5 @@ html:has(.demo-dialog[open]) { overflow: hidden; }
 @media (max-width: 360px) { .demo-notice { gap: 12px; padding-inline: 16px; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; } }
 @media (max-width: 600px) { .footer__legal { flex-wrap: wrap; gap: 12px 20px; } }
+/* The supplied decorative scroll cue overlaps the stacked mobile CTA row. */
+@media (max-width: 600px) { .hero__scroll { display: none; } }
