@@ -160,9 +160,11 @@ try {
   await page.locator('[data-project="divine-health-black-onyx"] h2').click();
   await dialog.waitFor({ state: 'visible' });
   assert.equal(await dialog.locator('h2').innerText(), 'Divine Health & Wellness / Black Onyx');
+  await dialog.locator('.project-media img').evaluateAll(images => Promise.all(images.map(img => { img.loading = 'eager'; return img.decode(); })));
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   await page.keyboard.press('Shift+Tab');
   assert.equal(await dialog.locator('.inspect-link').count(), 0);
-  assert.ok(await dialog.locator('.external-links a').last().evaluate((el) => el === document.activeElement), 'Focus must wrap to the final available website link.');
+  assert.ok(await dialog.locator('button:visible, a[href]:visible, video[controls]:visible').last().evaluate((el) => el === document.activeElement), 'Focus must wrap to the final available dialog control.');
   await page.keyboard.press('Tab');
   assert.ok(await close.evaluate((el) => el === document.activeElement));
   await dialog.locator('h2').click();

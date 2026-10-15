@@ -8,6 +8,7 @@ const media = [...data.media].sort((a, b) => a.order - b.order);
 const available = media.filter((item) => item.url && item.id !== omitId);
 const pending = media.filter((item) => !item.url);
 const preview = media.some((item) => item.url) ? undefined : pending.find((item) => item.placeholder);
+const boundedMedia = media.filter((item) => item.url).length > 1;
 const number = String(data.order).padStart(2, '0');
 ---
 
@@ -19,7 +20,7 @@ const number = String(data.order).padStart(2, '0');
   {preview && <ProjectMedia cover={preview} number={number} title={data.title} presentation="detail" showCaption={false} />}
   {available.map((item) => (
     <div class="media-item">
-      <ProjectMedia cover={item} number={number} title={data.title} presentation="detail" />
+      <ProjectMedia cover={item} number={number} title={data.title} presentation="detail" bounded={boundedMedia} />
 
     </div>
   ))}

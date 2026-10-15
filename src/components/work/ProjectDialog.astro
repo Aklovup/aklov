@@ -1,6 +1,7 @@
 ---
 import { render, type CollectionEntry } from 'astro:content';
 import ProjectDetail from './ProjectDetail.astro';
+import ProjectImageViewer from './ProjectImageViewer.astro';
 
 interface Props { projects: CollectionEntry<'projects'>[]; }
 const { projects } = Astro.props;
@@ -12,6 +13,7 @@ const details = await Promise.all(projects.map(async (project) => ({
 <dialog id="project-dialog" class="project-dialog" aria-labelledby="project-dialog-title" data-project-dialog>
   <div data-dialog-content></div>
 </dialog>
+<ProjectImageViewer />
 {details.map(({ project, Content }) => (
   <template data-project-detail={project.data.slug} data-project-aliases={project.data.aliases.join(' ')}>
     <ProjectDetail project={project}><Content /></ProjectDetail>

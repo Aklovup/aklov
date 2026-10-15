@@ -8,6 +8,7 @@ interface Props { project: CollectionEntry<'projects'>; }
 const { project } = Astro.props;
 const { data } = project;
 const lead = [...data.media].sort((a,b) => a.order - b.order).find((item) => item.url);
+const boundedMedia = data.media.filter((item) => item.url).length > 1;
 const number = String(data.order).padStart(2, '0');
 const categories = [...new Set([data.primaryCategory, ...data.additionalCategories])];
 const externalLinks = [
@@ -34,7 +35,7 @@ const externalLinks = [
       </ul>
     </header>
     <div class:list={['detail-layout', { 'has-lead': !!lead }]}>
-      {lead && <div class="media-item detail-lead"><ProjectMedia cover={lead} number={number} title={data.title} presentation="detail" /></div>}
+      {lead && <div class="media-item detail-lead"><ProjectMedia cover={lead} number={number} title={data.title} presentation="detail" bounded={boundedMedia} /></div>}
       <div class="detail-copy">
         <div class="case-study-copy"><slot /></div>
         {!!externalLinks.length && (
