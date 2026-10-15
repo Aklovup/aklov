@@ -29,7 +29,13 @@
     }
   ],
   "featured": false,
-  "order": 10
+  "order": 10,
+  "externalLinks": [
+    {
+      "label": "View live demo",
+      "url": "https://aklov-vortex-gym.pages.dev/"
+    }
+  ]
 }
 ---
 

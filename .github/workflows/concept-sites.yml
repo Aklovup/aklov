@@ -1,0 +1,28 @@
+name: Concept website validation
+on:
+  pull_request:
+    paths:
+      - 'concepts/**'
+      - 'tests/concepts.browser.mjs'
+      - '.github/workflows/concept-sites.yml'
+permissions:
+  contents: read
+jobs:
+  concept-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --no-save --package-lock=false playwright
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/concepts.browser.mjs
+      - name: Verify published Pages websites
+        run: CONCEPT_LIVE=1 node tests/concepts.browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: concept-sites-review
+          path: artifacts/concept-sites/

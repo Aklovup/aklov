@@ -6,6 +6,7 @@ import ProjectMedia from './ProjectMedia.astro';
 interface Props { project: CollectionEntry<'projects'>; index: number; }
 const { project, index } = Astro.props;
 const { data } = project;
+const demoLink = data.projectType === 'Independent Concept' ? data.externalLinks[0] : undefined;
 const number = String(data.order).padStart(2, '0');
 const categories = [...new Set([data.primaryCategory, ...data.additionalCategories])];
 ---
@@ -34,6 +35,11 @@ const categories = [...new Set([data.primaryCategory, ...data.additionalCategori
       <button type="button" class="project-open" data-project-open={data.slug} aria-haspopup="dialog" aria-controls="project-dialog" aria-label={`View project: ${data.title}`} hidden>
         View project <span aria-hidden="true">→</span>
       </button>
+      {demoLink && (
+        <a href={demoLink.url} target="_blank" rel="noopener noreferrer" aria-label={`${demoLink.label} for ${data.title} — independent design concept (opens in a new tab)`}>
+          {demoLink.label} <span aria-hidden="true">↗</span>
+        </a>
+      )}
       {data.externalUrl && (
         <a href={data.externalUrl} target="_blank" rel="noopener noreferrer" aria-label={`Visit external website for ${data.title} (opens in a new tab)`}>
           Visit website <span aria-hidden="true">↗</span>

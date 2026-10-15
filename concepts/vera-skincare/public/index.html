@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V&#201;RA Botanicals &#8212; Skincare Rooted in Nature</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1a13;--bg2:#111f16;--bg3:#0a1510;
+  --cream:#f0ebe3;--gold:#c9a84c;--gold2:#b8943e;
+  --mid:rgba(240,235,227,.5);--dim:rgba(240,235,227,.3);--div:rgba(240,235,227,.08);
+  --serif:'Cormorant',Georgia,serif;--sans:'Inter',system-ui,sans-serif;
+  --pad:clamp(24px,4vw,72px);--t:220ms ease;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body{font-family:var(--sans);background:var(--bg);color:var(--cream);overflow-x:hidden}
+img{display:block;max-width:100%;object-fit:cover}
+a{text-decoration:none;color:inherit}
+.rule{height:1px;background:var(--div)}
+.eyebrow{font-size:9px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.sec-h{font-family:var(--serif);font-size:clamp(2rem,4vw,3.6rem);font-weight:300;line-height:1.1;color:var(--cream)}
+.sec-h em{font-style:italic;color:var(--gold)}
+.btn-gold{background:var(--gold);color:var(--bg);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:13px 28px;display:inline-flex;align-items:center;gap:8px;transition:background var(--t)}
+.btn-gold:hover{background:var(--gold2)}
+.btn-outline{border:1px solid rgba(201,168,76,.4);color:var(--gold);font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;padding:12px 28px;display:inline-flex;align-items:center;gap:8px;transition:background var(--t),color var(--t)}
+.btn-outline:hover{background:var(--gold);color:var(--bg)}
+
+/* ─── HERO ─── */
+.hero{position:relative;width:100%;min-height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.hero__bg{position:absolute;inset:0;z-index:0}
+.hero__bg img{width:100%;height:100%;object-fit:cover;object-position:center 20%}
+.hero__bg::after{
+  content:'';position:absolute;inset:0;
+  background:
+    linear-gradient(to bottom,rgba(14,26,19,.6) 0%,rgba(14,26,19,.08) 38%,rgba(14,26,19,.04) 55%,rgba(14,26,19,.75) 78%,rgba(14,26,19,.94) 100%),
+    linear-gradient(to right,rgba(14,26,19,.55) 0%,rgba(14,26,19,0) 55%);
+}
+.nav{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:28px clamp(24px,4vw,64px);flex-shrink:0}
+.nav__logo img{height:46px;width:auto}
+.nav__links{display:flex;gap:32px;align-items:center}
+.nav__links a{font-size:11px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,235,227,.5);transition:color 200ms ease}
+.nav__links a:hover{color:#f0ebe3}
+.nav__right{display:flex;align-items:center;gap:22px}
+.nav__shop{font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(201,168,76,.45);color:#c9a84c;padding:8px 22px;transition:background 200ms,color 200ms}
+.nav__shop:hover{background:#c9a84c;color:#0e1a13}
+.nav__cart{color:rgba(240,235,227,.5);transition:color 200ms;display:flex;align-items:center}
+.nav__cart:hover{color:#f0ebe3}
+.nav__tag{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;background:rgba(201,168,76,.12);color:#c9a84c;border:1px solid rgba(201,168,76,.28);padding:3px 10px;border-radius:20px}
+.hero__body{position:relative;z-index:5;flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:0 clamp(24px,4vw,64px) 56px}
+.hero__h{font-family:'Cormorant',Georgia,serif;font-weight:300;font-size:clamp(4rem,9.5vw,10.5rem);line-height:.88;letter-spacing:-.01em;color:#f0ebe3;max-width:9ch;margin-bottom:30px}
+.hero__h em{font-style:italic;font-weight:300;color:#c9a84c;display:block}
+.hero__lower{display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap}
+.hero__copy{max-width:400px}
+.hero__desc{font-size:13px;font-weight:300;color:rgba(240,235,227,.52);line-height:1.88;margin-bottom:28px;max-width:38ch}
+.hero__actions{display:flex;align-items:center;gap:16px}
+.btn-hero-gold{background:#c9a84c;color:#0e1a13;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:13px 28px;display:inline-flex;align-items:center;gap:8px;transition:background 200ms}
+.btn-hero-gold:hover{background:#b8943e}
+.btn-hero-ghost{font-size:10px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:rgba(240,235,227,.46);border-bottom:1px solid rgba(240,235,227,.18);padding-bottom:2px;transition:color 200ms,border-color 200ms}
+.btn-hero-ghost:hover{color:#c9a84c;border-color:#c9a84c}
+.hero__card{background:rgba(14,26,19,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(201,168,76,.18);padding:22px 22px 20px;min-width:228px;max-width:264px;flex-shrink:0}
+.hero__card-label{font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:#c9a84c;margin-bottom:12px}
+.hero__card-name{font-family:'Cormorant',serif;font-size:1.3rem;font-weight:600;color:#f0ebe3;line-height:1.2;margin-bottom:9px}
+.hero__card-desc{font-size:11px;font-weight:300;color:rgba(240,235,227,.4);line-height:1.65;margin-bottom:18px}
+.hero__card-rule{height:1px;background:rgba(201,168,76,.15);margin-bottom:16px}
+.hero__card-foot{display:flex;align-items:center;justify-content:space-between}
+.hero__card-price{font-family:'Cormorant',serif;font-size:1.25rem;font-weight:600;color:#f0ebe3}
+.hero__card-link{font-size:9px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:#c9a84c;display:flex;align-items:center;gap:5px;transition:gap 180ms}
+.hero__card-link:hover{gap:9px}
+.hero__scroll{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:8px}
+.hero__scroll span{font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:rgba(240,235,227,.28)}
+.hero__scroll-line{width:1px;height:38px;background:linear-gradient(to bottom,rgba(201,168,76,.55),transparent);animation:scrollpulse 1.9s ease-in-out infinite}
+@keyframes scrollpulse{0%,100%{opacity:.35;transform:scaleY(1)}50%{opacity:1;transform:scaleY(.55)}}
+
+/* ─── BESTSELLERS ─── */
+.shop{padding:80px var(--pad)}
+.shop__head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:44px;gap:20px;flex-wrap:wrap}
+.shop__view{font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border-bottom:1px solid rgba(201,168,76,.3);padding-bottom:2px}
+.shop__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
+.pcard{position:relative;background:var(--bg2);overflow:hidden;cursor:pointer}
+.pcard__img{width:100%;height:340px;object-fit:cover;transition:transform .5s ease}
+.pcard:hover .pcard__img{transform:scale(1.04)}
+.pcard__body{padding:18px 16px 20px}
+.pcard__tag{font-size:8px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.pcard__name{font-family:var(--serif);font-size:1.1rem;font-weight:400;color:var(--cream);line-height:1.25;margin-bottom:6px}
+.pcard__sub{font-size:11px;font-weight:300;color:var(--mid);margin-bottom:14px;line-height:1.5}
+.pcard__foot{display:flex;align-items:center;justify-content:space-between}
+.pcard__price{font-family:var(--serif);font-size:1.05rem;font-weight:600;color:var(--cream)}
+.pcard__cta{font-size:9px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);border-bottom:1px solid rgba(201,168,76,.3);padding-bottom:1px}
+.pcard__badge{position:absolute;top:14px;left:14px;background:var(--gold);color:var(--bg);font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:4px 9px}
+
+/* ─── STORY SPLIT ─── */
+.story{display:grid;grid-template-columns:1fr 1fr;min-height:580px}
+.story__img{position:relative;overflow:hidden}
+.story__img img{width:100%;height:100%;min-height:580px;object-fit:cover;object-position:center 30%}
+.story__copy{background:var(--bg3);display:flex;flex-direction:column;justify-content:center;padding:72px clamp(32px,5vw,80px)}
+.story__copy .eyebrow{margin-bottom:20px}
+.story__copy .sec-h{margin-bottom:28px}
+.story__body{font-size:13px;font-weight:300;color:var(--mid);line-height:1.92;max-width:44ch;margin-bottom:36px}
+.story__facts{list-style:none;margin-bottom:40px;display:flex;flex-direction:column;gap:0}
+.story__fact{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-top:1px solid var(--div)}
+.story__fact-num{font-family:var(--serif);font-size:1.6rem;font-weight:300;color:var(--gold);line-height:1;min-width:32px}
+.story__fact-text{font-size:12px;font-weight:300;color:var(--mid);line-height:1.7;padding-top:4px}
+
+/* ─── INGREDIENTS ─── */
+.ingr{padding:88px var(--pad);background:var(--bg3)}
+.ingr__head{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:end;margin-bottom:56px}
+.ingr__intro{font-size:13px;font-weight:300;color:var(--mid);line-height:1.9;max-width:46ch}
+.ingr__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.icard{background:var(--bg2);overflow:hidden}
+.icard__img{width:100%;height:220px;object-fit:cover}
+.icard__body{padding:22px 20px 24px}
+.icard__name{font-family:var(--serif);font-size:1.2rem;font-weight:400;color:var(--cream);margin-bottom:8px}
+.icard__origin{font-size:9px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.icard__desc{font-size:11px;font-weight:300;color:var(--mid);line-height:1.7}
+
+/* ─── ROUTINE ─── */
+.routine{padding:88px var(--pad)}
+.routine__head{text-align:center;max-width:52ch;margin:0 auto 64px}
+.routine__head .sec-h{margin-top:10px}
+.routine__steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+.routine__steps::before{content:'';position:absolute;top:44px;left:12.5%;right:12.5%;height:1px;background:var(--div);z-index:0}
+.rstep{padding:0 20px;text-align:center;position:relative;z-index:1}
+.rstep__num{font-family:var(--serif);font-size:3.2rem;font-weight:300;color:var(--gold);opacity:.35;line-height:1;margin-bottom:16px}
+.rstep__img{width:100%;height:220px;object-fit:cover;margin-bottom:20px}
+.rstep__name{font-family:var(--serif);font-size:1.1rem;font-weight:400;color:var(--cream);margin-bottom:8px}
+.rstep__desc{font-size:11px;font-weight:300;color:var(--mid);line-height:1.7}
+.routine__cta{text-align:center;margin-top:52px}
+
+/* ─── PROOF / REVIEWS ─── */
+.proof{display:grid;grid-template-columns:1fr 1fr;min-height:500px}
+.proof__visual{position:relative;overflow:hidden}
+.proof__visual img{width:100%;height:100%;min-height:500px;object-fit:cover;object-position:center 25%}
+.proof__visual-label{position:absolute;bottom:24px;left:24px;background:rgba(14,26,19,.7);backdrop-filter:blur(10px);border:1px solid var(--div);padding:10px 16px}
+.proof__visual-label span{font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.proof__reviews{background:var(--bg2);padding:64px clamp(28px,4vw,64px);display:flex;flex-direction:column;justify-content:center;gap:28px}
+.rcard{background:var(--bg3);border:1px solid var(--div);padding:22px 20px}
+.rcard__stars{color:var(--gold);font-size:11px;letter-spacing:2px;margin-bottom:10px}
+.rcard__quote{font-family:var(--serif);font-size:1.05rem;font-style:italic;font-weight:300;color:var(--cream);line-height:1.6;margin-bottom:14px}
+.rcard__author{display:flex;align-items:center;gap:10px}
+.rcard__avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;object-position:top;flex-shrink:0}
+.rcard__name{font-size:11px;font-weight:500;color:var(--cream)}
+.rcard__platform{font-size:9px;font-weight:300;color:var(--mid);margin-top:1px}
+
+/* ─── PRESS ─── */
+.press{padding:52px var(--pad);border-top:1px solid var(--div);border-bottom:1px solid var(--div)}
+.press__inner{display:flex;align-items:center;justify-content:center;gap:clamp(28px,5vw,72px);flex-wrap:wrap}
+.press__label{font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-right:20px;white-space:nowrap}
+.press__name{font-family:var(--serif);font-size:1.05rem;font-weight:300;letter-spacing:.06em;color:rgba(240,235,227,.2);transition:color var(--t)}
+.press__name:hover{color:rgba(240,235,227,.55)}
+
+/* ─── NEWSLETTER — skincare image background ─── */
+.nl{position:relative;overflow:hidden}
+.nl__bg{position:absolute;inset:0;z-index:0}
+.nl__bg img{width:100%;height:100%;object-fit:cover;object-position:center 40%}
+.nl__bg::after{content:'';position:absolute;inset:0;background:rgba(14,26,19,.82)}
+.nl__inner{position:relative;z-index:2;padding:100px var(--pad);max-width:680px;margin:0 auto;text-align:center}
+.nl__inner .eyebrow{margin-bottom:16px}
+.nl__inner .sec-h{margin-bottom:16px}
+.nl__sub{font-size:13px;font-weight:300;color:var(--mid);line-height:1.85;margin-bottom:40px;max-width:46ch;margin-left:auto;margin-right:auto}
+.nl__form{display:flex;max-width:440px;margin:0 auto 20px}
+.nl__input{flex:1;background:rgba(240,235,227,.06);border:1px solid rgba(201,168,76,.25);border-right:none;color:var(--cream);font-family:var(--sans);font-size:12px;font-weight:300;padding:13px 18px;outline:none}
+.nl__input::placeholder{color:var(--dim)}
+.nl__submit{background:var(--gold);color:var(--bg);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:13px 22px;border:none;cursor:pointer;white-space:nowrap;transition:background var(--t)}
+.nl__submit:hover{background:var(--gold2)}
+.nl__note{font-size:10px;font-weight:300;color:var(--dim)}
+
+/* ─── FOOTER ─── */
+.footer{background:var(--bg3);padding:72px var(--pad) 36px}
+.footer__top{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:48px;padding-bottom:56px;border-bottom:1px solid var(--div)}
+.footer__brand-desc{font-size:12px;font-weight:300;color:var(--mid);line-height:1.88;max-width:32ch;margin-top:18px}
+.footer__socials{display:flex;gap:14px;margin-top:24px}
+.footer__social{width:30px;height:30px;border:1px solid var(--div);display:flex;align-items:center;justify-content:center;color:var(--mid);transition:border-color var(--t),color var(--t)}
+.footer__social:hover{border-color:var(--gold);color:var(--gold)}
+.footer__col-h{font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
+.footer__links{list-style:none;display:flex;flex-direction:column;gap:11px}
+.footer__links li a{font-size:12px;font-weight:300;color:var(--mid);transition:color var(--t)}
+.footer__links li a:hover{color:var(--cream)}
+.footer__bottom{display:flex;align-items:center;justify-content:space-between;padding-top:28px;flex-wrap:wrap;gap:12px}
+.footer__copy{font-size:10px;font-weight:300;color:var(--dim)}
+.footer__legal{display:flex;gap:20px}
+.footer__legal a{font-size:10px;font-weight:300;color:var(--dim);transition:color var(--t)}
+.footer__legal a:hover{color:var(--mid)}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:1024px){
+  .shop__grid{grid-template-columns:repeat(2,1fr)}
+  .story{grid-template-columns:1fr}
+  .story__img img{min-height:360px}
+  .ingr__head{grid-template-columns:1fr}
+  .ingr__grid{grid-template-columns:repeat(2,1fr)}
+  .proof{grid-template-columns:1fr}
+  .footer__top{grid-template-columns:1fr 1fr}
+  .hero__card{display:none}
+  .nav__links a:nth-child(n+3){display:none}
+  .hero__h{font-size:clamp(3.4rem,12vw,6rem)}
+}
+@media(max-width:720px){
+  .routine__steps{grid-template-columns:repeat(2,1fr)}
+  .routine__steps::before{display:none}
+  .ingr__grid{grid-template-columns:1fr}
+  .footer__top{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .nav__links{display:none}
+  .hero__h{font-size:clamp(3rem,14vw,5rem)}
+}
+@media(max-width:480px){
+  .shop__grid{grid-template-columns:1fr}
+  .nl__form{flex-direction:column}
+  .nl__input{border-right:1px solid rgba(201,168,76,.25);border-bottom:none}
+}
+</style>
+<meta name="description" content="VÉRA Skincare — an independent storefront design concept by Aklov.">
+<meta name="robots" content="noindex, follow">
+<link rel="stylesheet" href="/demo.css">
+<script src="/demo.js" defer></script>
+</head>
+<body>
+
+<!-- ══ HERO (nav fused inside) ══ -->
+<section class="hero" id="home">
+  <div class="hero__bg">
+    <img src="https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=1600&q=88" alt="V&#201;RA Botanicals &#8212; premium skincare editorial" loading="eager">
+  </div>
+  <nav class="nav">
+    <a href="#home"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNjAiIGhlaWdodD0iNTQiIHZpZXdCb3g9IjAgMCAxNjAgNTQiPgogIDxwYXRoIGQ9Ik0xNCA0OCBDMTQgNDAgMTMgMzIgMTUgMjIgQzE2IDE2IDE4IDEwIDE4IDYiIHN0cm9rZT0iI2M5YTg0YyIgc3Ryb2tlLXdpZHRoPSIwLjkiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogIDxwYXRoIGQ9Ik0xNiAxOCBDMTIgMTUgOCAxNyA3IDIyIEM5IDI0IDE0IDIyIDE2IDE4WiIgc3Ryb2tlPSIjYzlhODRjIiBzdHJva2Utd2lkdGg9IjAuOCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgogIDxwYXRoIGQ9Ik0xNyAyNCBDMjEgMjAgMjUgMjIgMjUgMjcgQzIyIDI4IDE4IDI3IDE3IDI0WiIgc3Ryb2tlPSIjYzlhODRjIiBzdHJva2Utd2lkdGg9IjAuOCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgogIDxwYXRoIGQ9Ik0xNSAzMiBDMTEgMjkgNyAzMSA3IDM2IEMxMCAzNyAxNCAzNSAxNSAzMloiIHN0cm9rZT0iI2M5YTg0YyIgc3Ryb2tlLXdpZHRoPSIwLjgiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KICA8cGF0aCBkPSJNMTYgMzggQzIwIDM0IDI0IDM2IDIzIDQxIEMyMCA0MiAxNiA0MCAxNiAzOFoiIHN0cm9rZT0iI2M5YTg0YyIgc3Ryb2tlLXdpZHRoPSIwLjgiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIxOCIgY3k9IjUiIHI9IjEuNiIgZmlsbD0iI2M5YTg0YyIvPgogIDx0ZXh0IHg9IjM0IiB5PSIzMyIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsICdUaW1lcyBOZXcgUm9tYW4nLCBzZXJpZiIgZm9udC1zaXplPSIyMiIgZm9udC13ZWlnaHQ9IjQwMCIgbGV0dGVyLXNwYWNpbmc9IjciIGZpbGw9IiNmMGViZTMiPlYmIzIwMTtSQTwvdGV4dD4KICA8dGV4dCB4PSIzNSIgeT0iNDciIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLCBzZXJpZiIgZm9udC1zaXplPSI2LjIiIGZvbnQtd2VpZ2h0PSI0MDAiIGxldHRlci1zcGFjaW5nPSI0LjUiIGZpbGw9InJnYmEoMjAxLDE2OCw3NiwwLjc1KSI+JiMxODM7IEJPVEFOSUNBTFMgJiMxODM7PC90ZXh0Pgo8L3N2Zz4=" alt="V&#201;RA Botanicals"></a>
+    <div class="nav__links">
+      <a href="#products">Products</a>
+      <a href="#ingredients">Ingredients</a>
+      <a href="#routines">Routines</a>
+      <a href="#about">About</a>
+      <span class="nav__tag">New In</span>
+    </div>
+    <div class="nav__right">
+      <a href="#demo-notice" data-demo-action="Cart" class="nav__cart" aria-label="Cart">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      </a>
+      <a href="#products" class="nav__shop">Shop All</a>
+    </div>
+  </nav>
+  <div class="hero__body">
+    <h1 class="hero__h">Your Skin,<br><em>Restored.</em></h1>
+    <div class="hero__lower">
+      <div class="hero__copy">
+        <p class="hero__desc">V&#201;RA harnesses cold-pressed botanicals and bioactive compounds proven to restore the skin barrier, reduce inflammation, and reveal lasting radiance &#8212; without compromise.</p>
+        <div class="hero__actions">
+          <a href="#products" class="btn-hero-gold">Shop the Collection <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          <a href="#ingredients" class="btn-hero-ghost">Our Ingredients</a>
+        </div>
+      </div>
+      <div class="hero__card">
+        <div class="hero__card-label">Featured Product</div>
+        <div class="hero__card-name">Barrier Repair<br>Concentrate</div>
+        <p class="hero__card-desc">Cold-pressed rosehip, ceramide complex, and bakuchiol &#8212; clinically tested for visible results in 14 days.</p>
+        <div class="hero__card-rule"></div>
+        <div class="hero__card-foot">
+          <span class="hero__card-price">&#163;68</span>
+          <a href="#products" class="hero__card-link">Discover <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hero__scroll" aria-hidden="true">
+    <span>Scroll</span>
+    <div class="hero__scroll-line"></div>
+  </div>
+</section>
+
+<!-- ══ BESTSELLERS ══ -->
+<section class="shop" id="products">
+  <div class="shop__head">
+    <div>
+      <div class="eyebrow">Curated for Your Skin</div>
+      <h2 class="sec-h">Our <em>Bestsellers</em></h2>
+    </div>
+    <a href="#products" class="shop__view">View All Products &rarr;</a>
+  </div>
+  <div class="shop__grid">
+    <div class="pcard">
+      <span class="pcard__badge">Best Seller</span>
+      <img class="pcard__img" src="https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&q=82" alt="Barrier Repair Concentrate">
+      <div class="pcard__body">
+        <div class="pcard__tag">Serums</div>
+        <div class="pcard__name">Barrier Repair Concentrate</div>
+        <div class="pcard__sub">Rosehip &middot; Ceramide &middot; Bakuchiol</div>
+        <div class="pcard__foot"><span class="pcard__price">&#163;68</span><a href="#demo-notice" data-demo-action="Add to Bag" class="pcard__cta">Add to Bag</a></div>
+      </div>
+    </div>
+    <div class="pcard">
+      <img class="pcard__img" src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&q=82" alt="Vitamin C Brightening Serum">
+      <div class="pcard__body">
+        <div class="pcard__tag">Serums</div>
+        <div class="pcard__name">Vitamin C Brightening Serum</div>
+        <div class="pcard__sub">15% Ascorbic &middot; Ferulic &middot; Niacinamide</div>
+        <div class="pcard__foot"><span class="pcard__price">&#163;54</span><a href="#demo-notice" data-demo-action="Add to Bag" class="pcard__cta">Add to Bag</a></div>
+      </div>
+    </div>
+    <div class="pcard">
+      <span class="pcard__badge">New In</span>
+      <img class="pcard__img" src="https://images.unsplash.com/photo-1601049676869-702ea24cfd58?w=600&q=82" alt="Ceramide Moisture Lock">
+      <div class="pcard__body">
+        <div class="pcard__tag">Moisturisers</div>
+        <div class="pcard__name">Ceramide Moisture Lock Cream</div>
+        <div class="pcard__sub">Ceramide III &middot; Shea &middot; Hyaluronic Acid</div>
+        <div class="pcard__foot"><span class="pcard__price">&#163;46</span><a href="#demo-notice" data-demo-action="Add to Bag" class="pcard__cta">Add to Bag</a></div>
+      </div>
+    </div>
+    <div class="pcard">
+      <img class="pcard__img" src="https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=600&q=82" alt="Retinol Renewal Night Cream">
+      <div class="pcard__body">
+        <div class="pcard__tag">Night Care</div>
+        <div class="pcard__name">Retinol Renewal Night Cream</div>
+        <div class="pcard__sub">0.3% Encapsulated Retinol &middot; Peptides</div>
+        <div class="pcard__foot"><span class="pcard__price">&#163;72</span><a href="#demo-notice" data-demo-action="Add to Bag" class="pcard__cta">Add to Bag</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ══ PHILOSOPHY SPLIT ══ -->
+<section class="story" id="about">
+  <div class="story__img">
+    <img src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=900&q=84" alt="V&#201;RA botanical ingredient sourcing">
+  </div>
+  <div class="story__copy">
+    <div class="eyebrow">Our Philosophy</div>
+    <h2 class="sec-h">Science meets<br><em>the botanical world</em></h2>
+    <p class="story__body">Every V&#201;RA formula begins with a question: what does the skin barrier actually need? We work with independent dermatologists and biochemists to identify bioactive compounds that deliver measurable results &#8212; then pair them with cold-pressed plant extracts chosen for synergy, not trend.</p>
+    <ul class="story__facts">
+      <li class="story__fact"><span class="story__fact-num">01</span><span class="story__fact-text">All actives are clinically tested at effective concentrations &#8212; not trace-level inclusions for marketing purposes.</span></li>
+      <li class="story__fact"><span class="story__fact-num">02</span><span class="story__fact-text">Every formula is fragrance-free, dermatologist-approved, and developed for sensitive and reactive skin types.</span></li>
+      <li class="story__fact"><span class="story__fact-num">03</span><span class="story__fact-text">Packaging uses 90% recycled glass and aluminium. No virgin plastic in our supply chain since 2023.</span></li>
+    </ul>
+    <a href="#about" class="btn-outline">Read Our Story <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ══ INGREDIENTS ══ -->
+<section class="ingr" id="ingredients">
+  <div class="ingr__head">
+    <div>
+      <div class="eyebrow">What&#8217;s Inside</div>
+      <h2 class="sec-h">Ingredients that<br><em>earn their place</em></h2>
+    </div>
+    <p class="ingr__intro">No filler. No fragrance. No compromise. Every ingredient in a V&#201;RA formula is chosen for a specific, proven function &#8212; and declared fully on every label.</p>
+  </div>
+  <div class="ingr__grid">
+    <div class="icard">
+      <img class="icard__img" src="https://images.unsplash.com/photo-1567748157439-651aca2ff064?w=600&q=82" alt="Rosehip">
+      <div class="icard__body">
+        <div class="icard__origin">Patagonia, Chile</div>
+        <div class="icard__name">Cold-Pressed Rosehip</div>
+        <p class="icard__desc">Rich in trans-retinoic acid and essential fatty acids &#8212; naturally accelerates cell turnover and visibly softens post-blemish marks.</p>
+      </div>
+    </div>
+    <div class="icard">
+      <img class="icard__img" src="https://images.unsplash.com/photo-1612817288484-6f916006741a?w=600&q=82" alt="Ceramide">
+      <div class="icard__body">
+        <div class="icard__origin">Biofermentation &middot; EU Lab</div>
+        <div class="icard__name">Ceramide Complex III</div>
+        <p class="icard__desc">Replenishes the lipid matrix of the stratum corneum, locking in moisture and fortifying the skin&#8217;s natural defence against environmental aggressors.</p>
+      </div>
+    </div>
+    <div class="icard">
+      <img class="icard__img" src="https://images.unsplash.com/photo-1574482620811-1aa16ffe3c82?w=600&q=82" alt="Bakuchiol">
+      <div class="icard__body">
+        <div class="icard__origin">Psoralea Corylifolia &middot; India</div>
+        <div class="icard__name">Bakuchiol</div>
+        <p class="icard__desc">Plant-derived retinol alternative with equivalent efficacy at 0.5% and zero irritation risk &#8212; safe for pregnancy, reactive, and rosacea-prone skin.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ══ ROUTINE BUILDER ══ -->
+<section class="routine" id="routines" style="background:var(--bg2)">
+  <div class="routine__head">
+    <div class="eyebrow">Build Your Ritual</div>
+    <h2 class="sec-h">A routine designed<br>to <em>actually work</em></h2>
+  </div>
+  <div class="routine__steps">
+    <div class="rstep">
+      <div class="rstep__num">01</div>
+      <img class="rstep__img" src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=500&q=80" alt="Cleanse">
+      <div class="rstep__name">Cleanse</div>
+      <p class="rstep__desc">Gentle Enzyme Cleanser removes impurities without stripping the acid mantle.</p>
+    </div>
+    <div class="rstep">
+      <div class="rstep__num">02</div>
+      <img class="rstep__img" src="https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=500&q=80" alt="Treat">
+      <div class="rstep__name">Treat</div>
+      <p class="rstep__desc">Barrier Repair Concentrate or Vitamin C Serum &#8212; applied to slightly damp skin for maximum penetration.</p>
+    </div>
+    <div class="rstep">
+      <div class="rstep__num">03</div>
+      <img class="rstep__img" src="https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=500&q=80" alt="Moisturise">
+      <div class="rstep__name">Moisturise</div>
+      <p class="rstep__desc">Ceramide Moisture Lock seals actives and hydration into the skin. AM and PM.</p>
+    </div>
+    <div class="rstep">
+      <div class="rstep__num">04</div>
+      <img class="rstep__img" src="https://images.unsplash.com/photo-1548094990-c16ca90f1f0d?w=500&q=80" alt="Protect">
+      <div class="rstep__name">Protect</div>
+      <p class="rstep__desc">SPF 50 Mineral Shield &#8212; broad spectrum, weightless, reef-safe. AM only. Non-negotiable.</p>
+    </div>
+  </div>
+  <div class="routine__cta">
+    <a href="#products" class="btn-gold">Shop the Full Routine <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ══ REVIEWS ══ -->
+<section class="proof" id="reviews">
+  <div class="proof__visual">
+    <img src="https://images.unsplash.com/photo-1614735241165-6756e1df61ab?w=800&q=84" alt="8-week skin result">
+    <div class="proof__visual-label"><span>8-week result &middot; Barrier Repair Concentrate</span></div>
+  </div>
+  <div class="proof__reviews">
+    <div>
+      <div class="eyebrow">Customer Reviews</div>
+      <h2 class="sec-h">Real skin,<br><em>real results</em></h2>
+    </div>
+    <div class="rcard">
+      <div class="rcard__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="rcard__quote">&#8220;My skin barrier was completely destroyed after years of over-exfoliating. After 6 weeks of the Barrier Repair Concentrate I genuinely don&#8217;t recognise my skin &#8212; it&#8217;s calm, plump, and I&#8217;ve stopped reaching for concealer.&#8221;</p>
+      <div class="rcard__author">
+        <img class="rcard__avatar" src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=80&q=80" alt="Sophie R.">
+        <div><div class="rcard__name">Sophie R.</div><div class="rcard__platform">Verified &middot; Trustpilot</div></div>
+      </div>
+    </div>
+    <div class="rcard">
+      <div class="rcard__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="rcard__quote">&#8220;I&#8217;m 42 and have tried everything. The Vitamin C Serum is the first product that has visibly reduced my hyperpigmentation without making my sensitive skin flare. Nothing else comes close.&#8221;</p>
+      <div class="rcard__author">
+        <img class="rcard__avatar" src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=80&q=80" alt="Claire M.">
+        <div><div class="rcard__name">Claire M.</div><div class="rcard__platform">Verified &middot; Google Reviews</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ══ PRESS BAR ══ -->
+<div class="press">
+  <div class="press__inner">
+    <span class="press__label">As seen in</span>
+    <span class="press__name">VOGUE</span>
+    <span class="press__name">Elle</span>
+    <span class="press__name">Harper&#8217;s Bazaar</span>
+    <span class="press__name">Refinery29</span>
+    <span class="press__name">The Sunday Times</span>
+    <span class="press__name">Byrdie</span>
+  </div>
+</div>
+
+<!-- ══ NEWSLETTER — skincare flat-lay background ══ -->
+<section class="nl" id="newsletter">
+  <div class="nl__bg">
+    <img src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1400&q=84" alt="V&#201;RA Botanicals skincare collection editorial">
+  </div>
+  <div class="nl__inner">
+    <div class="eyebrow">Join the Inner Circle</div>
+    <h2 class="sec-h">Skincare knowledge.<br><em>Delivered monthly.</em></h2>
+    <p class="nl__sub">Early access to new launches, ingredient deep-dives written by our dermatology team, and exclusive offers &#8212; for members only.</p>
+    <form class="nl__form" data-demo-form action="#demo-notice">
+      <input class="nl__input" type="email" aria-label="Email address (demonstration only)" placeholder="Your email address">
+      <button class="nl__submit" type="submit">Subscribe</button>
+    </form>
+    <p class="nl__note">No spam. Unsubscribe anytime. We respect your inbox as much as your skin.</p>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer">
+  <div class="footer__top">
+    <div>
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNjAiIGhlaWdodD0iNTQiIHZpZXdCb3g9IjAgMCAxNjAgNTQiPgogIDxwYXRoIGQ9Ik0xNCA0OCBDMTQgNDAgMTMgMzIgMTUgMjIgQzE2IDE2IDE4IDEwIDE4IDYiIHN0cm9rZT0iI2M5YTg0YyIgc3Ryb2tlLXdpZHRoPSIwLjkiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogIDxwYXRoIGQ9Ik0xNiAxOCBDMTIgMTUgOCAxNyA3IDIyIEM5IDI0IDE0IDIyIDE2IDE4WiIgc3Ryb2tlPSIjYzlhODRjIiBzdHJva2Utd2lkdGg9IjAuOCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgogIDxwYXRoIGQ9Ik0xNyAyNCBDMjEgMjAgMjUgMjIgMjUgMjcgQzIyIDI4IDE4IDI3IDE3IDI0WiIgc3Ryb2tlPSIjYzlhODRjIiBzdHJva2Utd2lkdGg9IjAuOCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgogIDxwYXRoIGQ9Ik0xNSAzMiBDMTEgMjkgNyAzMSA3IDM2IEMxMCAzNyAxNCAzNSAxNSAzMloiIHN0cm9rZT0iI2M5YTg0YyIgc3Ryb2tlLXdpZHRoPSIwLjgiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KICA8cGF0aCBkPSJNMTYgMzggQzIwIDM0IDI0IDM2IDIzIDQxIEMyMCA0MiAxNiA0MCAxNiAzOFoiIHN0cm9rZT0iI2M5YTg0YyIgc3Ryb2tlLXdpZHRoPSIwLjgiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIxOCIgY3k9IjUiIHI9IjEuNiIgZmlsbD0iI2M5YTg0YyIvPgogIDx0ZXh0IHg9IjM0IiB5PSIzMyIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsICdUaW1lcyBOZXcgUm9tYW4nLCBzZXJpZiIgZm9udC1zaXplPSIyMiIgZm9udC13ZWlnaHQ9IjQwMCIgbGV0dGVyLXNwYWNpbmc9IjciIGZpbGw9IiNmMGViZTMiPlYmIzIwMTtSQTwvdGV4dD4KICA8dGV4dCB4PSIzNSIgeT0iNDciIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLCBzZXJpZiIgZm9udC1zaXplPSI2LjIiIGZvbnQtd2VpZ2h0PSI0MDAiIGxldHRlci1zcGFjaW5nPSI0LjUiIGZpbGw9InJnYmEoMjAxLDE2OCw3NiwwLjc1KSI+JiMxODM7IEJPVEFOSUNBTFMgJiMxODM7PC90ZXh0Pgo8L3N2Zz4=" alt="V&#201;RA Botanicals" style="height:40px;width:auto">
+      <p class="footer__brand-desc">Premium botanical skincare rooted in science. Formulated in London. Sold worldwide. Every product, barrier-first.</p>
+      <div class="footer__socials">
+        <a href="#demo-notice" data-demo-action="Instagram" class="footer__social" aria-label="Instagram"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+        <a href="#demo-notice" data-demo-action="TikTok" class="footer__social" aria-label="TikTok"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 12a4 4 0 104 4V4a5 5 0 005 5"/></svg></a>
+        <a href="#demo-notice" data-demo-action="Pinterest" class="footer__social" aria-label="Pinterest"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.24 2.65 7.86 6.39 9.29-.09-.78-.17-1.99.04-2.85.18-.77 1.22-5.16 1.22-5.16s-.31-.63-.31-1.56c0-1.46.85-2.55 1.9-2.55.9 0 1.33.67 1.33 1.48 0 .9-.58 2.26-.87 3.51-.25 1.05.52 1.9 1.54 1.9 1.85 0 3.1-2.37 3.1-5.18 0-2.14-1.44-3.64-3.51-3.64-2.39 0-3.79 1.79-3.79 3.65 0 .72.28 1.5.62 1.92.07.08.08.15.06.23l-.23.94c-.04.14-.12.17-.28.1C7.7 13.5 7 11.9 7 10.5 7 7.7 9.12 5 12.9 5c3.04 0 5.4 2.17 5.4 5.07 0 3.02-1.9 5.45-4.54 5.45-.89 0-1.72-.46-2-1l-.54 2.02c-.2.75-.73 1.69-1.09 2.26.82.25 1.69.39 2.6.39 5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg></a>
+      </div>
+    </div>
+    <div>
+      <div class="footer__col-h">Shop</div>
+      <ul class="footer__links">
+        <li><a href="#products">All Products</a></li>
+        <li><a href="#demo-notice" data-demo-action="Serums">Serums</a></li>
+        <li><a href="#demo-notice" data-demo-action="Moisturisers">Moisturisers</a></li>
+        <li><a href="#demo-notice" data-demo-action="SPF">SPF</a></li>
+        <li><a href="#demo-notice" data-demo-action="Gift Sets">Gift Sets</a></li>
+        <li><a href="#routines">Build a Routine</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer__col-h">Learn</div>
+      <ul class="footer__links">
+        <li><a href="#ingredients">Our Ingredients</a></li>
+        <li><a href="#demo-notice" data-demo-action="The Journal">The Journal</a></li>
+        <li><a href="#demo-notice" data-demo-action="Skin Quiz">Skin Quiz</a></li>
+        <li><a href="#about">About V&#201;RA</a></li>
+        <li><a href="#demo-notice" data-demo-action="Sustainability">Sustainability</a></li>
+        <li><a href="#demo-notice" data-demo-action="Stockists">Stockists</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer__col-h">Support</div>
+      <ul class="footer__links">
+        <li><a href="#demo-notice" data-demo-action="FAQ">FAQ</a></li>
+        <li><a href="#demo-notice" data-demo-action="Shipping &amp; Returns">Shipping &amp; Returns</a></li>
+        <li><a href="#demo-notice" data-demo-action="Contact Us">Contact Us</a></li>
+        <li><a href="#demo-notice" data-demo-action="Wholesale">Wholesale</a></li>
+        <li><a href="#demo-notice" data-demo-action="Press Enquiries">Press Enquiries</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer__bottom">
+    <span class="footer__copy">&copy; 2026 V&#201;RA Botanicals Ltd. All rights reserved. Registered in England &amp; Wales.</span>
+    <div class="footer__legal">
+      <a href="#demo-notice" data-demo-action="Privacy Policy">Privacy Policy</a>
+      <a href="#demo-notice" data-demo-action="Terms of Service">Terms of Service</a>
+      <a href="#demo-notice" data-demo-action="Cookie Settings">Cookie Settings</a>
+      <a href="#demo-notice" data-demo-action="Accessibility">Accessibility</a>
+    </div>
+  </div>
+</footer>
+
+<aside class="demo-notice" id="demo-notice" aria-label="About this design concept"><span>Independent design concept · Demo only</span><a href="#demo-notice" data-demo-action="About this concept">About this demo</a><a href="https://aklov.pages.dev/work/?project=vera-skincare-concept">Aklov portfolio ↗</a><p class="demo-context">Independent design concept by Aklov. Products, prices, people, testimonials and results are illustrative. No purchases, bookings, memberships or subscriptions are processed.</p></aside>
+<dialog class="demo-dialog" aria-labelledby="demo-title" aria-describedby="demo-description"><h2 id="demo-title">Design concept only</h2><p id="demo-description">Independent design concept by Aklov. Products, prices, people, testimonials and results are illustrative. No purchases, bookings, memberships or subscriptions are processed.</p><button type="button" data-demo-close autofocus>Continue exploring</button></dialog>
+</body>
+</html>

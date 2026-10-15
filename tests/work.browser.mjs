@@ -77,7 +77,7 @@ try {
   assert.equal(await page.locator('[data-media-id]').count(), 10);
   assert.equal(await page.locator('.media-placeholder').count(), projects.filter((project) => !project.cover.url).length);
   assert.equal(await page.locator('.project-media img, .project-media video, .project-media canvas[data-gif-still]').count(), projects.filter((project) => project.cover.url).length);
-  assert.equal(await page.locator('[data-project] a[target="_blank"]').count(), 2);
+  assert.equal(await page.locator('[data-project] a[target="_blank"]').count(), projects.filter(p => p.externalUrl).length + projects.filter(p => p.projectType === 'Independent Concept' && p.externalLinks?.length).length);
   assert.equal(await page.locator('[data-project-open]').count(), 10);
   assert.equal(await page.locator('dialog').count(), 1);
   assert.equal(await page.locator('dialog').isVisible(), false);
@@ -140,6 +140,14 @@ try {
     else assert.equal(await dialog.locator('.media-placeholder').count(), 1);
     assert.equal(await dialog.locator('.detail-type').innerText(), project.projectType);
     assert.equal(await dialog.locator('.external-links a').count(), (project.externalUrl ? 1 : 0) + (project.externalLinks?.length || 0));
+    if (project.projectType === 'Independent Concept') {
+      const demoLink = page.locator(`[data-project="${project.slug}"] .card-footer a`);
+      assert.equal(normalize(await demoLink.innerText()), 'View live demo ↗');
+      assert.equal(await demoLink.getAttribute('href'), project.externalLinks[0].url);
+      assert.equal(await demoLink.getAttribute('target'), '_blank');
+      assert.equal(await dialog.locator('.external-links a').getAttribute('href'), project.externalLinks[0].url);
+      assert.equal(await dialog.locator('.detail-type').innerText(), 'Independent Concept');
+    }
     await page.keyboard.press('Escape');
     await page.waitForFunction(() => !document.querySelector('dialog').open && !document.querySelector('[data-dialog-content]').children.length && !new URL(location.href).searchParams.has('project'));
     await page.waitForFunction((slug) => document.activeElement?.getAttribute('data-project-open') === slug, project.slug);
