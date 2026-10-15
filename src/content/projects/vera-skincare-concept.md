@@ -13,9 +13,11 @@
   "cover": {
     "id": "website-concept-01-cover",
     "type": "image",
-    "alt": "",
-    "width": 1600,
-    "height": 1000
+    "alt": "Full-page website design image showing the hero, product collection, and editorial storytelling sections.",
+    "width": 1440,
+    "height": 6169,
+    "url": "/images/projects/vera-skincare-concept/vera-concept-overview.jpg",
+    "placeholder": false
   },
   "media": [
     {
@@ -24,8 +26,10 @@
       "alt": "Full-page website design image showing the hero, product collection, and editorial storytelling sections.",
       "caption": "VÉRA skincare design concept",
       "order": 1,
-      "width": 1600,
-      "height": 1000
+      "width": 1440,
+      "height": 6169,
+      "url": "/images/projects/vera-skincare-concept/vera-concept-overview.jpg",
+      "placeholder": false
     }
   ],
   "featured": false,
