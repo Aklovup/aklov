@@ -5,6 +5,9 @@ export const links = {
   solutionsApplications: '/solutions/#applications',
   solutionsIntegrations: '/solutions/#integrations',
   work: '/work/',
+  workImpex: '/work/?project=impex-automotive',
+  workDivine: '/work/?project=divine-health-black-onyx',
+  workVera: '/work/?project=vera-skincare-concept',
   contact: '/contact/',
   email: 'mailto:aklovup@gmail.com',
   linkedin: 'https://www.linkedin.com/in/loveth-akpochimora-38283b226',
@@ -14,3 +17,4 @@ export const links = {
   workApplications: '/work/?category=applications',
   workIntegrations: '/work/?category=integrations',
 };
+

@@ -33,6 +33,8 @@ jobs:
         run: node --test --test-isolation=none tests/work.test.mjs tests/contact.test.mjs
       - name: Install the test browser
         run: npx playwright install --with-deps chromium
+      - name: Review the editorial homepage
+        run: node tests/home.browser.mjs
       - name: Verify uploaded static media
         run: node tests/media-assets.browser.mjs
       - name: Verify single images and bounded multi-image inspection
@@ -114,4 +116,12 @@ jobs:
         with:
           name: project-images-review
           path: artifacts/project-images/
+          if-no-files-found: ignore
+
+      - name: Save homepage review screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: homepage-review
+          path: artifacts/home-review/
           if-no-files-found: ignore
