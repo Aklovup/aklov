@@ -13,9 +13,11 @@
   "cover": {
     "id": "website-concept-02-cover",
     "type": "image",
-    "alt": "",
-    "width": 1600,
-    "height": 1000
+    "alt": "Full-page website design image showing the hero, training programs, and gym-benefits sections.",
+    "width": 1440,
+    "height": 5998,
+    "url": "/images/projects/vortex-gym-concept/vortex-gym-overview.jpg",
+    "placeholder": false
   },
   "media": [
     {
@@ -24,8 +26,10 @@
       "alt": "Full-page website design image showing the hero, training programs, and gym-benefits sections.",
       "caption": "Vortex Gym design concept",
       "order": 1,
-      "width": 1600,
-      "height": 1000
+      "width": 1440,
+      "height": 5998,
+      "url": "/images/projects/vortex-gym-concept/vortex-gym-overview.jpg",
+      "placeholder": false
     }
   ],
   "featured": false,

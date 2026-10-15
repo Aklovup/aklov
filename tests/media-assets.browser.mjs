@@ -1,15 +1,16 @@
 import assert from 'node:assert/strict';
+import sharp from 'sharp';
 import { readFileSync, readdirSync, mkdirSync, writeFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
 import { readProjects } from './project-content.mjs';
 import { profile } from '../src/data/about.ts';
-const files = readdirSync('public/images', { recursive: true }).filter((p) => /\.(png|gif)$/i.test(p));
-const metadata = files.map((file) => {
+const files = readdirSync('public/images', { recursive: true }).filter((p) => !p.startsWith('generated/') && /\.(png|gif|jpe?g)$/i.test(p));
+const metadata = await Promise.all(files.map(async (file) => {
   const bytes = readFileSync('public/images/' + file);
-  const gif = /^GIF8[79]a$/.test(bytes.subarray(0, 6).toString());
-  return { url: '/images/' + file, width: gif ? bytes.readUInt16LE(6) : bytes.readUInt32BE(16), height: gif ? bytes.readUInt16LE(8) : bytes.readUInt32BE(20), type: gif ? 'gif' : 'image', bytes: bytes.length };
-});
+  const info = await sharp(bytes, { animated: false }).metadata();
+  return { url: '/images/' + file, width: info.width, height: info.pageHeight || info.height, type: info.format === 'gif' ? 'gif' : 'image', bytes: bytes.length };
+}));
 const projects = readProjects();
 const indexed = new Map(metadata.map(item => [item.url, item]));
 for (const project of projects) {
@@ -21,7 +22,7 @@ for (const project of projects) {
   }
 }
 assert.equal(projects.find(p => p.slug === 'xans-operations-portal').media.length, 4);
-assert.equal(projects.flatMap(p => p.media).filter(item => item.url).length, 15);
+assert.equal(projects.flatMap(p => p.media).filter(item => item.url).length, 17);
 assert.ok(indexed.size >= 17);
 assert.ok(indexed.has(profile.portrait.src));
 console.log('ASSET_METADATA', JSON.stringify(metadata));
@@ -127,5 +128,5 @@ try {
       if (width === 1440 || width === 390) await page.screenshot({path:'artifacts/media-review/' + (route === '/' ? 'home' : 'about') + '-' + width + '.png'});
     }
   }
-  console.log('Passed: 17 uploaded files, exact dimensions/types, 15 project media items, XANS four-item gallery, paused GIF playback, both portraits and responsive media.');
+  console.log('Passed: uploaded GIF/PNG/JPEG files, exact dimensions/types, 17 project media items, XANS four-item gallery, paused GIF playback, both portraits and responsive media.');
 } finally { await browser?.close(); server.kill('SIGTERM'); }
