@@ -62,6 +62,7 @@ try {
     assert.equal(await page.locator('.service-list > a').count(), 5);
     assert.equal(await page.locator('.principle').count(), 3);
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Horizontal overflow at ' + width);
+    await page.keyboard.press('Tab');
     await hero.locator('.btn-gold').focus();
     assert.equal(await hero.locator('.btn-gold').evaluate(el => getComputedStyle(el).outlineStyle), 'solid');
     if ([390,768,1440].includes(width)) {
