@@ -29,7 +29,13 @@
     }
   ],
   "featured": false,
-  "order": 9
+  "order": 9,
+  "externalLinks": [
+    {
+      "label": "View live demo",
+      "url": "https://aklov-vera-skincare.pages.dev/"
+    }
+  ]
 }
 ---
 

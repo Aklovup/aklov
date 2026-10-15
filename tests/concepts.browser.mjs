@@ -3,7 +3,7 @@ import { createServer } from 'node:http';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
 import assert from 'node:assert/strict';
-const out = 'artifacts/concept-sites';
+const out = process.env.CONCEPT_LIVE === '1' ? 'artifacts/concept-sites/live' : 'artifacts/concept-sites/local';
 await mkdir(out, { recursive: true });
 const audit = JSON.parse(await readFile('concepts/audit.json', 'utf8'));
 const server = createServer(async (req, res) => {
@@ -38,6 +38,9 @@ try {
       });
       const response = await page.goto(`${base}/`, { waitUntil:'networkidle', timeout:60000 });
       assert.equal(response.status(),200);
+      assert.equal(await page.locator('a[href="#"]').count(), 0);
+      for (const anchor of await page.locator('a[href^="#"]:not([data-demo-action])').all()) { const target = await anchor.getAttribute('href'); assert(await page.locator(target).count()); }
+      assert(await page.locator('body').evaluate(el => getComputedStyle(el, '::before').content.includes('DEMO ONLY')));
       await page.evaluate(async () => { for(let y=0;y<document.body.scrollHeight;y+=600){scrollTo(0,y);await new Promise(r=>setTimeout(r,30));} });
       await page.waitForTimeout(2000);
       const layout = await page.evaluate(() => ({ width:innerWidth, scrollWidth:document.documentElement.scrollWidth, brokenImages:[...document.images].filter(i=>!i.complete||!i.naturalWidth).map(i=>i.src), badAnchors:[...document.querySelectorAll('a[href^="#"]')].filter(a=>a.hash && !document.getElementById(decodeURIComponent(a.hash.slice(1)))).map(a=>a.outerHTML), heading:document.querySelector('h1').textContent, fonts:document.fonts.status }));
