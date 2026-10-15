@@ -382,14 +382,14 @@ const steps = [
   .hero-actions { display: flex; flex-direction: column; align-items: start; gap: 12px; }
   .hero-explore { display: inline-flex; align-items: center; gap: 20px; min-height: 44px; border-bottom: 1px solid var(--line-dark); font-size: 12px; font-weight: 600; }
   .hero-explore span { font-size: 18px; }
-  .idx { padding-block: 22px 26px; border-top: 1px solid var(--line-dark); color: var(--ivory); background: transparent; --focus-color: var(--gold); }
+  .idx { width: 100%; min-width: 0; padding-block: 22px 26px; border-top: 1px solid var(--line-dark); color: var(--ivory); background: transparent; --focus-color: var(--gold); }
   .idx-top { margin-bottom: 16px; color: var(--gold); font-size: 9px; }
   .idx-links { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
-  .idx-row { display: grid; grid-template-columns: 20px minmax(0, 1fr) 12px; gap: 10px; align-items: baseline; min-height: 64px; padding: 8px 20px; border-left: 1px solid var(--line-dark); }
+  .idx-row { min-width: 0; display: grid; grid-template-columns: 20px minmax(0, 1fr) 12px; gap: 10px; align-items: baseline; min-height: 64px; padding: 8px 20px; border-left: 1px solid var(--line-dark); }
   .idx-row:first-child { border-left: 0; padding-left: 0; }
   .idx-row:last-child { padding-right: 0; }
   .idx-n { color: var(--gold); font-size: 10px; }
-  .idx-t { font-family: var(--display); font-size: clamp(20px, 1.7vw, 28px); line-height: 1.12; }
+  .idx-t { overflow-wrap: anywhere; font-family: var(--display); font-size: clamp(20px, 1.7vw, 28px); line-height: 1.12; }
   .idx-a { color: var(--gold); font-size: 16px; }
 
   /* Introduction */
@@ -740,7 +740,7 @@ const steps = [
     .hero-copy { font-size: 15px; }
     .hero-lower { margin-top: 26px; padding-bottom: 28px; }
     .hero-actions { gap: 14px 24px; }
-    .idx { padding-block: 20px; }
+    .idx { width: 100%; min-width: 0; padding-block: 20px; }
     .idx-links { grid-template-columns: 1fr; }
     .idx-row, .idx-row:nth-child(even) { min-height: 52px; padding: 12px 0; }
     .idx-t { font-size: 22px; }

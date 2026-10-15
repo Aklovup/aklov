@@ -50,7 +50,7 @@ try {
       const bounds=await line.evaluate(el=>{const r=document.createRange();r.selectNodeContents(el);const b=r.getBoundingClientRect();return {left:b.left,right:b.right};});
       assert.ok(bounds.left>=-1&&bounds.right<=width+1,'Solutions headline clips at '+width+': '+JSON.stringify(bounds));
     }
-    report.layouts.push(await page.evaluate(()=>({width:innerWidth,height:document.documentElement.scrollHeight,overflow:[...document.querySelectorAll('.hero h1,.idx,.sol-title,.sol-goal,.sol-actions a,.sol-list,.steps,.closing-grid,.nav,.foot-links')].filter(el=>{if(!el.getClientRects().length)return false;const b=el.getBoundingClientRect();return b.left < -1 || b.right > innerWidth+1 || el.scrollWidth > el.clientWidth+1;}).map(el=>({class:el.className,text:el.textContent.trim().slice(0,90)}))})));
+    report.layouts.push(await page.evaluate(()=>({width:innerWidth,height:document.documentElement.scrollHeight,overflow:[...document.querySelectorAll('.hero h1,.idx,.sol-title,.sol-goal,.sol-actions a,.sol-list,.steps,.closing-grid,.nav,.foot-links')].filter(el=>{if(!el.getClientRects().length)return false;const b=el.getBoundingClientRect();return b.left < -1 || b.right > innerWidth+1 || el.scrollWidth > el.clientWidth+1;}).map(el=>({class:el.className,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right,scroll:el.scrollWidth,client:el.clientWidth,text:el.textContent.trim().slice(0,90)}))})));
   }
   const image=page.locator('.sols-figure img');
   await image.scrollIntoViewIfNeeded();
@@ -58,7 +58,7 @@ try {
   report.image=await image.evaluate(img=>({src:img.src,loaded:img.complete&&img.naturalWidth>0,width:img.naturalWidth,height:img.naturalHeight,alt:img.alt,explicitDimensions:img.hasAttribute('width')&&img.hasAttribute('height')}));
   assert.ok(report.image.loaded && report.image.explicitDimensions);
   assert.ok(report.image.src.includes('/images/generated/solutions/'));
-  assert.ok(report.layouts.every(layout => layout.overflow.length === 0), JSON.stringify(report.layouts));
+
   for (const [label,width] of [['desktop',1440],['tablet',768],['mobile',390],['narrow',320]]) {
     await page.setViewportSize({width,height:1000});
     const frame = await page.locator('.sols-figure').boundingBox();
@@ -69,6 +69,7 @@ try {
     await page.screenshot({path:output+'/solutions-'+label+'.png',fullPage:true});
     await page.screenshot({path:output+'/solutions-hero-'+label+'.png'});
   }
+  assert.ok(report.layouts.every(layout => layout.overflow.length === 0), JSON.stringify(report.layouts));
   await page.setViewportSize({width:390,height:844});
   const menu=page.locator('.menu-toggle');
   await menu.click();
