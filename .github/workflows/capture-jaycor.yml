@@ -1,0 +1,23 @@
+name: Capture JAYCOR FieldBus page
+on:
+  push:
+    branches: ['capture/jaycor-fieldbus-20261015']
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --prefix /tmp/jaycor-capture --no-save --package-lock=false playwright
+      - run: /tmp/jaycor-capture/node_modules/.bin/playwright install --with-deps chromium
+      - run: node scripts/capture-jaycor.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jaycor-fieldbus-full-page
+          path: artifacts/jaycor-capture/
