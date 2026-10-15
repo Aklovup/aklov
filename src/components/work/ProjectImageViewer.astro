@@ -1,0 +1,127 @@
+<template data-image-viewer-template>
+  <dialog id="project-image-viewer" class="image-viewer" aria-labelledby="full-page-image-title">
+    <header class="image-viewer-controls">
+      <h2 id="full-page-image-title">Full-page image</h2>
+      <button type="button" data-image-viewer-close autofocus aria-label="Close full-page image">Back to project <span aria-hidden="true">×</span></button>
+    </header>
+    <p class="image-viewer-status" role="status" aria-live="polite"></p>
+    <div class="full-page-image-content"></div>
+  </dialog>
+</template>
+
+<script>
+  const template = document.querySelector<HTMLTemplateElement>('[data-image-viewer-template]');
+  const projectDialog = document.querySelector<HTMLDialogElement>('[data-project-dialog]');
+  let frames: HTMLElement[] = [];
+  let viewer: HTMLDialogElement | undefined;
+  const updateCrops = () => {
+    for (const frame of frames) {
+      const image = frame.querySelector<HTMLImageElement>('img');
+      const link = frame.parentElement?.querySelector<HTMLAnchorElement>('[data-full-page-image]');
+      if (!image || !link) continue;
+      const cropped = image.complete && image.naturalWidth > 0 && image.getBoundingClientRect().height > frame.clientHeight + 1;
+      link.hidden = !cropped;
+      frame.dataset.cropped = String(cropped);
+    }
+  };
+  const observer = new ResizeObserver(updateCrops);
+  const initialize = (root: ParentNode) => {
+    observer.disconnect();
+    frames = [...root.querySelectorAll<HTMLElement>('[data-crop-preview]')];
+    for (const frame of frames) {
+      observer.observe(frame);
+      const image = frame.querySelector('img');
+      if (image) observer.observe(image);
+    }
+    requestAnimationFrame(updateCrops);
+  };
+  const closeViewer = () => { if (viewer?.open) viewer.close(); };
+  document.addEventListener('aklov:project-open', (event) => {
+    closeViewer();
+    initialize((event as CustomEvent<{ root: ParentNode }>).detail.root);
+  });
+  document.addEventListener('load', (event) => {
+    if (event.target instanceof HTMLImageElement && event.target.closest('[data-crop-preview]')) updateCrops();
+  }, true);
+  projectDialog?.addEventListener('close', () => {
+    if (projectDialog.open) return;
+    closeViewer();
+    observer.disconnect();
+    frames = [];
+  });
+  window.addEventListener('popstate', closeViewer);
+  initialize(projectDialog || document);
+  document.addEventListener('click', (event) => {
+    const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('[data-full-page-image]') : null;
+    if (!link || link.hidden || !template || !projectDialog?.open || typeof HTMLDialogElement.prototype.showModal !== 'function') return;
+    event.preventDefault();
+    if (viewer?.open) return;
+    const fragment = template.content.cloneNode(true) as DocumentFragment;
+    const current = fragment.querySelector<HTMLDialogElement>('dialog')!;
+    viewer = current;
+    const close = current.querySelector<HTMLButtonElement>('[data-image-viewer-close]')!;
+    const status = current.querySelector<HTMLElement>('[role="status"]')!;
+    current.querySelector('h2')!.textContent = link.dataset.imageTitle || 'Full-page image';
+    status.textContent = 'Loading full-page image…';
+    const image = document.createElement('img');
+    image.alt = link.dataset.imageAlt || '';
+    image.width = Number(link.dataset.imageWidth);
+    image.height = Number(link.dataset.imageHeight);
+    image.style.maxWidth = `${image.width}px`;
+    image.decoding = 'async';
+    image.addEventListener('load', () => { status.textContent = ''; });
+    image.addEventListener('error', () => { image.hidden = true; status.textContent = "The image couldn't load. Close this view and try again."; });
+    // Load the original only on request; galleries continue using optimized previews.
+    image.src = link.href;
+    current.querySelector('.full-page-image-content')!.append(image);
+    let startedOutside = false;
+    const outside = (e: MouseEvent) => {
+      const box = current.getBoundingClientRect();
+      return e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom;
+    };
+    current.addEventListener('pointerdown', (e) => { startedOutside = e.target === current && outside(e); });
+    current.addEventListener('click', (e) => {
+      if (e.target === current && startedOutside && outside(e)) current.close();
+      startedOutside = false;
+    });
+    close.addEventListener('click', () => current.close());
+    current.addEventListener('keydown', (e) => {
+      // This viewer has one control; keep Tab within the active modal.
+      if (e.key === 'Tab') { e.preventDefault(); close.focus(); }
+    });
+    current.addEventListener('close', () => {
+      const target = link;
+      current.remove();
+      if (viewer === current) viewer = undefined;
+      if (!viewer?.open && projectDialog.open) {
+        if (target.isConnected && target.getClientRects().length) target.focus({ preventScroll: true });
+        else projectDialog.querySelector<HTMLButtonElement>('[data-dialog-close]')?.focus({ preventScroll: true });
+      }
+    }, { once: true });
+    document.body.append(fragment);
+    current.showModal();
+    current.scrollTop = 0;
+    close.focus({ preventScroll: true });
+  });
+</script>
+
+<style>
+  .image-viewer { width: min(1320px, calc(100vw - 48px)); height: calc(100dvh - 48px); max-width: none; max-height: none; margin: auto; padding: 0; border: 1px solid var(--line); overflow: auto; overscroll-behavior: contain; background: var(--ivory); color: var(--charcoal); }
+  .image-viewer::backdrop { background: rgba(21, 21, 21, .92); }
+  .image-viewer-controls { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 12px clamp(20px, 3vw, 40px); background: var(--ivory); border-bottom: 1px solid var(--line); }
+  .image-viewer-controls h2 { margin: 0; font-family: var(--display); font-size: clamp(22px, 3vw, 30px); font-weight: 400; line-height: 1.1; }
+  .image-viewer-controls button { display: inline-flex; align-items: center; gap: 18px; flex-shrink: 0; min-height: 44px; padding: 0 4px; border: 0; background: transparent; color: var(--charcoal); font: 600 12px var(--sans); cursor: pointer; }
+  .image-viewer-controls button span { font-size: 24px; font-weight: 400; }
+  .image-viewer-controls button:focus-visible { outline-color: var(--charcoal); }
+  .image-viewer-status { margin: 0; padding: 16px 20px; color: var(--body); font-size: 13px; }
+  .image-viewer-status:empty { display: none; }
+  .full-page-image-content { padding: clamp(12px, 2vw, 28px); }
+  .full-page-image-content :global(img) { display: block; width: 100%; height: auto; margin-inline: auto; }
+  .full-page-image-content :global(img[hidden]) { display: none; }
+  @media (max-width: 640px) {
+    .image-viewer { width: 100vw; height: 100dvh; margin: 0; border: 0; }
+    .image-viewer-controls { padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 12px max(16px, env(safe-area-inset-left)); gap: 12px; }
+    .image-viewer-controls button { gap: 10px; }
+    .full-page-image-content { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+  }
+</style>

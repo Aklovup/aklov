@@ -8,15 +8,17 @@ interface Props {
   title: string;
   presentation?: 'card' | 'detail';
   showCaption?: boolean;
+  bounded?: boolean;
 }
-const { cover, number, title, presentation = 'card', showCaption = true } = Astro.props;
+const { cover, number, title, presentation = 'card', showCaption = true, bounded = false } = Astro.props;
+const boundedImage = presentation === 'detail' && bounded && cover.type === 'image' && !!cover.url;
 const preview = mediaPreview(cover.url);
 const poster = cover.poster || (cover.type === 'gif' ? preview?.src : undefined);
 const sizes = presentation === 'card' ? '(max-width: 640px) calc(100vw - 40px), 55vw' : '(max-width: 1000px) calc(100vw - 80px), 45vw';
 const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'Video preview' : 'Image preview';
 ---
 
-<figure class:list={['project-media', { 'detail-presentation': presentation === 'detail', 'card-presentation': presentation === 'card' }]} data-media-id={cover.id} data-media-type={cover.type} style={presentation === 'detail' ? `--media-ratio: ${cover.width} / ${cover.height}` : undefined}>
+<figure class:list={['project-media', { 'detail-presentation': presentation === 'detail', 'card-presentation': presentation === 'card', 'bounded-presentation': boundedImage }]} data-media-id={cover.id} data-media-type={cover.type} style={presentation === 'detail' ? `--media-ratio: ${cover.width} / ${cover.height}` : undefined}>
   {cover.url ? (
     cover.type === 'gif' ? (
       <div class="gif-preview" data-gif-preview data-src={cover.url} data-alt={cover.alt} data-width={cover.width} data-height={cover.height}>
@@ -38,6 +40,13 @@ const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'V
         <source src={cover.url} />
         <a href={cover.url}>View video: {title}</a>
       </video>
+    ) : boundedImage ? (
+      <div class="bounded-image">
+        <div class="image-preview" data-crop-preview>
+          <img src={preview?.src || cover.url} srcset={preview?.srcset} sizes={sizes} alt={cover.alt} width={cover.width} height={cover.height} loading="lazy" decoding="async" />
+        </div>
+        <a class="full-page-link" href={cover.url} target="_blank" rel="noopener noreferrer" data-full-page-image data-image-alt={cover.alt} data-image-title={cover.caption || title} data-image-width={cover.width} data-image-height={cover.height} aria-haspopup="dialog" aria-label={`View full page: ${cover.caption || title}`} hidden>View full page</a>
+      </div>
     ) : (
       <img
         src={preview?.src || cover.url}
@@ -152,6 +161,13 @@ const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'V
   .detail-presentation .media-placeholder,
   .detail-presentation .gif-preview { aspect-ratio: var(--media-ratio); }
   .detail-presentation img, .detail-presentation video { max-height: 75dvh; }
+  .detail-presentation:not(.bounded-presentation) > img { max-height: none; }
+  .image-preview { display: block; height: clamp(240px, 32vw, 420px); overflow: hidden; background: var(--charcoal); }
+  .image-preview img { display: block; width: 100%; height: auto; max-height: none; object-fit: contain; object-position: center top; }
+  .full-page-link { display: inline-flex; align-items: center; min-height: 44px; margin-top: 8px; color: var(--charcoal); font-size: 12px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+  .full-page-link[hidden] { display: none; }
+  .full-page-link:focus-visible { outline-color: var(--charcoal); }
+  @media (hover: hover) { .full-page-link:hover { color: var(--gold-dark); } }
   .gif-preview { position: relative; overflow: hidden; background: var(--charcoal); color: var(--ivory); }
   .gif-preview :global(img), .gif-preview :global(canvas) { position: absolute; inset: 0; width: 100%; height: 100%; max-height: none; object-fit: contain; }
   .card-presentation > img,
