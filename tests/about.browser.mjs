@@ -84,6 +84,14 @@ try {
   assert.equal(await page.locator('.together-story .reading-copy [data-approved-copy]').count(), 5);
   assert.deepEqual(await page.locator('.stage-list h3').allInnerTexts(), about.approach.stages.map((stage) => stage.title));
   assert.equal(await page.locator('.stage-list li').count(), 4);
+  // Chapters share a reading surface; the portrait is introduced only once.
+  assert.equal(await page.locator('[data-about-portrait]').count(), 1);
+  const storySurface = await page.locator('.profile-story').evaluate(element => getComputedStyle(element).backgroundColor);
+  assert.equal(storySurface, 'rgb(245, 242, 234)');
+  for (const chapter of ['.biography', '.approach', '.experience', '.together']) {
+    assert.equal(await page.locator(chapter).evaluate(element => getComputedStyle(element).backgroundColor), 'rgba(0, 0, 0, 0)');
+    assert.equal(await page.locator(chapter + ' > .wrap').evaluate(element => getComputedStyle(element).borderTopStyle), 'solid');
+  }
   assert.equal(await page.locator('.designation').innerText(), profile.designation);
   assert.equal(normalize(await page.locator('.portrait-name').innerText()), profile.name);
   assert.equal(await page.locator('.portrait-frame .portrait-name').count(), 1);
@@ -189,3 +197,4 @@ try {
   await browser?.close();
   server.kill('SIGTERM');
 }
+

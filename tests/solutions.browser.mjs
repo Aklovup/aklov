@@ -25,10 +25,14 @@ try {
   assert.equal(await page.locator('.sol-list li').count(),30);
   assert.equal(await page.locator('.step').count(),4);
   assert.equal(await page.locator('.arc').count(),0);
-  assert.equal(await page.locator('.sol > .wrap > .sol-top > h2').count(),5);
+  assert.equal(await page.locator('.sol-summary > .sol-top > h2').count(),5);
   assert.equal(await page.locator('.sol-list > h3').count(),5);
   assert.equal((await page.locator('#page-title').innerText()).replace(/\s+/g,' ').trim(),'Better ways to run, connect and grow your business.');
   assert.equal(await page.locator('.idx').evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)');
+  assert.equal(await page.locator('.service-catalogue').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(245, 242, 234)');
+  assert.equal(await page.locator('.sol.is-dark, .sol.is-deep').count(),0);
+  assert.equal(await page.locator('.approach').evaluate(el=>getComputedStyle(el).backgroundColor),await page.locator('.choose').evaluate(el=>getComputedStyle(el).backgroundColor));
+  assert.equal(await page.locator('.choose').evaluate(el=>getComputedStyle(el).color),'rgb(21, 21, 21)');
   const tablet = page.locator('[data-solutions-tablet]');
   const screen = tablet.locator('.tablet-screen');
   const screenImage = screen.locator('img');
@@ -51,7 +55,7 @@ try {
   await page.locator('.idx-row').first().evaluate(el=>el.blur());
   report.links=await page.locator('.hero-actions a, .sol-actions a, .choose-cta a, .closing-act a').evaluateAll(links=>links.map(a=>({text:a.textContent.trim(),href:a.getAttribute('href')})));
   assert.equal(report.links.filter(link => link.href === '/contact/').length, 8);
-  for(const width of [320,390,640,768,1000,1001,1280,1440,1920]) {
+  for(const width of [320,390,640,641,768,1000,1001,1280,1440,1920]) {
     await page.setViewportSize({width,height:1000});
     for(const line of await page.locator('.hero h1 > span').all()) {
       const bounds=await line.evaluate(el=>{const r=document.createRange();r.selectNodeContents(el);const b=r.getBoundingClientRect();return {left:b.left,right:b.right};});
@@ -76,8 +80,20 @@ try {
     } else assert.ok(device.y>=actions.y+actions.height+8,'Tablet precedes or overlaps the mobile actions');
     assert.ok(await screenImage.evaluate(img=>img.complete&&img.naturalWidth>0));
     assert.ok(await screen.evaluate(el=>el.scrollHeight>el.clientHeight),'Full-page source is not cropped to the opening hero');
+    for (const service of await page.locator('.sol').all()) {
+      const summary = await service.locator('.sol-summary').boundingBox();
+      const details = await service.locator('.sol-body').boundingBox();
+      if (width > 640) {
+        assert.ok(details.x >= summary.x + summary.width, 'Service columns overlap at ' + width);
+        assert.ok(Math.abs(details.y - summary.y) < 1, 'Service rows lose their shared top alignment');
+      } else assert.ok(details.y >= summary.y + summary.height, 'Service content overlaps on mobile');
+    }
+    if (width > 1000) {
+      const steps = await page.locator('.step').evaluateAll(items => items.map(el => el.getBoundingClientRect().top));
+      assert.ok(steps.every(top => Math.abs(top - steps[0]) < 1), 'Solutions process should read as one horizontal sequence');
+    }
     report.tablet.push({width,fullyVisible:true,actionsGrouped:true,centeredOrStacked:true,sourceLoaded:true});
-    report.layouts.push(await page.evaluate(()=>({width:innerWidth,height:document.documentElement.scrollHeight,overflow:[...document.querySelectorAll('.hero h1,.idx,.sol-title,.sol-goal,.sol-actions a,.sol-list,.steps,.closing-grid,.nav,.foot-links')].filter(el=>{if(!el.getClientRects().length)return false;const b=el.getBoundingClientRect();return b.left < -1 || b.right > innerWidth+1 || el.scrollWidth > el.clientWidth+1;}).map(el=>({class:el.className,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right,scroll:el.scrollWidth,client:el.clientWidth,text:el.textContent.trim().slice(0,90)}))})));
+    report.layouts.push(await page.evaluate(()=>({width:innerWidth,height:document.documentElement.scrollHeight,overflow:[...document.querySelectorAll('.hero h1,.idx,.sol-title,.sol-goal,.sol-actions a,.sol-list,.steps,.closing-grid,.choose h2,.choose-grid,.sol-summary,.sol-body,.nav,.foot-links')].filter(el=>{if(!el.getClientRects().length)return false;const b=el.getBoundingClientRect();return b.left < -1 || b.right > innerWidth+1 || el.scrollWidth > el.clientWidth+1;}).map(el=>({class:el.className,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right,scroll:el.scrollWidth,client:el.clientWidth,text:el.textContent.trim().slice(0,90)}))})));
   }
   const image=page.locator('.sols-figure img');
   await image.scrollIntoViewIfNeeded();
@@ -119,5 +135,6 @@ try {
   console.log('SOLUTIONS_AUDIT',JSON.stringify(report));
   writeFileSync(output+'/audit.json',JSON.stringify(report,null,2));
 } finally {await browser?.close();server.kill('SIGTERM');}
+
 
 
