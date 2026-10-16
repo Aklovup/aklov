@@ -8,7 +8,7 @@ const output = 'artifacts/solutions-review';
 mkdirSync(output, {recursive:true});
 const server = spawn('npm', ['run','preview','--','--host','127.0.0.1','--port','4333'], {stdio:'inherit'});
 let browser;
-const report = {pageErrors:[],layouts:[],image:{},links:[],mobileMenu:{}};
+const report = {pageErrors:[],layouts:[],tablet:[],image:{},links:[],mobileMenu:{}};
 try {
   for (let i=0;i<100;i++) {
     try {if ((await fetch(base+'/solutions/')).ok) break;} catch {}
@@ -29,6 +29,13 @@ try {
   assert.equal(await page.locator('.sol-list > h3').count(),5);
   assert.equal((await page.locator('#page-title').innerText()).replace(/\s+/g,' ').trim(),'Better ways to run, connect and grow your business.');
   assert.equal(await page.locator('.idx').evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)');
+  const tablet = page.locator('[data-solutions-tablet]');
+  const screen = tablet.locator('.tablet-screen');
+  const screenImage = screen.locator('img');
+  await screenImage.evaluate(img=>img.decode());
+  assert.ok((await screenImage.getAttribute('src')).includes('/images/generated/projects/vortex-gym-concept/'));
+  assert.equal(await tablet.locator('figcaption').count(),0);
+  assert.equal(await page.locator('.hero-introduction .hero-actions .btn-gold').getAttribute('href'),'/contact/');
   const destinations=['website','customer','workflow','applications','integrations'];
   assert.deepEqual(await page.locator('.idx-row').evaluateAll(items=>items.map(a=>a.getAttribute('href'))),destinations.map(id=>'#'+id));
   for(const id of destinations) {
@@ -50,6 +57,21 @@ try {
       const bounds=await line.evaluate(el=>{const r=document.createRange();r.selectNodeContents(el);const b=r.getBoundingClientRect();return {left:b.left,right:b.right};});
       assert.ok(bounds.left>=-1&&bounds.right<=width+1,'Solutions headline clips at '+width+': '+JSON.stringify(bounds));
     }
+    const intro = await page.locator('.hero-introduction').boundingBox();
+    const actions = await page.locator('.hero-actions').boundingBox();
+    const stage = await tablet.boundingBox();
+    const device = await tablet.locator('.tablet-device').boundingBox();
+    const index = await page.locator('.idx').boundingBox();
+    assert.ok(device.x>=8&&device.x+device.width<=width-8,'Tablet clips at '+width+': '+JSON.stringify(device));
+    assert.ok(actions.y>=intro.y&&actions.y+actions.height<=intro.y+intro.height+1,'Actions outside introduction');
+    assert.ok(index.y>=device.y+device.height,'Tablet reaches the service index');
+    if(width>1000) {
+      assert.ok(device.x>=intro.x+intro.width+12,'Tablet overlaps the text column at '+width);
+      assert.ok(Math.abs((stage.y+stage.height/2)-(intro.y+intro.height/2))<2,'Tablet stage not vertically centered');
+    } else assert.ok(device.y>=actions.y+actions.height+8,'Tablet precedes or overlaps the mobile actions');
+    assert.ok(await screenImage.evaluate(img=>img.complete&&img.naturalWidth>0));
+    assert.ok(await screen.evaluate(el=>el.scrollHeight>el.clientHeight),'Full-page source is not cropped to the opening hero');
+    report.tablet.push({width,fullyVisible:true,actionsGrouped:true,centeredOrStacked:true,sourceLoaded:true});
     report.layouts.push(await page.evaluate(()=>({width:innerWidth,height:document.documentElement.scrollHeight,overflow:[...document.querySelectorAll('.hero h1,.idx,.sol-title,.sol-goal,.sol-actions a,.sol-list,.steps,.closing-grid,.nav,.foot-links')].filter(el=>{if(!el.getClientRects().length)return false;const b=el.getBoundingClientRect();return b.left < -1 || b.right > innerWidth+1 || el.scrollWidth > el.clientWidth+1;}).map(el=>({class:el.className,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right,scroll:el.scrollWidth,client:el.clientWidth,text:el.textContent.trim().slice(0,90)}))})));
   }
   const image=page.locator('.sols-figure img');
@@ -68,6 +90,7 @@ try {
     await page.evaluate(()=>scrollTo(0,0));
     await page.screenshot({path:output+'/solutions-'+label+'.png',fullPage:true});
     await page.screenshot({path:output+'/solutions-hero-'+label+'.png'});
+    await tablet.screenshot({path:output+'/solutions-tablet-'+label+'.png'});
   }
   assert.ok(report.layouts.every(layout => layout.overflow.length === 0), JSON.stringify(report.layouts));
   await page.setViewportSize({width:390,height:844});
@@ -85,8 +108,11 @@ try {
   assert.ok(report.mobileMenu.escapeReturnsFocus);
   assert.ok(report.mobileMenu.noJSNavigationVisible);
   await noJS.close();
+  await page.emulateMedia({reducedMotion:'reduce'});
+  assert.equal(await tablet.locator('.tablet-device').evaluate(el=>getComputedStyle(el).animationName),'none');
   assert.deepEqual(report.pageErrors,[]);
   console.log('SOLUTIONS_AUDIT',JSON.stringify(report));
   writeFileSync(output+'/audit.json',JSON.stringify(report,null,2));
 } finally {await browser?.close();server.kill('SIGTERM');}
+
 

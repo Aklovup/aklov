@@ -10,3 +10,12 @@ This change extends the homepage review branch to align Solutions with the appro
 - The existing browser suite checks all nine widths and image compositions, with additional checks for complete headline visibility, service heading hierarchy, index destinations/keyboard focus and actual anchor navigation.
 
 Preview `/solutions/` on the homepage branch. Review screenshots are saved in the `solutions-page-review` Actions artifact. Home and Solutions remain unmerged until the project owner approves.
+
+## Tablet hero refinement
+
+The Solutions hero now groups the headline, approved introduction and actions in one left column, with a vertically centered CSS tablet on the right. The full black device remains visible; a static perspective and restrained casing/shadow provide depth without WebGL, animation or generated imagery. Tablet/mobile layouts place the device after the text/actions with reduced perspective, before the service index. No visible project caption is added, per the owner's direction.
+
+`src/data/solutionsHero.ts` selects the temporary Vortex Gym project and a 3:2 screen crop. `SolutionsTablet.astro` resolves the real cover from the existing project entry and uses existing responsive media previews. CSS crops its full-page image to the opening hero. To replace it with approved workflow imagery, update the configured project slug and crop ratio after that project's cover has been uploaded and connected; no generated screen image is stored. Work-page project classification and content remain untouched.
+
+The Solutions browser audit additionally verifies the actual image loads, the screen crops, the transformed device stays fully within each viewport, actions stay with their text, the desktop stage is centered and mobile order is preserved at all nine widths. The tablet is a static image presentation, not an interactive embedded website.
+
