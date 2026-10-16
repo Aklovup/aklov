@@ -131,6 +131,7 @@ try {
         await page.locator('[data-project]:not([hidden]) img').evaluateAll(images => Promise.all(images.map(img => { img.loading = 'eager'; return img.decode(); })));
         await page.evaluate(() => document.fonts.ready);
         await page.evaluate(() => scrollTo(0,0));
+        await page.waitForTimeout(250); // Let selection-color transitions settle before review captures.
         await page.screenshot({ path: output + '/work-' + group + '-' + width + '.png', fullPage: true });
       }
     }

@@ -33,7 +33,7 @@ const categories = (['client', 'concepts'] as const).map(group => ({
         ))}
       </div>
       {categories.map(({ group, options }) => (
-        <div class="filters" role="group" aria-label={group === 'client' ? 'Filter client projects by category' : 'Filter independent concepts by category'} data-category-filters={group} hidden>
+        <div class:list={['filters', { 'single-category': options.length === 1 }]} role="group" aria-label={group === 'client' ? 'Filter client projects by category' : 'Filter independent concepts by category'} data-category-filters={group} hidden>
           {options.map(option => (
             <button type="button" data-filter={option.id} data-label={option.label} aria-pressed="false" aria-controls="project-grid">
               <span>{option.label}</span>
@@ -149,7 +149,7 @@ const categories = (['client', 'concepts'] as const).map(group => ({
   .project-grid > :global(.project-card[data-layout='1']),
   .project-grid > :global(.project-card[data-layout='2']) { grid-column: span 5; }
   .no-script, .empty-state { padding-block: 24px; color: var(--body); font-size: 14px; line-height: 1.8; }
-  @media (hover: hover) { .group-filters button:hover, .filters button:hover { color: var(--gold-dark); border-bottom-color: var(--gold-dark); } }
+  @media (hover: hover) { .group-filters button:not([aria-pressed='true']):hover, .filters button:hover { color: var(--gold-dark); border-bottom-color: var(--gold-dark); } }
   @media (max-width: 1000px) {
     .project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .project-grid > :global(.project-card[data-layout]) { grid-column: span 1; }
@@ -157,8 +157,11 @@ const categories = (['client', 'concepts'] as const).map(group => ({
   }
   @media (max-width: 640px) {
     .gallery-heading { align-items: flex-start; flex-direction: column; gap: 10px; }
-    .group-filters { gap: 0 18px; }
-    .group-filters button { gap: 8px; min-height: 52px; font-size: 13px; }
+    .group-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .group-filters button { flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 8px; min-width: 0; min-height: 84px; padding-block: 12px; font-size: 13px; }
+    .group-filters button > span:first-child { min-height: 2.8em; }
+    .filters.single-category { display: flex; }
+    .filters.single-category button { gap: 20px; }
     .filters { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; padding-bottom: 8px; }
     .filters button { justify-content: space-between; min-height: 64px; padding-block: 10px; border-bottom-width: 1px; font-size: 11px; }
     .filter-count { flex-shrink: 0; }
