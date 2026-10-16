@@ -8,7 +8,13 @@ All six approved sections, 39 body paragraphs/statements, four process stages, a
 
 The charcoal introduction retains its editorial headline and rectangular gold portrait card. The opening sentence sits beneath the headline, including on mobile; the portrait follows it before the remaining opening paragraphs on small screens. The subsequent two introductory paragraphs retain their original sequence.
 
-A continuous ivory `profile-story` surface contains the introduction, biography, approach, experience and Working Together. Thin chapter rules replace alternating dark/grey bands. Chapter headings use a quieter scale than the hero and final invitation. The portrait appears once in the opening; it does not remain pinned beside the full story. The introduction/biography transition uses one clear dividing rule without accumulated outer and inner section padding. Biography retains its readable column. Approach pairs the explanatory narrative with the four ruled stages above 1000px and stacks them at 1000px and below. The complete narrative remains before the sequence in document order. The approved approach closing becomes the single larger italic statement, with a restrained dark-gold treatment and no separate coloured band. Experience retains every approved paragraph rather than replacing the personal narrative with another project grid. Working Together uses a quieter heading beside one continuous reading column, stacking on mobile. The gold closing matches the Home/Solutions headline range, with one primary contact button and a quieter text link to Work.
+The profile uses an uninterrupted ivory reading surface rather than the numbered, ruled catalogue retained on Solutions. Biography and approach form a central essay with a bounded reading measure and 16px body text. There are no chapter numbers, repeated section rules, or parallel heading-and-description rows.
+
+The four real approach stages keep their numbers, appearing as a readable sequence within the essay without row dividers or decorative panels. The approved italic closing statement expands beyond the essay column and supplies the main expressive pause.
+
+Experience changes to a wider magazine-style prose spread, with two balanced text columns on desktop/tablet and a single reading column below 641px. Paragraphs remain in their original document order and do not split across columns. Every approved experience paragraph remains; there is no replacement project grid or invented summary. Working Together returns to a narrower conversational reading column and smaller heading.
+
+The existing gold closing, primary contact button, secondary Work link, and shared footer remain unchanged. The Solutions service catalogue is unchanged by this About revision.
 
 ## Portrait
 
@@ -36,5 +42,5 @@ For a local preview, check out the review branch, install the existing dependenc
 
 The existing validation workflow checks all 39 approved content blocks, metadata, semantic headings, actual portrait, continuous contour, unchanged source media, CTA destinations, visible keyboard focus, reduced motion, rendered text contrast, no-JavaScript rendering, responsive layout, and the grouped Work destination. Desktop, tablet, and mobile review screenshots are uploaded in `about-page-review`.
 
-The refinements do not change approved copy, portrait assets/components, shared styles/navigation, other page source files, portfolio content, hosting configuration, or dependencies. Existing shared destinations remain unchanged. Browser checks additionally verify one portrait and a continuous ruled chapter surface.
+The refinements do not change approved copy, portrait assets/components, shared styles/navigation, other page source files, portfolio content, hosting configuration, or dependencies. Existing shared destinations remain unchanged. Browser checks additionally verify one portrait and a unruled story surface, bounded reading measure, responsive prose columns and sequential process placement.
 

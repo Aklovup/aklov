@@ -40,10 +40,18 @@ async function checkLayout(page, width) {
     return box.left < -1 || box.right > innerWidth + 1 || element.scrollWidth > element.clientWidth + 1;
   }).map((element) => element.className || element.tagName));
   assert.deepEqual(overflow, [], 'Overflow at ' + width + 'px: ' + overflow.join(', '));
-  const introduction = await page.locator('.approach-introduction').boundingBox();
-  const sequence = await page.locator('.approach-sequence').boundingBox();
-  if (width > 1000) assert.ok(sequence.x >= introduction.x + introduction.width, 'Approach must pair narrative and stages on desktop.');
-  else assert.ok(sequence.y >= introduction.y + introduction.height, 'Approach must stack without overlap at ' + width);
+  // Profile content follows its reading order; no paired service-style columns.
+  const story = await page.evaluate(() => {
+    const bounds = selector => {
+      const b = document.querySelector(selector).getBoundingClientRect();
+      return { top: b.top, bottom: b.bottom, width: b.width };
+    };
+    return { introduction: bounds('.approach-introduction'), sequence: bounds('.approach-sequence'),
+      essay: bounds('.biography-copy'), experience: getComputedStyle(document.querySelector('.experience-story')).columnCount };
+  });
+  assert.ok(story.sequence.top >= story.introduction.bottom, 'Approach must follow the narrative at ' + width);
+  assert.ok(story.essay.width <= 681, 'Biography exceeds a comfortable reading measure');
+  assert.equal(story.experience, width <= 640 ? '1' : '2');
   const closingSize = await page.locator('.closing h2').evaluate(el => parseFloat(getComputedStyle(el).fontSize));
   assert.ok(closingSize <= 120, 'Closing headline exceeds the established range.');
   const secondary = page.locator('[data-about-work-secondary]');
@@ -84,13 +92,17 @@ try {
   assert.equal(await page.locator('.together-story .reading-copy [data-approved-copy]').count(), 5);
   assert.deepEqual(await page.locator('.stage-list h3').allInnerTexts(), about.approach.stages.map((stage) => stage.title));
   assert.equal(await page.locator('.stage-list li').count(), 4);
-  // Chapters share a reading surface; the portrait is introduced only once.
+  // The portrait appears once; only the meaningful process retains numbering.
   assert.equal(await page.locator('[data-about-portrait]').count(), 1);
+  assert.equal(await page.locator('.section-number').count(), 0);
+  assert.equal(await page.locator('.stage-list .stage-number').count(), 4);
+  assert.equal(await page.locator('.stage-list li').first().evaluate(element => getComputedStyle(element).borderBottomStyle), 'none');
+  assert.equal(await page.locator('.approach-closing').innerText(), about.approach.closing);
   const storySurface = await page.locator('.profile-story').evaluate(element => getComputedStyle(element).backgroundColor);
   assert.equal(storySurface, 'rgb(245, 242, 234)');
   for (const chapter of ['.biography', '.approach', '.experience', '.together']) {
     assert.equal(await page.locator(chapter).evaluate(element => getComputedStyle(element).backgroundColor), 'rgba(0, 0, 0, 0)');
-    assert.equal(await page.locator(chapter + ' > .wrap').evaluate(element => getComputedStyle(element).borderTopStyle), 'solid');
+    assert.equal(await page.locator(chapter + ' > .wrap').first().evaluate(element => getComputedStyle(element).borderTopStyle), 'none');
   }
   assert.equal(await page.locator('.designation').innerText(), profile.designation);
   assert.equal(normalize(await page.locator('.portrait-name').innerText()), profile.name);
