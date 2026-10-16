@@ -52,7 +52,10 @@ jobs:
       - name: Validate the Contact page and form states
         run: node tests/contact.browser.mjs
       - name: Inspect the live Contact branch preview without submitting
-        if: github.head_ref == 'feat/contact-page'
+        if: github.head_ref == 'feat/editorial-homepage'
+        env:
+          CONTACT_PREVIEW_URL: https://feat-editorial-homepage.aklov.pages.dev/contact/
+          CONTACT_PREVIEW_SHA: ${{ github.event.pull_request.head.sha }}
         run: node tests/contact.preview.mjs
       - name: Save desktop and mobile review screenshots
         if: always()
