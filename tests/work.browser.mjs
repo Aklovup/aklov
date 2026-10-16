@@ -9,8 +9,8 @@ const output = 'artifacts/work-review';
 const counts = { all: 10, websites: 5, 'customer-systems': 2, automation: 5, applications: 2, integrations: 7 };
 const projects = readProjects();
 const expectedCatalog = [
-  'divine-health-black-onyx', 'moving-company-crm', 'guideyusuf-ai-support', 'impex-automotive',
-  'jaycor-commerce', 'instantresidency-booking', 'xans-operations-portal',
+  'impex-automotive', 'divine-health-black-onyx', 'moving-company-crm', 'guideyusuf-ai-support',
+  'xans-operations-portal', 'jaycor-commerce', 'instantresidency-booking',
   'wound-concierge', 'vera-skincare-concept', 'vortex-gym-concept',
 ];
 // Astro applies smart typography; quotation-mark formatting does not alter copy.

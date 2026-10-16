@@ -212,7 +212,7 @@ test('empty and exhausted categories are skipped without dropping or repeating p
   const input = [...apps, web, automation];
   const snapshot = structuredClone(input);
   assert.deepEqual(orderProjects(input).map(p => p.data.slug),
-    [web.data.slug, automation.data.slug, ...apps.map(p => p.data.slug)]);
+    [apps[0].data.slug, web.data.slug, automation.data.slug, ...apps.slice(1).map(p => p.data.slug)]);
   assert.deepEqual(input, snapshot, 'Ordering mutated collection entries or their input array.');
 });
 
@@ -222,16 +222,16 @@ test('tied category positions resolve by slug independent of input order or feat
   z.data.featured = true;
   z.data.cover = { url: '/images/example.png' };
   const web = entry('websites', 1);
-  assert.deepEqual(orderProjects([z, a, web]), [web, a, z]);
-  assert.deepEqual(orderProjects([web, a, z]), [web, a, z]);
+  assert.deepEqual(orderProjects([z, a, web]), [a, web, z]);
+  assert.deepEqual(orderProjects([a, web, z]), [a, web, z]);
 });
 
 test('new projects enter their category position automatically and secondary categories do not duplicate them', () => {
   const web = entry('websites', 1), app = entry('applications', 1);
   app.data.additionalCategories = ['websites', 'integrations'];
-  assert.deepEqual(orderProjects([app, web]), [web, app]);
+  assert.deepEqual(orderProjects([app, web]), [app, web]);
   const nextWeb = entry('websites', 2), crm = entry('customer-systems', 1);
-  assert.deepEqual(orderProjects([app, nextWeb, web, crm]), [web, crm, app, nextWeb]);
+  assert.deepEqual(orderProjects([app, nextWeb, web, crm]), [app, web, crm, nextWeb]);
 });
 
 test('filters preserve the rotated catalog order while including secondary categories', () => {
