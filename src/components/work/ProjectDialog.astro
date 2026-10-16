@@ -47,7 +47,7 @@ const details = await Promise.all(projects.map(async (project, index) => ({
       requestAnimationFrame(() => {
         if (dialog.open) return;
         if (target.isConnected && !target.closest('[hidden]')) target.focus({ preventScroll: true });
-        else document.querySelector<HTMLButtonElement>('[data-filter][aria-pressed="true"]')?.focus({ preventScroll: true });
+        else document.querySelector<HTMLButtonElement>('[data-group][aria-pressed="true"]')?.focus({ preventScroll: true });
         returnTarget = undefined;
       });
     };

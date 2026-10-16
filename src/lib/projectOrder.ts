@@ -1,12 +1,11 @@
-import { categoryIds, type ProjectCategory } from '../data/projectCategories.ts';
+import { categoryIds, conceptCategoryIds, type ProjectCategory } from '../data/projectCategories.ts';
 
 interface OrderedProject {
-  data: { primaryCategory: ProjectCategory; order: number; slug: string };
+  data: { primaryCategory: ProjectCategory; order: number; slug: string; projectType?: string };
 }
 
-/** One project per primary category per round; empty/exhausted categories are skipped. */
-export function orderProjects<T extends OrderedProject>(projects: readonly T[]): T[] {
-  const buckets = categoryIds.map((category) => projects
+function rotate<T extends OrderedProject>(projects: readonly T[], priority: readonly ProjectCategory[]): T[] {
+  const buckets = priority.map((category) => projects
     .filter(({ data }) => data.primaryCategory === category)
     .sort((a, b) => a.data.order - b.data.order
       || (a.data.slug < b.data.slug ? -1 : a.data.slug > b.data.slug ? 1 : 0)));
@@ -18,4 +17,12 @@ export function orderProjects<T extends OrderedProject>(projects: readonly T[]):
     }
   }
   return ordered;
+}
+
+/** Client work leads; concepts follow in a separate, website-first rotation. */
+export function orderProjects<T extends OrderedProject>(projects: readonly T[]): T[] {
+  return [
+    ...rotate(projects.filter(({ data }) => data.projectType !== 'Independent Concept'), categoryIds),
+    ...rotate(projects.filter(({ data }) => data.projectType === 'Independent Concept'), conceptCategoryIds),
+  ];
 }

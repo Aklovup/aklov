@@ -90,6 +90,12 @@ try {
     await page.keyboard.press('Escape');
     await dialog.waitFor({state:'hidden'});
   }
+  await page.goto(base);
+  await page.locator('.concept-link').click();
+  await page.waitForURL('**/work/?type=concepts');
+  assert.equal(await page.locator('[data-group="concepts"]').getAttribute('aria-pressed'), 'true');
+  assert.equal(await page.locator('[data-project]:not([hidden])').count(), 2);
+  assert.equal(await page.locator('[data-category-filters="concepts"] [data-filter]').count(), 1);
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.goto(base);
   assert.equal(await page.locator('[data-playing-gif]').count(),0);

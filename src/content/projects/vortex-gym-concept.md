@@ -33,7 +33,7 @@
     }
   ],
   "featured": false,
-  "order": 5,
+  "order": 2,
   "externalLinks": [
     {
       "label": "View live demo",

@@ -14,6 +14,8 @@ const categories = [...new Set([data.primaryCategory, ...data.additionalCategori
 <article
   class="project-card"
   data-project={data.slug}
+  data-project-type={data.projectType}
+  data-primary-category={data.primaryCategory}
   data-categories={categories.join(' ')}
   data-layout={index % 4}
   aria-labelledby={`project-${data.slug}`}

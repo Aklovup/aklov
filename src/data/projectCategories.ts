@@ -19,3 +19,8 @@ export const projectCategories: { id: ProjectCategory; label: string }[] = [
 
 export const categoryLabel = (id: ProjectCategory) =>
   projectCategories.find((category) => category.id === id)!.label;
+
+// Concepts use the same capabilities, with Websites leading their own rotation.
+export const conceptCategoryIds: readonly ProjectCategory[] = [
+  'websites', ...categoryIds.filter(id => id !== 'websites'),
+];

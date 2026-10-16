@@ -254,6 +254,12 @@ Unknown category values should fall back gracefully to All Projects.
 
 Filtering should work without full-page reloads and support browser history navigation.
 
+Two-level filter navigation
+
+The top level is All Projects, Client Projects, and Independent Concepts. All Projects has no category row. Client Projects and Independent Concepts show All plus populated category options. Hide empty categories. When a group contains fewer than two distinct primary categories, show only All; do not show a redundant category option merely because projects have additional category tags. Once two primary categories are populated, offer every nonempty category in that group's priority order, including additional-category matches. Category options and counts derive from content entries, without hand-maintained lists of projects.
+
+Use `?type=client` and `?type=concepts` for the group, with existing `category` parameters for capability. A valid legacy category-only URL selects Client Projects. Unknown filters fall back gracefully. Preserve project deep links, unrelated parameters, hash, and browser history. Keep cross-page destinations in `src/data/links.ts`; the homepage concepts link opens Independent Concepts directly. A live-demo link is optional project metadata, not a classification or a requirement for the concepts group.
+
 Project content structure
 
 Use Astro content collections for portfolio projects.
@@ -278,9 +284,9 @@ Keep the schema extensible without overengineering it.
 
 Project ordering
 
-All Projects uses a deterministic rotation: Custom Business Applications, Websites, Customer & Sales Systems, Workflow Automation, then Integrations & Reporting. Take one project from each primary category per round. Skip empty or exhausted categories; never duplicate a project because of additional categories.
+All Projects shows client work first, followed by independent concepts. Each group has its own deterministic rotation. Client priority: Custom Business Applications, Websites, Customer & Sales Systems, Workflow Automation, then Integrations & Reporting. Concept priority: Websites, Custom Business Applications, Customer & Sales Systems, Workflow Automation, then Integrations & Reporting. Take one project from each primary category per round within its group. Skip empty or exhausted categories; never duplicate a project because of additional categories.
 
-The existing project `order` field is internal ordering within its primary category, not a global rank. Codex maintains these numbers when adding projects. Sort each category by `order`, then canonical slug for deterministic ties. Featured status and media availability must not move projects ahead of this rotation. Category filters match both primary and additional categories and preserve the relative catalog order. Visible project numbers reflect the full catalog position and match their popups; internal category order numbers are not exposed separately.
+The existing project `order` field is internal ordering within its project type and primary category, not a global rank. Codex maintains these numbers when adding projects. Sort each category by `order`, then canonical slug for deterministic ties. Featured status and media availability must not move projects ahead of this rotation. Category filters match both primary and additional categories within the selected group and preserve the relative catalog order. Visible project numbers reflect the full catalog position and match their popups; internal category order numbers are not exposed separately.
 
 Adding content entries must not require changes to Work page markup or card layout. Preserve the existing responsive composition, media metadata workflow, and project URLs.
 

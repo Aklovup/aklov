@@ -1,9 +1,6 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { stripTypeScriptTypes } from 'node:module';
 import test from 'node:test';
-import vm from 'node:vm';
-import { filterFromUrl, matchesFilter, urlForFilter } from '../src/scripts/projectFilter.ts';
+import { matchesFilter, matchesSelection, selectionFromUrl, urlForSelection, categoryFilters, normalizeSelection } from '../src/scripts/projectFilter.ts';
 import { resolveProjectSlug, urlForProject } from '../src/scripts/projectState.ts';
 import { orderProjects } from '../src/lib/projectOrder.ts';
 import { categoryIds } from '../src/data/projectCategories.ts';
@@ -12,16 +9,18 @@ import { readProjects } from './project-content.mjs';
 const projects = orderProjects(readProjects().map(data => ({ data }))).map(({ data }) => data);
 
 const expectedCounts = {
-  all: 10, websites: 5, 'customer-systems': 2, automation: 5, applications: 2, integrations: 7,
+  all: 8, websites: 3, 'customer-systems': 2, automation: 5, applications: 2, integrations: 7,
 };
 
 test('all ten projects have unique slugs, category-local ordering and stable media identifiers', () => {
   assert.equal(projects.length, 10);
   assert.equal(new Set(projects.map((p) => p.slug)).size, 10);
   assert.equal(new Set(projects.map((p) => p.cover.id)).size, 10);
-  for (const category of categoryIds) {
-    const orders = projects.filter(p => p.primaryCategory === category).map(p => p.order);
-    assert.deepEqual(orders, Array.from({ length: orders.length }, (_, i) => i + 1));
+  for (const type of ['Client Project', 'Independent Concept']) {
+    for (const category of categoryIds) {
+      const orders = projects.filter(p => p.projectType === type && p.primaryCategory === category).map(p => p.order);
+      assert.deepEqual(orders, Array.from({ length: orders.length }, (_, i) => i + 1));
+    }
   }
   assert.ok(projects.every((p) => p.headline && p.body && (!p.cover.url || (p.cover.alt.trim() && p.cover.url.startsWith('/images/')))));
   assert.equal(projects.filter((p) => p.cover.type === 'gif').length, 2);
@@ -68,126 +67,76 @@ test('project URL changes preserve category, unrelated parameters and hash', () 
   assert.equal(current.searchParams.has('project'), false);
 });
 
-test('every filter matches both primary and additional categories', () => {
-  for (const [filter, count] of Object.entries(expectedCounts)) {
-    assert.equal(projects.filter((p) => matchesFilter([p.primaryCategory, ...p.additionalCategories], filter)).length, count, filter);
+
+test('group membership separates eight client projects and two concepts without duplicates', () => {
+  for (const [group, count] of [['all', 10], ['client', 8], ['concepts', 2]]) {
+    assert.equal(projects.filter(p => matchesSelection(p, { group, category: 'all' })).length, count);
+  }
+  for (const [category, count] of Object.entries(expectedCounts)) {
+    assert.equal(projects.filter(p => matchesSelection(p, { group: 'client', category })).length, count);
+  }
+  assert.deepEqual(projects.map(p => p.slug), [
+    'impex-automotive', 'divine-health-black-onyx', 'moving-company-crm', 'guideyusuf-ai-support',
+    'xans-operations-portal', 'jaycor-commerce', 'instantresidency-booking', 'wound-concierge',
+    'vera-skincare-concept', 'vortex-gym-concept',
+  ]);
+});
+
+test('group URLs, legacy category links, and unknown parameters initialize predictably', () => {
+  const parse = suffix => selectionFromUrl(new URL('https://aklov.example/work/' + suffix));
+  assert.deepEqual(parse(''), { group: 'all', category: 'all' });
+  for (const category of categoryIds) {
+    assert.deepEqual(parse('?category=' + category), { group: 'client', category });
+    assert.deepEqual(parse('?type=client&category=' + category), { group: 'client', category });
+    assert.deepEqual(parse('?type=concepts&category=' + category), { group: 'concepts', category });
+  }
+  assert.deepEqual(parse('?type=concepts'), { group: 'concepts', category: 'all' });
+  assert.deepEqual(parse('?type=client&category=unknown'), { group: 'client', category: 'all' });
+  assert.deepEqual(parse('?type=all&category=websites'), { group: 'all', category: 'all' });
+  for (const suffix of ['?category=unknown', '?type=unknown', '?category=WEBSITES', '?type=%3Cscript%3E']) {
+    assert.deepEqual(parse(suffix), { group: 'all', category: 'all' });
   }
 });
 
-test('direct category URLs initialize correctly, with graceful unknown-category fallback', () => {
-  for (const filter of Object.keys(expectedCounts).filter((id) => id !== 'all')) {
-    assert.equal(filterFromUrl(new URL('https://aklov.example/work/?category=' + filter)), filter);
-  }
-  for (const suffix of ['', '?category=', '?category=unknown', '?category=WEBSITES', '?category=%3Cscript%3E']) {
-    assert.equal(filterFromUrl(new URL('https://aklov.example/work/' + suffix)), 'all');
-  }
+test('group/category URL transitions preserve project, source and hash without mutating input', () => {
+  const initial = new URL('https://aklov.example/work/?source=home&project=impex-automotive#projects');
+  const client = urlForSelection(initial, { group: 'client', category: 'applications' });
+  assert.equal(client.searchParams.get('type'), 'client');
+  assert.equal(client.searchParams.get('category'), 'applications');
+  const concepts = urlForSelection(client, { group: 'concepts', category: 'all' });
+  assert.equal(concepts.searchParams.get('type'), 'concepts');
+  assert.equal(concepts.searchParams.has('category'), false);
+  const all = urlForSelection(concepts, { group: 'all', category: 'all' });
+  assert.equal(all.href, initial.href);
+  assert.equal(initial.searchParams.has('type'), false);
+  assert.equal(concepts.searchParams.get('project'), 'impex-automotive');
+  assert.equal(concepts.hash, '#projects');
 });
 
-test('URL changes preserve unrelated query parameters and hash; All Projects removes category', () => {
-  const initial = new URL('https://aklov.example/work/?source=solutions&category=unknown#projects');
-  const next = urlForFilter(initial, 'websites');
-  assert.equal(next.href, 'https://aklov.example/work/?source=solutions&category=websites#projects');
-  assert.equal(urlForFilter(next, 'all').href, 'https://aklov.example/work/?source=solutions#projects');
-  assert.equal(initial.searchParams.get('category'), 'unknown');
+test('category controls hide empty options and show only All for zero or one primary category', () => {
+  assert.deepEqual(categoryFilters(projects, 'all'), []);
+  assert.deepEqual(categoryFilters([], 'concepts'), [{ id: 'all', label: 'All', count: 0 }]);
+  assert.deepEqual(categoryFilters(projects, 'concepts'), [{ id: 'all', label: 'All', count: 2 }]);
+  const taggedConcept = { projectType: 'Independent Concept', primaryCategory: 'websites', additionalCategories: ['automation'] };
+  assert.deepEqual(categoryFilters([taggedConcept], 'concepts'), [{ id: 'all', label: 'All', count: 1 }]);
+  const next = { projectType: 'Independent Concept', primaryCategory: 'applications', additionalCategories: ['integrations'] };
+  const options = categoryFilters([taggedConcept, next], 'concepts');
+  assert.deepEqual(options.map(o => o.id), ['all', 'websites', 'applications', 'automation', 'integrations']);
+  assert.deepEqual(options.map(o => o.count), [2, 1, 1, 1, 1]);
+  assert.equal(options.some(o => o.id === 'customer-systems'), false);
 });
 
-// Execute the actual gallery script against a small DOM/history fixture.
-// These are logic tests, not a substitute for a rendered browser review.
-function galleryFixture(initialUrl) {
-  const labels = {
-    all: 'All Projects', websites: 'Websites', 'customer-systems': 'Customer & Sales Systems',
-    automation: 'Workflow Automation', applications: 'Custom Business Applications', integrations: 'Integrations & Reporting',
-  };
-  const buttons = Object.entries(labels).map(([filter, label]) => ({
-    dataset: { filter, label }, attributes: {}, listeners: {},
-    setAttribute(name, value) { this.attributes[name] = value; },
-    addEventListener(name, listener) { this.listeners[name] = listener; },
-  }));
-  const cards = projects.map((p) => ({
-    dataset: { project: p.slug, categories: [p.primaryCategory, ...p.additionalCategories].join(' ') }, hidden: false,
-  }));
-  const result = { textContent: '' };
-  const empty = { hidden: true };
-  const filters = { hidden: true, querySelectorAll: () => buttons };
-  const gallery = {
-    querySelector(selector) {
-      return { '[data-filters]': filters, '[data-result-count]': result, '[data-empty-state]': empty }[selector];
-    },
-    querySelectorAll: () => cards,
-  };
-  const historyEntries = [initialUrl];
-  let historyIndex = 0;
-  const window = { location: { href: initialUrl }, listeners: {}, addEventListener(name, fn) { this.listeners[name] = fn; } };
-  const history = { pushState(_state, _title, url) {
-    historyEntries.splice(historyIndex + 1);
-    historyEntries.push(String(url));
-    historyIndex++;
-    window.location.href = String(url);
-  } };
-  const source = readFileSync(new URL('../src/components/work/ProjectGallery.astro', import.meta.url), 'utf8')
-    .split('<script>')[1].split('</script>')[0]
-    .replace(/^\s*import .*;$/gm, '');
-  vm.runInNewContext(stripTypeScriptTypes(source), {
-    document: { querySelector: () => gallery }, window, history, URL, filterFromUrl, matchesFilter, urlForFilter,
-  });
-  return {
-    cards, buttons, filters, result,
-    click(filter) { buttons.find((button) => button.dataset.filter === filter).listeners.click(); },
-    travel(delta) {
-      historyIndex += delta;
-      window.location.href = historyEntries[historyIndex];
-      window.listeners.popstate();
-    },
-    get url() { return window.location.href; },
-    get historyLength() { return historyEntries.length; },
-    get visibleCount() { return cards.filter((card) => !card.hidden).length; },
-  };
-}
-
-test('gallery initializes selection and enables controls from each direct URL', () => {
-  for (const [filter, count] of Object.entries(expectedCounts)) {
-    const fixture = galleryFixture('https://aklov.example/work/?category=' + filter);
-    assert.equal(fixture.filters.hidden, false);
-    assert.equal(fixture.visibleCount, count);
-    assert.equal(fixture.buttons.filter((button) => button.attributes['aria-pressed'] === 'true').length, 1);
-    assert.equal(fixture.buttons.find((button) => button.dataset.filter === filter).attributes['aria-pressed'], 'true');
-    assert.ok(fixture.result.textContent.startsWith(count + ' projects'));
-  }
+test('client category counts include additional tags and follow the client priority', () => {
+  const options = categoryFilters(projects, 'client');
+  assert.deepEqual(options.map(o => o.id), ['all', ...categoryIds]);
+  for (const option of options) assert.equal(option.count, expectedCounts[option.id]);
 });
 
-test('filter clicks update cards, recompose their layout and do not duplicate history', () => {
-  const fixture = galleryFixture('https://aklov.example/work/');
-  for (const [filter, count] of Object.entries(expectedCounts)) {
-    fixture.click(filter);
-    assert.equal(fixture.visibleCount, count);
-    assert.deepEqual(fixture.cards.filter((card) => !card.hidden).map((card) => card.dataset.layout),
-      Array.from({ length: count }, (_, index) => String(index % 4)));
-    const length = fixture.historyLength;
-    fixture.click(filter);
-    assert.equal(fixture.historyLength, length);
-  }
-});
-
-test('Back and Forward restore filter, count and pressed state', () => {
-  const fixture = galleryFixture('https://aklov.example/work/?source=solutions#projects');
-  fixture.click('websites');
-  fixture.click('customer-systems');
-  fixture.travel(-1);
-  assert.equal(fixture.visibleCount, 5);
-  assert.equal(fixture.buttons.find((button) => button.dataset.filter === 'websites').attributes['aria-pressed'], 'true');
-  fixture.travel(-1);
-  assert.equal(fixture.visibleCount, 10);
-  fixture.travel(1);
-  fixture.travel(1);
-  assert.equal(fixture.visibleCount, 2);
-  assert.equal(fixture.url, 'https://aklov.example/work/?source=solutions&category=customer-systems#projects');
-});
-
-test('unknown category initializes All Projects and can be normalized by its button', () => {
-  const fixture = galleryFixture('https://aklov.example/work/?category=unknown&source=solutions');
-  assert.equal(fixture.visibleCount, 10);
-  fixture.click('all');
-  assert.equal(fixture.url, 'https://aklov.example/work/?source=solutions');
+test('unavailable group categories fall back to that group All', () => {
+  assert.deepEqual(normalizeSelection(projects, { group: 'concepts', category: 'websites' }), { group: 'concepts', category: 'all' });
+  const empty = [{ projectType: 'Client Project', primaryCategory: 'applications', additionalCategories: [] }];
+  assert.deepEqual(normalizeSelection(empty, { group: 'client', category: 'automation' }), { group: 'client', category: 'all' });
+  assert.deepEqual(normalizeSelection(projects, { group: 'all', category: 'websites' }), { group: 'all', category: 'all' });
 });
 
 const entry = (primaryCategory, order, slug = primaryCategory + '-' + order) =>
@@ -234,13 +183,36 @@ test('new projects enter their category position automatically and secondary cat
   assert.deepEqual(orderProjects([app, nextWeb, web, crm]), [app, web, crm, nextWeb]);
 });
 
-test('filters preserve the rotated catalog order while including secondary categories', () => {
-  const fixture = galleryFixture('https://aklov.example/work/');
-  const allSlugs = fixture.cards.map(card => card.dataset.project);
-  for (const filter of Object.keys(expectedCounts)) {
-    fixture.click(filter);
-    const expected = projects.filter(p => matchesFilter([p.primaryCategory, ...p.additionalCategories], filter)).map(p => p.slug);
-    assert.deepEqual(fixture.cards.filter(card => !card.hidden).map(card => card.dataset.project), expected);
-    assert.deepEqual(fixture.cards.map(card => card.dataset.project), allSlugs);
+
+test('client rotations stay ahead of concepts; concept capability order starts with Websites', () => {
+  const typed = (category, type, order = 1) => {
+    const item = entry(category, order, type + '-' + category + '-' + order);
+    item.data.projectType = type;
+    return item;
+  };
+  const input = [
+    typed('applications', 'Independent Concept'), typed('automation', 'Independent Concept'),
+    typed('websites', 'Independent Concept'), typed('integrations', 'Client Project'),
+    typed('applications', 'Client Project'), typed('websites', 'Client Project'),
+    typed('websites', 'Independent Concept', 2),
+  ];
+  const result = orderProjects(input);
+  assert.deepEqual(result.map(p => [p.data.projectType, p.data.primaryCategory]), [
+    ['Client Project', 'applications'], ['Client Project', 'websites'], ['Client Project', 'integrations'],
+    ['Independent Concept', 'websites'], ['Independent Concept', 'applications'],
+    ['Independent Concept', 'automation'], ['Independent Concept', 'websites'],
+  ]);
+  assert.equal(result.length, input.length);
+  assert.equal(new Set(result.map(p => p.data.slug)).size, input.length);
+});
+
+test('filtering either group retains the catalog order and includes secondary category matches', () => {
+  for (const group of ['client', 'concepts']) {
+    for (const option of categoryFilters(projects, group)) {
+      const visible = projects.filter(p => matchesSelection(p, { group, category: option.id }));
+      assert.equal(visible.length, option.count);
+      assert.deepEqual(visible.map(p => projects.indexOf(p)), visible.map(p => projects.indexOf(p)).sort((a,b) => a-b));
+      assert.ok(visible.every(p => p.projectType === (group === 'client' ? 'Client Project' : 'Independent Concept')));
+    }
   }
 });
