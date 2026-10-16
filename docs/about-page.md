@@ -8,13 +8,13 @@ All six approved sections, 39 body paragraphs/statements, four process stages, a
 
 The charcoal introduction retains its editorial headline and rectangular gold portrait card. The opening sentence sits beneath the headline, including on mobile; the portrait follows it before the remaining opening paragraphs on small screens. The subsequent two introductory paragraphs retain their original sequence.
 
-The profile uses an uninterrupted ivory reading surface rather than the numbered, ruled catalogue retained on Solutions. Biography and approach form a central essay with a bounded reading measure and 16px body text. There are no chapter numbers, repeated section rules, or parallel heading-and-description rows.
+The body follows the owner's supplied editorial reference: headings align to a consistent left margin, with the longer approved story on the wider right side. Biography, experience and Working Together use this split above 640px and intentionally stack below it. The body is no longer a series of narrow centred essay columns.
 
-The four real approach stages keep their numbers, appearing as a readable sequence within the essay without row dividers or decorative panels. The approved italic closing statement expands beyond the essay column and supplies the main expressive pause.
+The approach narrative sits beneath its heading on the left, paired with four numbered, ruled stages on the right above 1000px. At 1000px and below, the sequence follows the complete narrative. All 39 approved content blocks remain in their original document order. The reference's alternate headings and shorter marketing copy are not substituted for the approved text.
 
-Experience changes to a wider magazine-style prose spread, with two balanced text columns on desktop/tablet and a single reading column below 641px. Paragraphs remain in their original document order and do not split across columns. Every approved experience paragraph remains; there is no replacement project grid or invented summary. Working Together returns to a narrower conversational reading column and smaller heading.
+Selective gold italic emphasis uses existing heading words. A centred pull statement is the only intentionally centred body element; its approved text is preserved, with charcoal italic type and restrained gold emphasis. The experience text remains readable prose rather than a service list or project grid. Rules are limited to the approach boundary, actual process stages and Working Together boundary.
 
-The existing gold closing, primary contact button, secondary Work link, and shared footer remain unchanged. The Solutions service catalogue is unchanged by this About revision.
+The gold invitation is compact, with its headline on the left and approved text and actions on the right. It stacks on mobile. The existing portrait, shared footer, metadata, link destinations and Solutions service catalogue remain unchanged.
 
 ## Portrait
 
@@ -42,5 +42,5 @@ For a local preview, check out the review branch, install the existing dependenc
 
 The existing validation workflow checks all 39 approved content blocks, metadata, semantic headings, actual portrait, continuous contour, unchanged source media, CTA destinations, visible keyboard focus, reduced motion, rendered text contrast, no-JavaScript rendering, responsive layout, and the grouped Work destination. Desktop, tablet, and mobile review screenshots are uploaded in `about-page-review`.
 
-The refinements do not change approved copy, portrait assets/components, shared styles/navigation, other page source files, portfolio content, hosting configuration, or dependencies. Existing shared destinations remain unchanged. Browser checks additionally verify one portrait and a unruled story surface, bounded reading measure, responsive prose columns and sequential process placement.
+The refinements do not change approved copy, portrait assets/components, shared styles/navigation, other page source files, portfolio content, hosting configuration, or dependencies. Existing shared destinations remain unchanged. Browser checks additionally verify one portrait, split heading/story alignment, desktop narrative/stage pairing, responsive stacking and selective stage rules.
 

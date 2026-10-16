@@ -40,18 +40,21 @@ async function checkLayout(page, width) {
     return box.left < -1 || box.right > innerWidth + 1 || element.scrollWidth > element.clientWidth + 1;
   }).map((element) => element.className || element.tagName));
   assert.deepEqual(overflow, [], 'Overflow at ' + width + 'px: ' + overflow.join(', '));
-  // Profile content follows its reading order; no paired service-style columns.
-  const story = await page.evaluate(() => {
-    const bounds = selector => {
+  // Measure paired columns atomically, independent of viewport scrolling.
+  const layout = await page.evaluate(() => {
+    const box = selector => {
       const b = document.querySelector(selector).getBoundingClientRect();
-      return { top: b.top, bottom: b.bottom, width: b.width };
+      return { x: b.x, y: b.y, right: b.right, bottom: b.bottom };
     };
-    return { introduction: bounds('.approach-introduction'), sequence: bounds('.approach-sequence'),
-      essay: bounds('.biography-copy'), experience: getComputedStyle(document.querySelector('.experience-story')).columnCount };
+    return { introduction: box('.approach-introduction'), sequence: box('.approach-sequence'),
+      pairs: [['.biography .section-heading', '.biography-copy'], ['.experience-heading', '.experience-story'], ['.together .section-heading', '.together-story']].map(([heading, copy]) => ({ heading: box(heading), copy: box(copy) })) };
   });
-  assert.ok(story.sequence.top >= story.introduction.bottom, 'Approach must follow the narrative at ' + width);
-  assert.ok(story.essay.width <= 681, 'Biography exceeds a comfortable reading measure');
-  assert.equal(story.experience, width <= 640 ? '1' : '2');
+  for (const { heading, copy } of layout.pairs) {
+    if (width > 640) assert.ok(copy.x >= heading.right, 'Story should occupy the right column at ' + width);
+    else assert.ok(copy.y >= heading.bottom, 'Mobile heading and story overlap at ' + width);
+  }
+  if (width > 1000) assert.ok(layout.sequence.x >= layout.introduction.right, 'Desktop stages must sit beside the narrative');
+  else assert.ok(layout.sequence.y >= layout.introduction.bottom, 'Stacked stages must follow the narrative');
   const closingSize = await page.locator('.closing h2').evaluate(el => parseFloat(getComputedStyle(el).fontSize));
   assert.ok(closingSize <= 120, 'Closing headline exceeds the established range.');
   const secondary = page.locator('[data-about-work-secondary]');
@@ -96,13 +99,13 @@ try {
   assert.equal(await page.locator('[data-about-portrait]').count(), 1);
   assert.equal(await page.locator('.section-number').count(), 0);
   assert.equal(await page.locator('.stage-list .stage-number').count(), 4);
-  assert.equal(await page.locator('.stage-list li').first().evaluate(element => getComputedStyle(element).borderBottomStyle), 'none');
+  assert.equal(await page.locator('.stage-list li').first().evaluate(element => getComputedStyle(element).borderBottomStyle), 'solid');
   assert.equal(await page.locator('.approach-closing').innerText(), about.approach.closing);
   const storySurface = await page.locator('.profile-story').evaluate(element => getComputedStyle(element).backgroundColor);
   assert.equal(storySurface, 'rgb(245, 242, 234)');
   for (const chapter of ['.biography', '.approach', '.experience', '.together']) {
     assert.equal(await page.locator(chapter).evaluate(element => getComputedStyle(element).backgroundColor), 'rgba(0, 0, 0, 0)');
-    assert.equal(await page.locator(chapter + ' > .wrap').first().evaluate(element => getComputedStyle(element).borderTopStyle), 'none');
+    assert.equal(await page.locator(chapter + ' > .wrap').first().evaluate(element => getComputedStyle(element).borderTopStyle), chapter === '.approach' ? 'solid' : 'none');
   }
   assert.equal(await page.locator('.designation').innerText(), profile.designation);
   assert.equal(normalize(await page.locator('.portrait-name').innerText()), profile.name);

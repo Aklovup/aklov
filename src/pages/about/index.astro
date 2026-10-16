@@ -5,6 +5,10 @@ import { about } from '../../data/about';
 import { links } from '../../data/links';
 
 const [headlineStart, headlineEnd] = about.introduction.headline.split('understanding');
+const [biographyStart, biographyEnd] = about.biography.heading.split('about me');
+const [approachStart, approachEnd] = about.approach.heading.split('the work');
+const [experienceStart, experienceEnd] = about.work.heading.split("I've done");
+const [togetherStart, togetherEnd] = about.together.heading.split('together');
 ---
 
 <BaseLayout title={about.metadata.title} description={about.metadata.description}>
@@ -35,7 +39,7 @@ const [headlineStart, headlineEnd] = about.introduction.headline.split('understa
       <section class="section biography" aria-labelledby="biography-title">
         <div class="wrap biography-grid">
           <div class="section-heading">
-            <h2 id="biography-title">{about.biography.heading}</h2>
+            <h2 id="biography-title">{biographyStart}<em>about me</em>{biographyEnd}</h2>
           </div>
           <div class="reading-copy biography-copy">
             {about.biography.paragraphs.map((paragraph, index) => (
@@ -48,7 +52,7 @@ const [headlineStart, headlineEnd] = about.introduction.headline.split('understa
       <section class="section approach" aria-labelledby="approach-title">
         <div class="wrap">
           <div class="section-heading">
-            <h2 id="approach-title">{about.approach.heading}</h2>
+            <h2 id="approach-title">{approachStart}<em>the work</em>{approachEnd}</h2>
           </div>
           <div class="approach-layout">
             <div class="approach-introduction">
@@ -72,7 +76,9 @@ const [headlineStart, headlineEnd] = about.introduction.headline.split('understa
           </div>
         </div>
         <div class="wrap statement">
-          <p class="approach-closing" data-approved-copy>{about.approach.closing}</p>
+          <p class="approach-closing" data-approved-copy>{about.approach.closing.split(/(makes sense|actually use it)/g).map((part) => (
+            part === 'makes sense' || part === 'actually use it' ? <em>{part}</em> : part
+          ))}</p>
         </div>
       </section>
 
@@ -80,11 +86,11 @@ const [headlineStart, headlineEnd] = about.introduction.headline.split('understa
         <div class="wrap">
           <div class="experience-heading">
             <div class="section-heading">
-              <h2 id="experience-title">{about.work.heading}</h2>
+              <h2 id="experience-title">{experienceStart}<em>I've done</em>{experienceEnd}</h2>
             </div>
-            <p class="lead" data-approved-copy>{about.work.paragraphs[0]}</p>
           </div>
           <div class="experience-story reading-copy">
+            <p class="lead" data-approved-copy>{about.work.paragraphs[0]}</p>
             {about.work.paragraphs.slice(1).map((paragraph) => (
               <p data-approved-copy>{paragraph}</p>
             ))}
@@ -97,7 +103,7 @@ const [headlineStart, headlineEnd] = about.introduction.headline.split('understa
         <div class="wrap">
           <div class="together-layout">
             <div class="section-heading">
-              <h2 id="together-title">{about.together.heading}</h2>
+              <h2 id="together-title">{togetherStart}<em>together</em>{togetherEnd}</h2>
             </div>
             <div class="together-story">
               <p class="lead" data-approved-copy>{about.together.paragraphs[0]}</p>
@@ -141,69 +147,68 @@ const [headlineStart, headlineEnd] = about.introduction.headline.split('understa
   .hero-opening { grid-column: 1; grid-row: 2; max-width: 55ch; color: var(--on-dark); font-size: 14px; line-height: 1.9; }
   .hero-opening p + p { margin-top: 18px; }
   .hero-heading .opening-line { margin: 28px 0 0; color: var(--ivory); font-family: var(--display); font-size: clamp(26px, 2.5vw, 38px); line-height: 1.2; }
-  /* A profile is read as a story, rather than scanned as a service catalogue. */
+  /* A shared left margin anchors the headings; the story occupies the wider right column. */
   .profile-story { background: var(--ivory); color: var(--charcoal); }
+  .profile-story > .section > .wrap, .intro-detail > .wrap { max-width: 1440px; }
   .intro-detail { padding-block: clamp(40px, 5vw, 72px); }
-  .intro-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 96px); align-items: start; }
-  .intro-detail p { max-width: 58ch; color: var(--body); font-size: 15px; line-height: 1.9; }
-  .intro-detail p:first-child { color: var(--charcoal); font-family: var(--display); font-size: clamp(26px, 2.5vw, 38px); line-height: 1.28; letter-spacing: -.02em; }
-  .section { padding-bottom: clamp(48px, 5vw, 80px); }
+  .intro-detail-grid { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: clamp(36px, 7vw, 100px); align-items: start; }
+  .intro-detail p { max-width: 62ch; color: var(--body); font-size: 16px; line-height: 1.85; }
+  .intro-detail p:first-child { color: var(--charcoal); font-family: var(--display); font-size: clamp(26px, 2.5vw, 36px); line-height: 1.28; letter-spacing: -.02em; }
+  .section { padding-bottom: clamp(44px, 5vw, 72px); }
   .section-heading { min-width: 0; }
-  .reading-copy { color: var(--body); font-size: 16px; line-height: 1.9; }
-  .reading-copy p + p { margin-top: 22px; }
-  .lead { color: var(--charcoal); font-family: var(--display); font-size: clamp(26px, 2.4vw, 38px); line-height: 1.3; letter-spacing: -.02em; }
+  .section-heading h2 { max-width: 14ch; font-size: clamp(42px, 4.4vw, 68px); line-height: 1.02; }
+  .section-heading h2 em { display: block; color: var(--about-accent); font-style: italic; }
+  .reading-copy { max-width: 66ch; color: var(--body); font-size: 16px; line-height: 1.85; }
+  .reading-copy p + p { margin-top: 20px; }
+  .lead { color: var(--charcoal); font-family: var(--display); font-size: clamp(25px, 2.3vw, 34px); line-height: 1.3; letter-spacing: -.02em; }
+  .biography-grid, .experience > .wrap, .together-layout { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 28px clamp(36px, 7vw, 100px); align-items: start; }
+  .biography-copy .lead { margin-bottom: 26px; }
 
-  /* The biography opens the essay in a comfortable central reading measure. */
-  .biography { padding-top: 12px; }
-  .biography-grid, .approach > .wrap:not(.statement) { max-width: calc(680px + var(--pad) * 2); }
-  .biography h2 { max-width: none; margin-bottom: 28px; }
-  .biography-copy .lead { margin-bottom: 28px; }
-
-  /* Continue the essay, then let the four real stages sit within its reading flow. */
+  /* Narrative and stages form one spread, rather than a centred essay. */
   .approach { --focus-color: var(--charcoal); }
-  .approach h2 { max-width: 18ch; font-size: clamp(42px, 4vw, 62px); line-height: 1.04; }
-  .approach-layout { margin-top: 28px; }
-  .approach-introduction .reading-copy { margin-top: 26px; }
-  .approach-lead { font-family: var(--display); font-size: clamp(28px, 2.6vw, 38px); line-height: 1.3; letter-spacing: -.02em; }
-  .approach-sequence { margin-top: 36px; }
-  .sequence-introduction { color: var(--body); font-size: 16px; line-height: 1.9; }
-  .stage-list { list-style: none; margin: 28px 0 0; padding: 0; }
-  .stage-list li { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 10px 20px; margin-top: 26px; }
-  .stage-list li:first-child { margin-top: 0; }
-  .stage-number { grid-column: 1; grid-row: 1 / span 2; color: var(--about-accent); font-family: var(--display); font-size: 32px; line-height: 1.1; }
-  .stage-list h3 { grid-column: 2; font-size: 32px; line-height: 1.1; letter-spacing: -.025em; }
-  .stage-list p { grid-column: 2; color: var(--body); font-size: 16px; line-height: 1.85; }
+  .approach > .wrap:not(.statement) { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); column-gap: clamp(36px, 7vw, 100px); border-top: 1px solid var(--line); padding-top: clamp(36px, 4vw, 56px); }
+  .approach .section-heading { grid-column: 1; grid-row: 1; }
+  .approach-layout { display: contents; }
+  .approach-introduction { grid-column: 1; grid-row: 2; margin-top: 26px; }
+  .approach-introduction .reading-copy { margin-top: 22px; font-size: 15px; }
+  .approach-lead { font-family: var(--display); font-size: clamp(25px, 2.2vw, 32px); line-height: 1.3; letter-spacing: -.02em; }
+  .approach-sequence { grid-column: 2; grid-row: 1 / span 2; min-width: 0; }
+  .sequence-introduction { margin-bottom: 22px; color: var(--body); font-size: 15px; line-height: 1.85; }
+  .stage-list { list-style: none; margin: 0; padding: 0; }
+  .stage-list li { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 10px 20px; padding-block: 28px; border-bottom: 1px solid var(--line); }
+  .stage-list li:first-child { padding-top: 0; }
+  .stage-number { grid-column: 1; grid-row: 1 / span 2; color: var(--about-accent); font-family: var(--display); font-size: 48px; font-style: italic; line-height: 1; }
+  .stage-list h3 { grid-column: 2; font-size: clamp(28px, 2.3vw, 36px); font-style: italic; line-height: 1.1; letter-spacing: -.025em; }
+  .stage-list p { grid-column: 2; max-width: 56ch; color: var(--body); font-size: 16px; line-height: 1.8; }
 
-  /* One expansive statement interrupts the narrower essay without a new colour band. */
-  .statement { max-width: 1240px; padding-top: clamp(40px, 5vw, 72px); }
-  .approach-closing { max-width: 27ch; margin: 0; color: var(--about-accent); font-family: var(--display); font-size: clamp(40px, 5.8vw, 88px); font-style: italic; line-height: 1.05; letter-spacing: -.025em; }
+  /* The only centred element is the deliberate pull statement, not the body copy. */
+  .profile-story > .approach > .statement { max-width: 1180px; padding-top: clamp(40px, 5vw, 72px); }
+  .approach-closing { max-width: 26ch; margin: 0 auto; color: var(--charcoal); font-family: var(--display); font-size: clamp(38px, 5vw, 76px); font-style: italic; line-height: 1.08; letter-spacing: -.025em; }
+  .approach-closing em { color: var(--about-accent); font-style: inherit; }
 
-  /* Experience reads as a magazine spread, with uninterrupted prose instead of rows. */
-  .experience > .wrap { max-width: 1240px; }
-  .experience-heading { max-width: 850px; }
-  .experience h2 { max-width: none; margin-bottom: 24px; font-size: clamp(46px, 5vw, 76px); }
-  .experience-heading .lead { max-width: 44ch; }
-  .experience-story { columns: 2; column-gap: clamp(32px, 6vw, 88px); margin-top: 32px; }
-  .experience-story p { break-inside: avoid; margin: 0 0 22px; }
-  .experience-story p + p { margin-top: 0; }
-  .editorial-link { display: inline-flex; align-items: center; min-height: 48px; margin-top: 8px; padding-bottom: 4px; border-bottom: 1px solid currentColor; font-size: 13px; font-weight: 600; transition: color .2s ease; }
+  /* Personal experience remains prose, without a second services or project grid. */
+  .experience-story .lead { margin-bottom: 24px; }
+  .editorial-link { grid-column: 2; justify-self: start; display: inline-flex; align-items: center; min-height: 48px; padding-bottom: 4px; border-bottom: 1px solid currentColor; font-size: 13px; font-weight: 600; transition: color .2s ease; }
   .editorial-link:focus-visible { outline-color: var(--charcoal); }
+  .together-layout { border-top: 1px solid var(--line); padding-top: clamp(32px, 4vw, 52px); }
+  .together-story .lead { max-width: 34ch; margin-bottom: 24px; }
 
-  /* End the profile in the quieter scale of a personal conversation. */
-  .together > .wrap { max-width: calc(640px + var(--pad) * 2); }
-  .together h2 { max-width: none; margin-bottom: 24px; font-size: clamp(42px, 4vw, 60px); line-height: 1.04; }
-  .together-story .lead { margin-bottom: 26px; font-size: clamp(26px, 2.3vw, 34px); }
-  .closing { padding-block: clamp(56px, 6vw, 100px) 0; background: var(--gold); color: var(--charcoal); }
-  .closing h2 { max-width: 19ch; font-size: clamp(52px, 7.5vw, 120px); line-height: .96; letter-spacing: -.035em; }
-  .closing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 96px); margin-top: clamp(36px, 5vw, 72px); padding-block: 32px 56px; border-top: 1px solid var(--charcoal); }
-  .closing-grid > p { max-width: 56ch; font-size: 15px; line-height: 1.9; }
-  .closing-actions { display: flex; flex-wrap: wrap; gap: 14px; align-items: start; align-content: start; }
+  /* A compact invitation ends the profile at the same editorial scale. */
+  .closing { padding-block: clamp(40px, 5vw, 64px); background: var(--gold); color: var(--charcoal); }
+  .closing > .wrap { max-width: 1440px; display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 28px clamp(36px, 7vw, 100px); align-items: start; }
+  .closing h2 { max-width: 18ch; font-size: clamp(40px, 4.4vw, 64px); font-style: italic; line-height: 1.03; letter-spacing: -.035em; }
+  .closing-grid > p { max-width: 58ch; font-size: 15px; line-height: 1.85; }
+  .closing-actions { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; margin-top: 24px; }
   .closing-work-link { display: inline-flex; align-items: center; min-height: 52px; width: fit-content; padding-block: 8px; border-bottom: 1px solid currentColor; font-size: 13px; font-weight: 600; line-height: 1.6; transition: color .2s ease; }
   .closing a:focus-visible { outline-color: var(--charcoal); }
   @media (hover: hover) { .editorial-link:hover { color: var(--about-accent); } }
   @media (max-width: 1000px) {
     .hero-composition { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 28px 32px; }
     h1 { font-size: clamp(52px, 6.8vw, 76px); }
+    .approach > .wrap:not(.statement) { display: block; }
+    .approach-introduction { margin-top: 24px; }
+    .approach-introduction .reading-copy { max-width: 70ch; }
+    .approach-sequence { margin-top: 32px; }
   }
   @media (max-width: 640px) {
     .hero-composition { grid-template-columns: 1fr; gap: 28px; }
@@ -211,16 +216,15 @@ const [headlineStart, headlineEnd] = about.introduction.headline.split('understa
     h1 { max-width: 15ch; font-size: clamp(52px, 13.2vw, 78px); margin-top: 22px; }
     .hero-portrait { grid-column: 1; grid-row: 2; width: min(88%, 360px); justify-self: end; }
     .hero-opening { grid-column: 1; grid-row: 3; max-width: none; }
-    .intro-detail-grid, .closing-grid { grid-template-columns: 1fr; gap: 28px; }
-    h2 { font-size: clamp(46px, 11.5vw, 68px); }
-    .experience-story { columns: 1; }
-    .stage-list li { grid-template-columns: 32px minmax(0, 1fr); column-gap: 16px; }
-    .stage-number, .stage-list h3 { font-size: 30px; }
-    .closing h2 { font-size: clamp(48px, 11vw, 68px); }
+    .intro-detail-grid, .biography-grid, .experience > .wrap, .together-layout, .closing > .wrap { grid-template-columns: 1fr; gap: 24px; }
+    .section-heading h2 { font-size: clamp(42px, 11vw, 60px); }
+    .stage-list li { grid-template-columns: 40px minmax(0, 1fr); column-gap: 16px; padding-block: 24px; }
+    .stage-number { font-size: 40px; }
+    .stage-list h3 { font-size: 32px; }
+    .editorial-link { grid-column: 1; }
+    .closing h2 { font-size: clamp(40px, 10.5vw, 60px); }
     .closing-actions { flex-direction: column; align-items: stretch; }
     .closing-actions .btn { width: 100%; }
     .closing-work-link { align-self: flex-start; }
   }
 </style>
-
-
