@@ -323,6 +323,16 @@ The media system should support:
 - Different aspect ratios.
 - Full-size inspection where appropriate.
 
+Media ownership and upload workflow
+
+The project owner uploads approved media to the appropriate `public/images/` folder and may identify the main/cover image. Codex handles integration and metadata: source paths, actual dimensions, media types, alternative text, concise descriptive captions, optional posters, and gallery order.
+
+Review the actual media alongside its filename and approved project content. Filenames are clues, not proof of functionality. Codex is authorized to write factual media captions and alternative text; this does not authorize rewriting approved case-study or page copy, inventing outcomes, or claiming functionality from screenshots.
+
+Preserve the owner's selected cover and stable media identifiers. If no cover is specified, preserve the existing cover; for a new project choose a representative supplied asset and report the choice. Keep missing sources pending and do not guess URLs or dimensions. Cover alternative text belongs in the cover metadata; visible gallery captions belong in media entries, without adding redundant captions to card covers.
+
+The owner does not need to edit content metadata. Check uploads for confidential information and flag uncertain mappings or sensitive details before publication.
+
 Store media references in structured project data.
 
 Do not hard-code image URLs into card layouts.

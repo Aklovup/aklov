@@ -13,7 +13,7 @@
   "cover": {
     "id": "website-concept-02-cover",
     "type": "image",
-    "alt": "Full-page website design image showing the hero, training programs, and gym-benefits sections.",
+    "alt": "Vortex Gym independent design concept showing its fitness hero, training programs, and gym-benefits sections.",
     "width": 1440,
     "height": 5998,
     "url": "/images/projects/vortex-gym-concept/vortex-gym-overview.jpg",
@@ -23,8 +23,8 @@
     {
       "id": "vortex-gym-overview",
       "type": "image",
-      "alt": "Full-page website design image showing the hero, training programs, and gym-benefits sections.",
-      "caption": "Vortex Gym design concept",
+      "alt": "Vortex Gym independent design concept showing its fitness hero, training programs, and gym-benefits sections.",
+      "caption": "Vortex Gym — full-page design concept",
       "order": 1,
       "width": 1440,
       "height": 5998,
@@ -42,7 +42,6 @@
   ]
 }
 ---
-
 ### Overview
 
 Vortex Gym is an independent fitness website concept exploring a bold visual approach to presenting training programs, gym facilities, and membership-oriented calls to action.

@@ -15,7 +15,7 @@
   "cover": {
     "id": "divine-black-onyx-cover",
     "type": "image",
-    "alt": "Screenshot of the brand gateway.",
+    "alt": "Divine Health & Wellness and Black Onyx brand gateway with separate shopping destinations.",
     "width": 1920,
     "height": 1521,
     "url": "/images/projects/divine-health-black-onyx/Gateway.png"
@@ -24,8 +24,8 @@
     {
       "id": "divine-brand-gateway",
       "type": "image",
-      "alt": "Screenshot of the brand gateway.",
-      "caption": "Brand gateway",
+      "alt": "Divine Health & Wellness and Black Onyx brand gateway with separate shopping destinations.",
+      "caption": "Divine Health & Wellness / Black Onyx gateway",
       "order": 1,
       "width": 1920,
       "height": 1521,
@@ -34,7 +34,7 @@
     {
       "id": "divine-storefront",
       "type": "image",
-      "alt": "Screenshot of the Divine Health & Wellness shop.",
+      "alt": "Divine Health & Wellness storefront with product listings and category navigation.",
       "caption": "Divine Health & Wellness storefront",
       "order": 2,
       "width": 1920,
@@ -44,7 +44,7 @@
     {
       "id": "black-onyx-storefront",
       "type": "image",
-      "alt": "Screenshot of the Black Onyx shopping experience.",
+      "alt": "Black Onyx storefront with its own brand presentation and product selection.",
       "caption": "Black Onyx storefront",
       "order": 3,
       "width": 1920,
@@ -54,8 +54,8 @@
     {
       "id": "divine-shared-checkout",
       "type": "image",
-      "alt": "Screenshot of the shared cart or checkout environment.",
-      "caption": "Shared cart",
+      "alt": "Shared Divine Health & Wellness and Black Onyx shopping cart with items and order summary.",
+      "caption": "Shared shopping cart",
       "order": 4,
       "width": 1920,
       "height": 1752,
@@ -73,7 +73,6 @@
   "order": 3
 }
 ---
-
 ### Overview
 
 A multi-brand shopping experience that gives Divine Health & Wellness and Black Onyx their own visual identities while sharing the underlying commerce infrastructure.

@@ -1,5 +1,7 @@
 # Repository-hosted image standard and interrupted R2 audit
 
+This document records the interrupted R2 task and subsequent migration. Audit findings below describe that point in time, not a fresh Cloudflare account audit. For the current upload workflow and media inventory, see `public/images/README.md`.
+
 ## Audit findings
 
 The audit checked local Git status/log, the current GitHub `main` and `feat/impex-media` refs, source files, and Cloudflare configuration. Both GitHub branches pointed to `4a73db9cca1e7cda58e17f99345e80190d5b942c`; no R2 implementation commit or PR had been published. The local branch was clean, and its source files matched that main commit. Local snapshot commits contain already-merged About/Contact work, not an R2 implementation, and were preserved.
@@ -30,7 +32,7 @@ Then reference `/images/projects/impex-automotive/Impex_Homepage.gif` from its e
 
 Existing media components already accept root-relative public URLs, so no runtime, schema, component, routing or dependency change is needed. Files in `public` are served as supplied; optimize them before uploading, provide actual dimensions, and check their crop/loading behavior when wiring them in.
 
-The current Solutions photo remains its existing external source until an approved replacement is uploaded. The owner subsequently supplied Home and About portraits; their existing portrait areas now reference the actual repository files without changing page copy or layout.
+The Solutions photograph was subsequently uploaded as `public/images/solutions/Solutions_img.jpg` and now uses local static delivery. The supplied portraits are retained in `public/images/portraits/`; About uses its portrait, while the current homepage review no longer displays a portrait.
 
 ## Validation
 
@@ -40,16 +42,16 @@ The new Impex browser check verifies the actual uploaded GIF header/dimensions, 
 
 ## Uploaded media integration
 
-The Home and About pages use `public/images/portraits/Portrait_home.png` and `Portrait_about.png` respectively. Original files are preserved.
+The repository retains `public/images/portraits/Portrait_home.png` and `Portrait_about.png`. About uses its portrait; the current homepage review omits the Home portrait. Original files are preserved.
 
 Project media is mapped in the individual Markdown entries, with dimensions read from the actual GIF/PNG headers:
 
 - Impex: `Impex_Homepage.gif`, `Impex_Product_Cart.gif`, `Impex_Review_Payment.gif` (3/3).
 - XANS: `Xans_Home.gif`, `Xans_add_order.gif`, `Xans_logQC.gif`, `Xans_Invoice.gif` (4/4). Dashboard comes first and is the card cover. Invoice media is a GIF, not a static screenshot.
-- Divine/Black Onyx: `Gateway.png`, `Dhw_shop.png`, `BO_shop.png`, `shared_cart.png` (4/4). Gateway is the card cover.
-- JAYCOR: `Jaycor_shop.png`, `Jaycor_PDP.png` (2/2).
+- Divine/Black Onyx: `Gateway.png`, `divine-health-shop.png`, `BO_shop.png`, `shared_cart.png` (4/4). Gateway is the card cover.
+- JAYCOR: `jaycor-shop.png`, `jaycor-product.png` (2/2).
 - Wound Concierge: `Woundconcierge_Home.png`, `Woundconcierge_thrive.png` (2/3). Customer-workflow media is still pending.
 
-All GIFs remain paused with a visible frame until Play is activated. No schema changes, image-hosting changes, generated imagery or new dependencies are needed. Media for Moving Company CRM, GuideYusuf, InstantResidency, VÉRA and Vortex is not yet uploaded; retain their existing pending states.
+All GIFs remain paused with a visible frame until Play is activated. No schema changes, image-hosting changes, generated imagery or new dependencies are needed. VÉRA and Vortex now each have one uploaded full-page design image: `vera-concept-overview.jpg` and `vortex-gym-overview.jpg` in their respective project folders. Media for Moving Company CRM, GuideYusuf, and InstantResidency is still pending. All 17 supplied portfolio gallery items have source paths, dimensions, media types, alternative text, captions, and display order. The owner uploads media and may specify covers; Codex handles the metadata and integration as documented in `public/images/README.md`.
 
 `tests/media-assets.browser.mjs` verifies file availability, actual dimensions, card/detail data, all sourced project galleries, play/pause and portrait rendering. The existing build and regression suites continue to cover filtering, popup history/accessibility, approved About copy, and Contact form behavior without sending inquiries.

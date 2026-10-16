@@ -13,7 +13,7 @@
   "cover": {
     "id": "impex-cover",
     "type": "gif",
-    "alt": "GIF demonstrating the portal homepage and product discovery.",
+    "alt": "Impex Automotive ordering portal with product navigation and featured automotive parts.",
     "width": 1280,
     "height": 610,
     "url": "/images/projects/impex-automotive/Impex_Homepage.gif"
@@ -22,7 +22,7 @@
     {
       "id": "impex-homepage",
       "type": "gif",
-      "alt": "GIF demonstrating the portal homepage and product discovery.",
+      "alt": "Impex Automotive ordering portal with product navigation and featured automotive parts.",
       "caption": "Portal homepage and product discovery",
       "order": 1,
       "width": 1280,
@@ -32,7 +32,7 @@
     {
       "id": "impex-product-cart",
       "type": "gif",
-      "alt": "GIF demonstrating product selection and cart interactions.",
+      "alt": "Impex Automotive product selection and shopping-cart demonstration.",
       "caption": "Product selection and cart",
       "order": 2,
       "width": 1280,
@@ -42,8 +42,8 @@
     {
       "id": "impex-checkout",
       "type": "gif",
-      "alt": "GIF demonstrating the Stripe checkout experience.",
-      "caption": "Stripe checkout",
+      "alt": "Impex Automotive order-review and Stripe checkout demonstration.",
+      "caption": "Order review and Stripe checkout",
       "order": 3,
       "width": 1280,
       "height": 610,
@@ -54,7 +54,6 @@
   "order": 1
 }
 ---
-
 ### Overview
 
 A custom ordering portal bringing product browsing, cart management, Stripe checkout, and inventory synchronization together within Zoho Creator.

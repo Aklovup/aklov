@@ -13,7 +13,7 @@
   "cover": {
     "id": "website-concept-01-cover",
     "type": "image",
-    "alt": "Full-page website design image showing the hero, product collection, and editorial storytelling sections.",
+    "alt": "VÉRA Skincare independent design concept showing its botanical hero, product collections, and editorial sections.",
     "width": 1440,
     "height": 6169,
     "url": "/images/projects/vera-skincare-concept/vera-concept-overview.jpg",
@@ -23,8 +23,8 @@
     {
       "id": "vera-concept-overview",
       "type": "image",
-      "alt": "Full-page website design image showing the hero, product collection, and editorial storytelling sections.",
-      "caption": "VÉRA skincare design concept",
+      "alt": "VÉRA Skincare independent design concept showing its botanical hero, product collections, and editorial sections.",
+      "caption": "VÉRA Skincare — full-page design concept",
       "order": 1,
       "width": 1440,
       "height": 6169,
@@ -42,7 +42,6 @@
   ]
 }
 ---
-
 ### Overview
 
 VÉRA is an independent skincare website concept exploring how premium imagery, refined typography, and carefully structured product presentation can create a distinctive online shopping experience.
