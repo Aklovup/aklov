@@ -141,7 +141,7 @@ try {
     assert.equal(await dialog.locator('h2').innerText(), project.title);
     const number = String(expectedCatalog.indexOf(project.slug) + 1).padStart(2, '0');
     assert.equal(await page.locator('[data-project="' + project.slug + '"] .project-number').innerText(), number);
-    assert.equal(await dialog.locator('.detail-controls .mono').innerText(), 'Project / ' + number);
+    assert.equal(await dialog.locator('.detail-controls .mono').innerText(), 'PROJECT / ' + number);
     assert.equal(await dialog.locator('.detail-headline').innerText(), project.headline);
     assert.equal(await dialog.locator('.detail-introduction').innerText(), project.description);
     assert.equal(normalize(await dialog.locator('.case-study-copy').innerText()), normalize(project.body.replace(/^### /gm, '')));
