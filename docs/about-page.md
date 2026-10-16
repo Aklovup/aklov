@@ -1,33 +1,39 @@
 # About page
 
-The review route is `/about/`, on `feat/about-page`. The feature branch starts from the merged Work implementation on the latest main branch. Do not merge without owner approval.
+The route is `/about/`. The current refinements are reviewed on `feat/editorial-homepage` in PR #9; do not merge without owner approval. The original About-page feature branch has already been merged and is not the current review branch.
 
-## Design and content
+## Content and composition
 
-The page retains Aklov's Instrument Serif / DM Sans typography and charcoal, ivory and muted gold palette. A dark editorial introduction pairs the headline with a rectangular profile composition. The biography uses reading columns; the approach uses a ruled sequence instead of feature cards; experience and collaboration sections use different compositions; the closing invitation uses the established gold surface.
+All six approved sections, 39 body paragraphs/statements, four process stages, and original CTA wording remain in `src/data/about.ts`. The page reads this data without hydration or additional page-specific JavaScript.
 
-All six approved sections, 39 body paragraphs/statements, four process stages and supplied CTA labels are retained in `src/data/about.ts`. The static page reads that content without hydration or additional page JavaScript.
+The charcoal introduction retains its editorial headline and rectangular gold portrait card. The opening sentence sits beneath the headline, including on mobile; the portrait follows it before the remaining opening paragraphs on small screens. The subsequent two introductory paragraphs retain their original sequence.
+
+The introduction/biography transition uses one clear dividing rule without accumulated outer and inner section padding. Biography retains its readable column. Approach pairs the explanatory narrative with the four ruled stages above 1000px and stacks them at 1000px and below. The complete narrative remains before the sequence in document order. Working Together uses a quieter heading beside one continuous reading column, stacking on mobile. The gold closing matches the Home/Solutions headline range, with one primary contact button and a quieter text link to Work.
 
 ## Portrait
 
-The photograph has not been supplied. The current fallback is a typographic monogram and name, rather than an invented likeness or unrelated photograph.
+The supplied transparent portrait is `public/images/portraits/Portrait_about.png`, referenced through `profile.portrait` in `src/data/about.ts`. Its actual dimensions are 438 × 570px.
 
-Upload the approved image to `public/images/portraits/`, then set `profile.portrait.src` in `src/data/about.ts` to its actual root-relative path, such as `/images/portraits/about.webp`. Do not assign a URL before the file exists. Files in `public` are served as supplied, so optimize the uploaded asset and set accurate dimensions. Preserve the existing fallback until the portrait is available.
+`src/components/about/AboutPortrait.astro` preserves the reserved 4:5 gold frame, ivory name panel, and attached gold contour. It has descriptive alternative text, an eager image, and a typographic fallback used only if no portrait source is configured. Do not add a fade or alter this approved treatment as part of unrelated updates.
 
-Update the actual width, height and alternative text as necessary. The portrait component uses Astro Image, responsive widths, explicit dimensions and a reserved 4:5 frame. Check the crop at desktop and mobile widths when the photograph is supplied.
+A higher-resolution approved transparent original would improve sharpness when the current source is displayed wider than 438px. Upscaling this file cannot restore detail. When a replacement is supplied, update the source path and actual dimensions, check responsive delivery and crop, and preserve the composition.
 
-## Navigation and contact
+## Destinations
 
-The existing Header and Footer add About. Their shared styling and behavior are unchanged.
+All cross-page CTAs use `src/data/links.ts`:
 
-All About cross-page CTA destinations come from `src/data/links.ts`: `links.work` points to `/work/`, and `links.contact` holds the pending Contact destination. Until `/contact/` is implemented, its working placeholder is the existing `mailto:aklovup@gmail.com`. Update this central entry when the page is ready. Header and footer contact navigation retain their existing homepage contact destination.
+- `links.workClients`: `/work/?type=client` for the experience section's “Explore selected projects →”.
+- `links.contact`: the implemented `/contact/` route for the primary closing action.
+- `links.work`: `/work/` for the secondary closing action.
 
-## Review and validation
+Shared header/footer navigation is reused. No duplicate navigation component or Contact page is created. The About page does not change the Contact form or its Web3Forms integration.
 
-The GitHub validation run uploads desktop, mobile and tablet screenshots in the `about-page-review` artifact. There is no separate HTML preview.
+## Preview and validation
 
-For an optional interactive local preview, check out `feat/about-page`, run `npm install` and `npm run dev`, then open `/about/`.
+Preview: https://feat-editorial-homepage.aklov.pages.dev/about/
 
-The existing workflow builds the site, runs the Work logic/browser regressions and validates the About page's complete copy, metadata, headings, portrait fallback, links, keyboard focus, reduced motion, rendered text contrast and nine viewport widths. Existing Home, Solutions, Work and case-study source files remain unchanged.
+For a local preview, check out the review branch, install the existing dependencies, run `npm run dev`, and open `/about/`. The build is `npm run build`; there is no separate HTML mockup.
 
-The final photograph and its crop/optimization review are the only pending asset work. Opening a mail application is represented by a validated mailto destination; actual email sending is not part of the page or its tests.
+The existing validation workflow checks all 39 approved content blocks, metadata, semantic headings, actual portrait, continuous contour, unchanged source media, CTA destinations, visible keyboard focus, reduced motion, rendered text contrast, no-JavaScript rendering, responsive layout, and the grouped Work destination. Desktop, tablet, and mobile review screenshots are uploaded in `about-page-review`.
+
+The refinements do not change approved copy, portrait assets/components, shared styles/navigation, other page source files, portfolio content, hosting configuration, or dependencies. The only cross-page configuration addition is the shared client-project destination.

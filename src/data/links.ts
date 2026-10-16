@@ -5,6 +5,7 @@ export const links = {
   solutionsApplications: '/solutions/#applications',
   solutionsIntegrations: '/solutions/#integrations',
   work: '/work/',
+  workClients: '/work/?type=client',
   workConcepts: '/work/?type=concepts',
   workImpex: '/work/?project=impex-automotive',
   workDivine: '/work/?project=divine-health-black-onyx',
