@@ -40,9 +40,13 @@ try {
   for (const [label, width, height] of [['desktop',1440,1100],['tablet',768,1000],['mobile',390,844],['narrow',320,844]]) {
     await page.setViewportSize({ width, height });
     await page.evaluate(() => document.fonts.ready);
+    await page.locator('.h-captcha').scrollIntoViewIfNeeded();
+    await page.frameLocator('.h-captcha iframe').getByRole('checkbox').waitFor({state:'visible'});
+    await page.waitForTimeout(250); // Allow the third-party frame to repaint after viewport resizing.
     const box = await page.locator('.h-captcha iframe').boundingBox();
     assert.ok(box && box.x >= 0 && box.x + box.width <= width, 'Live captcha overflow at ' + width);
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Live page overflow at ' + width);
+    await page.locator('.h-captcha').screenshot({path:output+'/captcha-'+label+'.png'});
     await page.screenshot({ path: output + '/contact-preview-' + label + '.png', fullPage: true });
   }
   // Inspect valid-form enablement without submitting or fabricating a captcha token.
