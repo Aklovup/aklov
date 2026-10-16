@@ -57,14 +57,13 @@ try {
       const bounds=await line.evaluate(el=>{const r=document.createRange();r.selectNodeContents(el);const b=r.getBoundingClientRect();return {left:b.left,right:b.right};});
       assert.ok(bounds.left>=-1&&bounds.right<=width+1,'Solutions headline clips at '+width+': '+JSON.stringify(bounds));
     }
-    const intro = await page.locator('.hero-introduction').boundingBox();
-    const actions = await page.locator('.hero-actions').boundingBox();
-    const stage = await tablet.boundingBox();
-    const device = await tablet.locator('.tablet-device').boundingBox();
-    const index = await page.locator('.idx').boundingBox();
+    const { intro, actions, stage, device, index } = await page.evaluate(() => {
+      const bounds = selector => { const b=document.querySelector(selector).getBoundingClientRect(); return {x:b.x,y:b.y,width:b.width,height:b.height}; };
+      return {intro:bounds('.hero-introduction'),actions:bounds('.hero-actions'),stage:bounds('[data-solutions-tablet]'),device:bounds('.tablet-device'),index:bounds('.idx')};
+    });
     assert.ok(device.x>=8&&device.x+device.width<=width-8,'Tablet clips at '+width+': '+JSON.stringify(device));
     assert.ok(actions.y>=intro.y&&actions.y+actions.height<=intro.y+intro.height+1,'Actions outside introduction');
-    assert.ok(index.y>=device.y+device.height,'Tablet reaches the service index');
+    assert.ok(index.y>=device.y+device.height,'Tablet reaches the service index at '+width+': '+JSON.stringify({intro,stage,device,index}));
     if(width>1000) {
       assert.ok(device.x>=intro.x+intro.width+12,'Tablet overlaps the text column at '+width);
       assert.ok(Math.abs((stage.y+stage.height/2)-(intro.y+intro.height/2))<2,'Tablet stage not vertically centered');
