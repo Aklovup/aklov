@@ -11,7 +11,7 @@
   "cover": {
     "id": "jaycor-cover",
     "type": "image",
-    "alt": "Screenshot of the customized product category page.",
+    "alt": "JAYCOR Fieldbus category page with product filters and a technical product catalog.",
     "width": 1920,
     "height": 7081,
     "url": "/images/projects/jaycor-commerce/jaycor-shop.png"
@@ -20,8 +20,8 @@
     {
       "id": "jaycor-category",
       "type": "image",
-      "alt": "Screenshot of the customized product category page.",
-      "caption": "Product category page",
+      "alt": "JAYCOR Fieldbus category page with product filters and a technical product catalog.",
+      "caption": "Fieldbus product category",
       "order": 1,
       "width": 1920,
       "height": 7081,
@@ -30,8 +30,8 @@
     {
       "id": "jaycor-product",
       "type": "image",
-      "alt": "Screenshot of the customized product details page.",
-      "caption": "Product details",
+      "alt": "JAYCOR product page with cable imagery, product information, and purchasing controls.",
+      "caption": "Product details and purchasing interface",
       "order": 2,
       "width": 1920,
       "height": 2651,
@@ -40,10 +40,9 @@
   ],
   "externalUrl": "https://www.jaycor.co.za/",
   "featured": false,
-  "order": 4
+  "order": 2
 }
 ---
-
 ### Overview
 
 Custom storefront development for JAYCOR, refining product discovery and shopping interfaces within Zoho Commerce.

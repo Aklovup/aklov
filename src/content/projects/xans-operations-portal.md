@@ -14,7 +14,7 @@
   "cover": {
     "id": "xans-cover",
     "type": "gif",
-    "alt": "Xans Operations Portal dashboard.",
+    "alt": "Xans Operations Portal dashboard with summary figures and an order list.",
     "width": 1280,
     "height": 576,
     "url": "/images/projects/xans-operations-portal/Xans_Home.gif"
@@ -23,7 +23,7 @@
     {
       "id": "xans-dashboard",
       "type": "gif",
-      "alt": "Xans Operations Portal dashboard.",
+      "alt": "Xans Operations Portal dashboard with summary figures and an order list.",
       "caption": "Operations dashboard",
       "order": 1,
       "url": "/images/projects/xans-operations-portal/Xans_Home.gif",
@@ -33,7 +33,7 @@
     {
       "id": "xans-order-form",
       "type": "gif",
-      "alt": "GIF showing interactive order entry.",
+      "alt": "Xans Operations Portal order-entry form and interactive order details.",
       "caption": "Order entry",
       "order": 2,
       "width": 1280,
@@ -43,7 +43,7 @@
     {
       "id": "xans-quality-control",
       "type": "gif",
-      "alt": "GIF showing the Log QC action and popup.",
+      "alt": "Xans Operations Portal quality-control logging demonstration.",
       "caption": "Quality-control logging",
       "order": 3,
       "width": 1280,
@@ -53,7 +53,7 @@
     {
       "id": "xans-invoice",
       "type": "gif",
-      "alt": "GIF showing an invoice generated through the portal.",
+      "alt": "Xans Operations Portal invoice-generation demonstration.",
       "caption": "Invoice generation",
       "order": 4,
       "width": 1280,
@@ -65,7 +65,6 @@
   "order": 2
 }
 ---
-
 ### Overview
 
 A role-based operations portal bringing quotation, order management, quality control, shipping, and financial processes into a connected workflow.

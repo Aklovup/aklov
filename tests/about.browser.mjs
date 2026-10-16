@@ -40,12 +40,22 @@ async function checkLayout(page, width) {
     return box.left < -1 || box.right > innerWidth + 1 || element.scrollWidth > element.clientWidth + 1;
   }).map((element) => element.className || element.tagName));
   assert.deepEqual(overflow, [], 'Overflow at ' + width + 'px: ' + overflow.join(', '));
+  const introduction = await page.locator('.approach-introduction').boundingBox();
+  const sequence = await page.locator('.approach-sequence').boundingBox();
+  if (width > 1000) assert.ok(sequence.x >= introduction.x + introduction.width, 'Approach must pair narrative and stages on desktop.');
+  else assert.ok(sequence.y >= introduction.y + introduction.height, 'Approach must stack without overlap at ' + width);
+  const closingSize = await page.locator('.closing h2').evaluate(el => parseFloat(getComputedStyle(el).fontSize));
+  assert.ok(closingSize <= 120, 'Closing headline exceeds the established range.');
+  const secondary = page.locator('[data-about-work-secondary]');
+  assert.equal(await secondary.evaluate(el => el.classList.contains('btn')), false, 'Secondary work link should remain quieter than the primary button.');
   const frame = await page.locator('.portrait-frame').boundingBox();
   assert.ok(Math.abs(frame.width / frame.height - .8) < .01, 'Portrait ratio changed.');
   if (width <= 640) {
     const heading = await page.locator('.hero-heading').boundingBox();
     const portrait = await page.locator('.hero-portrait').boundingBox();
     const copy = await page.locator('.hero-opening').boundingBox();
+    const opening = await page.locator('.hero-heading .opening-line').boundingBox();
+    assert.ok(opening.y + opening.height <= portrait.y + 1, 'Opening sentence must precede the portrait.');
     assert.ok(heading.y + heading.height <= portrait.y + 1);
     assert.ok(portrait.y + portrait.height <= copy.y + 1);
   }
@@ -69,6 +79,9 @@ try {
   ]);
   assert.deepEqual((await page.locator('[data-approved-copy]').allInnerTexts()).map(normalize), expectedParagraphs.map(normalize));
   assert.equal(expectedParagraphs.length, 39);
+  assert.equal(await page.locator('.hero-heading .opening-line').innerText(), about.introduction.paragraphs[0]);
+  assert.equal(await page.locator('.hero-opening [data-approved-copy]').count(), 2);
+  assert.equal(await page.locator('.together-story .reading-copy [data-approved-copy]').count(), 5);
   assert.deepEqual(await page.locator('.stage-list h3').allInnerTexts(), about.approach.stages.map((stage) => stage.title));
   assert.equal(await page.locator('.stage-list li').count(), 4);
   assert.equal(await page.locator('.designation').innerText(), profile.designation);
@@ -82,7 +95,7 @@ try {
   assert.ok(await portraitImage.evaluate(img => img.naturalWidth > 0));
   assert.equal(await page.locator('[data-about-contact]').getAttribute('href'), links.contact);
   assert.equal(await page.locator('[data-about-contact]').innerText(), about.closing.primaryCta);
-  assert.equal(await page.locator('[data-about-work-link]').getAttribute('href'), links.work);
+  assert.equal(await page.locator('[data-about-work-link]').getAttribute('href'), links.workClients);
   assert.equal(await page.locator('[data-about-work-secondary]').getAttribute('href'), links.work);
   assert.equal(await page.locator('[data-about-work-link]').innerText(), about.work.cta);
   assert.equal(await page.locator('[data-about-work-secondary]').innerText(), about.closing.secondaryCta);
@@ -117,7 +130,7 @@ try {
   });
   assert.deepEqual(lowContrast, [], 'Text contrast failed: ' + JSON.stringify(lowContrast));
 
-  for (const width of [320, 390, 640, 768, 1000, 1001, 1280, 1440, 1920]) await checkLayout(page, width);
+  for (const width of [320, 390, 640, 641, 768, 1000, 1001, 1280, 1440, 1920]) await checkLayout(page, width);
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: output + '/about-desktop.png', fullPage: true });
@@ -145,8 +158,8 @@ try {
   assert.equal(await page.locator('[data-about-contact]').evaluate((element) => getComputedStyle(element).transitionDuration), '0s');
 
   await page.locator('[data-about-work-link]').click();
-  await page.waitForURL('**/work/');
-  await page.waitForFunction(() => document.querySelectorAll('[data-project]:not([hidden])').length === 10);
+  await page.waitForURL('**/work/?type=client');
+  await page.waitForFunction(() => document.querySelectorAll('[data-project]:not([hidden])').length === 8 && document.querySelector('[data-group="client"]').getAttribute('aria-pressed') === 'true');
   await page.setViewportSize({ width: 390, height: 844 });
   const toggle = page.locator('.menu-toggle');
   await toggle.focus();
@@ -171,7 +184,7 @@ try {
   assert.ok(await noJsPage.locator('[data-about-portrait] img').isVisible());
   await noJsPage.locator('[data-about-portrait] img').evaluate(img => img.decode());
   await noJs.close();
-  console.log('Passed: all 39 approved paragraphs, metadata, heading hierarchy, uploaded portrait, CTAs, navigation, keyboard focus, reduced motion, text contrast, no-JS rendering and nine viewport widths.');
+  console.log('Passed: all 39 approved paragraphs, metadata, heading hierarchy, uploaded portrait, CTAs, navigation, keyboard focus, reduced motion, text contrast, no-JS rendering and ten viewport widths.');
 } finally {
   await browser?.close();
   server.kill('SIGTERM');

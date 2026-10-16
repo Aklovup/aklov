@@ -7,13 +7,15 @@ interface Props { project: CollectionEntry<'projects'>; index: number; }
 const { project, index } = Astro.props;
 const { data } = project;
 const demoLink = data.projectType === 'Independent Concept' ? data.externalLinks[0] : undefined;
-const number = String(data.order).padStart(2, '0');
+const number = String(index + 1).padStart(2, '0');
 const categories = [...new Set([data.primaryCategory, ...data.additionalCategories])];
 ---
 
 <article
   class="project-card"
   data-project={data.slug}
+  data-project-type={data.projectType}
+  data-primary-category={data.primaryCategory}
   data-categories={categories.join(' ')}
   data-layout={index % 4}
   aria-labelledby={`project-${data.slug}`}

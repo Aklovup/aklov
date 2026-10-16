@@ -1,18 +1,18 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { projectCategories } from '../../data/projectCategories';
+import { categoryFilters, projectGroups, matchesSelection } from '../../scripts/projectFilter';
 import ProjectCard from './ProjectCard.astro';
 import ProjectDialog from './ProjectDialog.astro';
 
 interface Props { projects: CollectionEntry<'projects'>[]; }
 const { projects } = Astro.props;
-const filters = [
-  { id: 'all', label: 'All Projects' },
-  ...projectCategories,
-];
-const countFor = (id: string) => projects.filter(({ data }) =>
-  id === 'all' || data.primaryCategory === id || data.additionalCategories.includes(id as typeof data.primaryCategory)
-).length;
+const data = projects.map(project => project.data);
+const groups = projectGroups.map(group => ({
+  ...group, count: data.filter(project => matchesSelection(project, { group: group.id, category: 'all' })).length,
+}));
+const categories = (['client', 'concepts'] as const).map(group => ({
+  group, options: categoryFilters(data, group),
+}));
 ---
 
 <section class="gallery" id="projects" aria-label="Portfolio projects" data-project-gallery>
@@ -23,18 +23,24 @@ const countFor = (id: string) => projects.filter(({ data }) =>
         {projects.length} projects · All Projects
       </p>
     </div>
-    <div class="filters" role="group" aria-label="Filter projects by category" hidden data-filters>
-      {filters.map((filter) => (
-        <button
-          type="button"
-          data-filter={filter.id}
-          data-label={filter.label}
-          aria-pressed={filter.id === 'all' ? 'true' : 'false'}
-          aria-controls="project-grid"
-        >
-          <span>{filter.label}</span>
-          <span class="filter-count" aria-hidden="true">{String(countFor(filter.id)).padStart(2, '0')}</span>
-        </button>
+    <div class="filter-controls" hidden data-filters>
+      <div class="group-filters" role="group" aria-label="Choose project collection">
+        {groups.map(group => (
+          <button type="button" data-group={group.id} data-label={group.label} aria-pressed={group.id === 'all' ? 'true' : 'false'} aria-controls="project-grid">
+            <span>{group.label}</span>
+            <span class="filter-count" aria-hidden="true">{String(group.count).padStart(2, '0')}</span>
+          </button>
+        ))}
+      </div>
+      {categories.map(({ group, options }) => (
+        <div class:list={['filters', { 'single-category': options.length === 1 }]} role="group" aria-label={group === 'client' ? 'Filter client projects by category' : 'Filter independent concepts by category'} data-category-filters={group} hidden>
+          {options.map(option => (
+            <button type="button" data-filter={option.id} data-label={option.label} aria-pressed="false" aria-controls="project-grid">
+              <span>{option.label}</span>
+              <span class="filter-count" aria-hidden="true">{String(option.count).padStart(2, '0')}</span>
+            </button>
+          ))}
+        </div>
       ))}
     </div>
     <noscript><p class="no-script">All projects are shown. Enable JavaScript to filter by category.</p></noscript>
@@ -47,43 +53,62 @@ const countFor = (id: string) => projects.filter(({ data }) =>
 <ProjectDialog projects={projects} />
 
 <script>
-  import { filterFromUrl, matchesFilter, urlForFilter } from '../../scripts/projectFilter';
-  import type { ProjectFilter } from '../../data/projectCategories';
+  import { matchesSelection, normalizeSelection, selectionFromUrl, urlForSelection, projectGroups } from '../../scripts/projectFilter';
+  import type { ProjectGroup, ProjectSelection } from '../../scripts/projectFilter';
+  import type { ProjectCategory, ProjectFilter } from '../../data/projectCategories';
 
   const gallery = document.querySelector<HTMLElement>('[data-project-gallery]');
   if (gallery) {
-    const filters = gallery.querySelector<HTMLElement>('[data-filters]')!;
-    const buttons = [...filters.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+    const controls = gallery.querySelector<HTMLElement>('[data-filters]')!;
+    const groups = [...controls.querySelectorAll<HTMLButtonElement>('[data-group]')];
+    const rows = [...controls.querySelectorAll<HTMLElement>('[data-category-filters]')];
     const cards = [...gallery.querySelectorAll<HTMLElement>('[data-project]')];
+    const records = cards.map(card => ({
+      projectType: card.dataset.projectType!,
+      primaryCategory: card.dataset.primaryCategory as ProjectCategory,
+      additionalCategories: (card.dataset.categories ?? '').split(' ').filter(Boolean) as ProjectCategory[],
+    }));
     const result = gallery.querySelector<HTMLElement>('[data-result-count]')!;
     const emptyState = gallery.querySelector<HTMLElement>('[data-empty-state]')!;
+    let active: ProjectSelection = { group: 'all', category: 'all' };
 
-    const applyFilter = (filter: ProjectFilter) => {
+    const applySelection = (selection: ProjectSelection) => {
+      active = normalizeSelection(records, selection);
       let visible = 0;
-      for (const card of cards) {
-        card.hidden = !matchesFilter((card.dataset.categories ?? '').split(' '), filter);
+      cards.forEach((card, index) => {
+        card.hidden = !matchesSelection(records[index], active);
         if (!card.hidden) card.dataset.layout = String(visible++ % 4);
+      });
+      for (const button of groups) button.setAttribute('aria-pressed', String(button.dataset.group === active.group));
+      for (const row of rows) {
+        row.hidden = row.dataset.categoryFilters !== active.group;
+        for (const button of row.querySelectorAll<HTMLButtonElement>('[data-filter]')) {
+          button.setAttribute('aria-pressed', String(!row.hidden && button.dataset.filter === active.category));
+        }
       }
-      for (const button of buttons) {
-        button.setAttribute('aria-pressed', String(button.dataset.filter === filter));
-      }
-      const label = buttons.find((button) => button.dataset.filter === filter)!.dataset.label;
-      result.textContent = `${visible} ${visible === 1 ? 'project' : 'projects'} · ${label}`;
+      const groupLabel = projectGroups.find(group => group.id === active.group)!.label;
+      const categoryLabel = rows.find(row => !row.hidden)?.querySelector<HTMLButtonElement>('[aria-pressed="true"]')?.dataset.label;
+      result.textContent = `${visible} ${visible === 1 ? 'project' : 'projects'} · ${groupLabel}${categoryLabel ? ' · ' + categoryLabel : ''}`;
       emptyState.hidden = visible !== 0;
     };
-
-    for (const button of buttons) {
-      button.addEventListener('click', () => {
-        const filter = button.dataset.filter as ProjectFilter;
-        const current = new URL(window.location.href);
-        const next = urlForFilter(current, filter);
-        if (next.href !== current.href) history.pushState(null, '', next);
-        applyFilter(filter);
-      });
+    const select = (selection: ProjectSelection) => {
+      const nextSelection = normalizeSelection(records, selection);
+      const current = new URL(window.location.href);
+      const next = urlForSelection(current, nextSelection);
+      if (next.href !== current.href) history.pushState(null, '', next);
+      applySelection(nextSelection);
+    };
+    for (const button of groups) {
+      button.addEventListener('click', () => select({ group: button.dataset.group as ProjectGroup, category: 'all' }));
     }
-    window.addEventListener('popstate', () => applyFilter(filterFromUrl(new URL(window.location.href))));
-    applyFilter(filterFromUrl(new URL(window.location.href)));
-    filters.hidden = false;
+    for (const row of rows) {
+      for (const button of row.querySelectorAll<HTMLButtonElement>('[data-filter]')) {
+        button.addEventListener('click', () => select({ group: row.dataset.categoryFilters as ProjectGroup, category: button.dataset.filter as ProjectFilter }));
+      }
+    }
+    window.addEventListener('popstate', () => applySelection(selectionFromUrl(new URL(window.location.href))));
+    applySelection(selectionFromUrl(new URL(window.location.href)));
+    controls.hidden = false;
   }
 </script>
 
@@ -92,8 +117,13 @@ const countFor = (id: string) => projects.filter(({ data }) =>
   .gallery-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 14px; margin-bottom: 24px; }
   .gallery-heading p { margin: 0; }
   .result-count { color: var(--body); font-size: 12px; line-height: 1.6; }
-  .filters { display: flex; flex-wrap: wrap; gap: 0 28px; padding-block: 4px 16px; border-block: 1px solid var(--charcoal); margin-bottom: clamp(32px, 4vw, 58px); }
-  .filters[hidden], .empty-state[hidden] { display: none; }
+  .filter-controls { margin-bottom: clamp(32px, 4vw, 58px); }
+  .group-filters { display: flex; flex-wrap: wrap; gap: 4px 36px; padding-block: 8px; border-block: 1px solid var(--charcoal); }
+  .group-filters button { display: inline-flex; align-items: baseline; gap: 12px; min-height: 48px; padding: 10px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--body); font: 500 clamp(14px, 1.2vw, 18px)/1.4 var(--sans); text-align: left; cursor: pointer; transition: color .2s ease, border-color .2s ease; }
+  .group-filters button[aria-pressed='true'] { color: var(--charcoal); border-bottom-color: var(--charcoal); }
+  .group-filters button:focus-visible { outline-color: var(--charcoal); outline-offset: 3px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 0 28px; padding-block: 4px 16px; border-bottom: 1px solid var(--line); }
+  .filter-controls[hidden], .filters[hidden], .empty-state[hidden] { display: none; }
   .filters button {
     display: inline-flex;
     align-items: center;
@@ -119,7 +149,7 @@ const countFor = (id: string) => projects.filter(({ data }) =>
   .project-grid > :global(.project-card[data-layout='1']),
   .project-grid > :global(.project-card[data-layout='2']) { grid-column: span 5; }
   .no-script, .empty-state { padding-block: 24px; color: var(--body); font-size: 14px; line-height: 1.8; }
-  @media (hover: hover) { .filters button:hover { color: var(--gold-dark); border-bottom-color: var(--gold-dark); } }
+  @media (hover: hover) { .group-filters button:not([aria-pressed='true']):hover, .filters button:hover { color: var(--gold-dark); border-bottom-color: var(--gold-dark); } }
   @media (max-width: 1000px) {
     .project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .project-grid > :global(.project-card[data-layout]) { grid-column: span 1; }
@@ -127,6 +157,11 @@ const countFor = (id: string) => projects.filter(({ data }) =>
   }
   @media (max-width: 640px) {
     .gallery-heading { align-items: flex-start; flex-direction: column; gap: 10px; }
+    .group-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .group-filters button { flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 8px; min-width: 0; min-height: 84px; padding-block: 12px; font-size: 13px; }
+    .group-filters button > span:first-child { min-height: 2.8em; }
+    .filters.single-category:not([hidden]) { display: flex; }
+    .filters.single-category button { gap: 20px; }
     .filters { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; padding-bottom: 8px; }
     .filters button { justify-content: space-between; min-height: 64px; padding-block: 10px; border-bottom-width: 1px; font-size: 11px; }
     .filter-count { flex-shrink: 0; }

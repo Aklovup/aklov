@@ -14,7 +14,7 @@
   "cover": {
     "id": "wound-concierge-cover",
     "type": "image",
-    "alt": "Screenshot of the storefront homepage.",
+    "alt": "Wound Concierge members-only storefront with customer sign-in and health-goal categories.",
     "width": 1920,
     "height": 1714,
     "url": "/images/projects/wound-concierge/Woundconcierge_Home.png"
@@ -23,7 +23,7 @@
     {
       "id": "wound-storefront",
       "type": "image",
-      "alt": "Screenshot of the storefront homepage.",
+      "alt": "Wound Concierge members-only storefront with customer sign-in and health-goal categories.",
       "caption": "Members-only storefront",
       "order": 1,
       "width": 1920,
@@ -42,7 +42,7 @@
     {
       "id": "wound-loyalty-widget",
       "type": "image",
-      "alt": "Screenshot of the Zoho Thrive widget displayed on the storefront.",
+      "alt": "Wound Concierge storefront with the Zoho Thrive referral and loyalty widget open.",
       "caption": "Referral and loyalty widget",
       "order": 3,
       "width": 1920,
@@ -51,10 +51,9 @@
     }
   ],
   "featured": false,
-  "order": 5
+  "order": 3
 }
 ---
-
 ### Overview
 
 A members-only Zoho Commerce experience combining controlled access, customer onboarding, and referral and loyalty management.

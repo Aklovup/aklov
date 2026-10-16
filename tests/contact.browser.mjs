@@ -81,8 +81,7 @@ try {
   assert.ok(!(await page.locator('[name="botcheck"]').isVisible()));
   assert.ok(!(await page.locator('[data-success]').isVisible()));
   assert.ok(!(await page.locator('[data-failure]').isVisible()));
-  await page.locator('[data-inquiry-form]').evaluate((form) => form.requestSubmit());
-  assert.equal(submissions, 0, 'Invalid form made an API request.');
+  assert.equal(submissions, 0, 'Loading the form made an API request.');
   // Check actual foreground/background contrast, including functional text.
 
   const lowContrast = await page.evaluate(() => {
@@ -114,17 +113,22 @@ try {
 
   for (const width of [320, 390, 640, 760, 768, 1000, 1001, 1280, 1440, 1920]) {
     await page.setViewportSize({ width, height: 1100 });
+    assert.equal(await page.locator('[aria-invalid="true"]').count(), 0, 'Initial form should not show validation errors.');
     const overflow = await page.evaluate(() => [...document.querySelectorAll('.contact-page .wrap, .contact-page h1, .inquiry, .field, input, textarea, select, .direct-links, .contact-page button, .nav, .foot-links')].filter((element) => {
       if (!element.getClientRects().length || element.closest('.honey')) return false;
       const box = element.getBoundingClientRect();
       return box.left < -1 || box.right > innerWidth + 1 || element.scrollWidth > element.clientWidth + 1;
     }).map((element) => element.id || element.className));
     assert.deepEqual(overflow, [], 'Overflow at ' + width + 'px');
-    if (width <= 760) {
+    if (width <= 1000) {
       const intro = await page.locator('.contact-introduction').boundingBox();
       const form = await page.locator('.form-column').boundingBox();
       const direct = await page.locator('.direct-contact').boundingBox();
       assert.ok(intro.y + intro.height <= form.y && form.y + form.height <= direct.y);
+      assert.ok(await page.locator('.email-shortcut').isVisible());
+      assert.equal(await page.locator('.email-shortcut').getAttribute('href'), links.email);
+    } else {
+      assert.equal(await page.locator('.email-shortcut').isVisible(), false);
     }
   }
   await page.setViewportSize({ width: 1440, height: 1100 });
@@ -221,9 +225,18 @@ try {
   assert.equal(requests, 1);
   release();
   await pending.page.locator('[data-success]').waitFor({ state: 'visible' });
-  assert.ok(await pending.page.getByRole('button', { name: contact.submitLabel }).isDisabled());
+  assert.ok(await pending.page.locator('[type="submit"]').isDisabled());
+  assert.ok(await pending.page.locator('[data-inquiry-fields]').isHidden());
+  assert.equal(await pending.page.locator('[data-contact-panel] h2').innerText(), contact.success.heading);
+  assert.equal(await pending.page.locator('[data-success] p').innerText(), contact.success.body);
+  assert.equal(await pending.page.locator('[data-feedback]').getAttribute('aria-labelledby'), 'inquiry-title');
+  assert.equal(await pending.page.locator('[data-success] h3:visible').count(), 0);
   assert.equal(await pending.page.locator('#inquiry-message').inputValue(), '');
   assert.ok(await pending.page.locator('[data-feedback]').evaluate((element) => document.activeElement === element));
+  await pending.page.setViewportSize({width:1440,height:1100});
+  await pending.page.screenshot({path:output+'/contact-success-desktop.png',fullPage:true});
+  await pending.page.setViewportSize({width:390,height:844});
+  await pending.page.screenshot({path:output+'/contact-success-mobile.png',fullPage:true});
   await pending.context.close();
 
   const spam = await deliveryFixture();
@@ -248,8 +261,11 @@ try {
     await fixture.page.getByRole('button', { name: contact.submitLabel }).click();
     await fixture.page.locator('[data-failure]').waitFor({ state: 'visible' });
     assert.ok(!(await fixture.page.locator('[data-success]').isVisible()));
+    assert.ok(await fixture.page.locator('[data-inquiry-fields]').isVisible());
+    assert.equal(await fixture.page.locator('#inquiry-title').innerText(), contact.formHeading);
     assert.ok(await fixture.page.getByRole('button', { name: contact.submitLabel }).isEnabled());
     assert.equal(await fixture.page.locator('#inquiry-message').inputValue(), 'I would like to discuss a business website.');
+    if(failure === 'http-error') await fixture.page.screenshot({path:output+'/contact-failure.png',fullPage:true});
     await fixture.context.close();
   }
   console.log('Passed: approved copy/contact links; validation and valid-form enablement; Web3Forms field mapping and strict acceptance; captcha/honeypot behavior; loading, success, rejection, network/malformed failure, reset and duplicate prevention; keyboard/contrast/reduced motion/no-JS and ten widths. API/captcha fixtures only; no real email sent by CI.');

@@ -41,10 +41,9 @@
     }
   ],
   "featured": false,
-  "order": 6
+  "order": 1
 }
 ---
-
 ### Overview
 
 A Zoho CRM system designed around the operational needs of a moving and storage business, from incoming leads through job coordination and completion.

@@ -4,12 +4,12 @@ import { categoryLabel } from '../../data/projectCategories';
 import ProjectMedia from './ProjectMedia.astro';
 import ProjectMediaGallery from './ProjectMediaGallery.astro';
 
-interface Props { project: CollectionEntry<'projects'>; }
-const { project } = Astro.props;
+interface Props { project: CollectionEntry<'projects'>; index: number; }
+const { project, index } = Astro.props;
 const { data } = project;
 const lead = [...data.media].sort((a,b) => a.order - b.order).find((item) => item.url);
 const boundedMedia = data.media.filter((item) => item.url).length > 1;
-const number = String(data.order).padStart(2, '0');
+const number = String(index + 1).padStart(2, '0');
 const categories = [...new Set([data.primaryCategory, ...data.additionalCategories])];
 const externalLinks = [
   ...(data.externalUrl ? [{ label: 'Visit Website', url: data.externalUrl }] : []),
@@ -48,7 +48,7 @@ const externalLinks = [
           </nav>
         )}
       </div>
-      {data.media.some((item) => item.id !== lead?.id) && <div class="detail-media"><ProjectMediaGallery project={project} omitId={lead?.id} /></div>}
+      {data.media.some((item) => item.id !== lead?.id) && <div class="detail-media"><ProjectMediaGallery project={project} number={number} omitId={lead?.id} /></div>}
     </div>
   </div>
 </article>

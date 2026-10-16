@@ -32,10 +32,9 @@
     }
   ],
   "featured": false,
-  "order": 8
+  "order": 2
 }
 ---
-
 ### Overview
 
 A consultation-booking automation connecting conversational AI with calendar availability, appointment management, customer records, and confirmations.

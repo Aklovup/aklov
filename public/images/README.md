@@ -1,47 +1,63 @@
 # Aklov website media
 
-Upload approved website images here in GitHub: `Aklovup/aklov/public/images/`.
-Astro copies this directory to the build output, and Cloudflare Pages serves its files directly. No R2 bucket, binding, media handler or private credential is required.
+Upload approved originals to `Aklovup/aklov/public/images/` in GitHub. Astro includes these files in the static build and Cloudflare Pages serves them directly. No R2 binding, media handler, or private credential is required.
 
-Use these folders:
+## Who does what
 
-- `portraits/` — Home and About portraits.
-- `solutions/` — approved replacement for the existing Solutions photograph.
-- `projects/<project-slug>/` — screenshots, GIFs, videos and optional still posters for each portfolio project. The ten existing projects have matching folders.
+The project owner uploads media and identifies the main/cover image when a particular choice is wanted. Descriptive filenames help, but there is no requirement to enter metadata manually.
 
-## Impex Automotive
+Codex reviews the actual media, filename, and approved project content, then maintains the individual entries in `src/content/projects/`: source paths, actual dimensions, media types, alternative text, concise captions, optional posters, and gallery order. Preserve existing cover choices unless the owner requests a replacement. Report any uncertain mapping rather than guessing. Captions describe the interface or sequence shown; they must not invent features, results, or client claims.
 
-Upload the portal-homepage GIF as:
+Upload first, then ask Codex to integrate the files. An upload alone does not automatically create a portfolio entry or change a cover.
 
-`public/images/projects/impex-automotive/Impex_Homepage.gif`
+## Upload folders
 
-Its browser URL will be:
+- `portraits/` — approved personal portraits.
+- `solutions/` — approved Solutions imagery.
+- `projects/<project-slug>/` — screenshots, GIFs, videos, and optional still posters.
 
-`/images/projects/impex-automotive/Impex_Homepage.gif`
+Browser URLs begin with `/images/`, without `public`. For example:
 
-Alternatively, an actual static cover image can be uploaded as `cover.webp`; do not rename a GIF's extension to WebP. Use a real converted/exported file with a matching extension.
+- GitHub file: `public/images/projects/impex-automotive/Impex_Homepage.gif`
+- Browser path: `/images/projects/impex-automotive/Impex_Homepage.gif`
 
-Once the file is uploaded, set the existing Impex `cover.url` and `impex-homepage` media item's `url` in `src/content/projects/impex-automotive.md` to the matching local URL. Supply descriptive cover alternative text and the file's actual width/height. Keep the media type consistent with the file. This reuses one source for the card and project popup.
+Prefer descriptive lowercase filenames with hyphens for new uploads. Existing filenames remain valid and need not be renamed. Keep the extension consistent with the actual file format; renaming a GIF to WebP does not convert it.
 
-The uploaded `Impex_Homepage.gif` is 1280 × 610 pixels and is now used by the existing Impex card and `impex-homepage` popup slot. The product/cart and checkout media remain pending: one of the three planned Impex items is supplied. The GIF loads into a visible still frame and stays paused by default. Play starts animation; Pause retains a visible frame. Reduced-motion visitors also receive the still preview. A static poster is optional and has not been supplied. The `.gitkeep` files preserve upload folders; they are not image assets.
+## Current portfolio inventory
 
-## General rules
+All 17 supplied gallery items have source paths, actual dimensions, types, alternative text, captions, and display order. Supplied covers also have accurate dimensions, types, and alternative text. Covers intentionally omit separate visible captions.
 
-- Browser URLs start with `/images/`; omit `public` from the URL.
-- Prefer lowercase filenames with hyphens and an extension matching the real format.
-- Upload the file before assigning its URL. Preserve a working reference or intentional placeholder while replacement files are absent.
-- Keep portfolio references in individual project content files, rather than card markup.
-- Preserve stable media identifiers, approved copy and original aspect ratios. Include accurate dimensions and alternative text.
-- Use optimized WebP/JPEG/PNG for static images and transparent WebP/PNG for cutout portraits. Existing GIF/video controls remain supported.
-- Redact private information before uploading client screenshots.
-- Use the feature-branch workflow for review; do not merge media changes without owner approval.
+| Project folder | Uploaded gallery items | Existing cover |
+| --- | --- | --- |
+| `impex-automotive` | 3 GIFs: homepage, product/cart, review/payment | `Impex_Homepage.gif` |
+| `xans-operations-portal` | 4 GIFs: dashboard, order entry, quality control, invoice generation | `Xans_Home.gif` |
+| `divine-health-black-onyx` | 4 images: gateway, Divine shop, Black Onyx shop, shared cart | `Gateway.png` |
+| `jaycor-commerce` | 2 images: category, product details | `jaycor-shop.png` |
+| `wound-concierge` | 2 images: storefront, referral/loyalty widget | `Woundconcierge_Home.png` |
+| `vera-skincare-concept` | 1 full-page independent design concept | `vera-concept-overview.jpg` |
+| `vortex-gym-concept` | 1 full-page independent design concept | `vortex-gym-overview.jpg` |
+| `moving-company-crm` | Pending: workflow and scheduling images | Pending |
+| `guideyusuf-ai-support` | Pending: support workflow image | Pending |
+| `instantresidency-booking` | Pending: booking workflow image | Pending |
 
-## Build-generated previews
+Wound Concierge's customer-processing workflow image is also pending. Missing media retains its stable identifier and planned caption without a fabricated URL. Placeholder dimensions are provisional until the actual file is supplied. The `.gitkeep` files preserve empty upload folders; they are not media assets.
 
-Upload originals to the existing project, portraits or Solutions folders. Do not upload to `public/images/generated/`.
+## Presentation and generated previews
 
-`npm run media` uses Sharp (Astro's image engine) to create 640/1280/1600px WebP derivatives without upscaling, including first-frame GIF posters. Output goes to ignored `public/images/generated/` and `.cache/media-manifest.json`. Both `npm run build` and `npm run dev` run this step automatically. Derived filenames include a source-content hash so replacing an original refreshes its previews.
+Do not upload to `public/images/generated/`. `npm run media` uses Sharp to generate responsive 640/1280/1600px WebP derivatives without upscaling, including first-frame GIF posters. Output is ignored at `public/images/generated/` and `.cache/media-manifest.json`. Both `npm run build` and `npm run dev` run this step automatically. Source-content hashes refresh previews when originals change.
 
-Original uploads remain unchanged. The existing project entries still hold original source references; components select responsive previews from the build manifest. GIF animation is requested only after Play, with the poster retained during loading and Pause retaining the current frame. Case-study images remain contained; card previews remain top-center covers. Full-size media links have been removed by owner request.
+Original uploads remain unchanged. Project entries reference originals; shared components resolve generated previews. GIFs show a still immediately and animate only after Play; Pause retains a visible frame. Card previews use top-center cover cropping.
 
-The Solutions source is `public/images/solutions/Solutions_img.jpg`. The Home/About portraits remain their supplied PNGs; higher-resolution originals can be supplied later. Final missing portfolio screenshots remain pending rather than being substituted.
+A single available case-study image keeps its natural full height. In galleries with multiple available media items, tall static images use a bounded preview and offer “View full page” only when cropped. GIFs retain their playback controls.
+
+The Solutions photograph is `public/images/solutions/Solutions_img.jpg`. The supplied portraits remain in `public/images/portraits/`; the Home portrait is retained even though the current homepage review no longer displays it.
+
+## Integration checks
+
+- Redact confidential information before uploading client media.
+- Preserve approved project text, stable media identifiers, and selected covers.
+- Verify file existence, dimensions, format, alternative text, captions, and order.
+- Run the build and relevant media/browser checks; verify crop, paused GIFs, and popup layouts.
+- Routine isolated media updates may go directly to main under the owner's standing instruction. Keep work on an existing unmerged feature branch there for review; do not merge unrelated design work automatically.
+
+See `AGENTS.md` for standing project guidance and `docs/static-images.md` for the historical R2 audit.

@@ -33,6 +33,8 @@ jobs:
         run: node --test --test-isolation=none tests/work.test.mjs tests/contact.test.mjs
       - name: Install the test browser
         run: npx playwright install --with-deps chromium
+      - name: Review the editorial homepage
+        run: node tests/home.browser.mjs
       - name: Verify uploaded static media
         run: node tests/media-assets.browser.mjs
       - name: Verify single images and bounded multi-image inspection
@@ -50,7 +52,10 @@ jobs:
       - name: Validate the Contact page and form states
         run: node tests/contact.browser.mjs
       - name: Inspect the live Contact branch preview without submitting
-        if: github.head_ref == 'feat/contact-page'
+        if: github.head_ref == 'feat/editorial-homepage'
+        env:
+          CONTACT_PREVIEW_URL: https://feat-editorial-homepage.aklov.pages.dev/contact/
+          CONTACT_PREVIEW_SHA: ${{ github.event.pull_request.head.sha }}
         run: node tests/contact.preview.mjs
       - name: Save desktop and mobile review screenshots
         if: always()
@@ -114,4 +119,12 @@ jobs:
         with:
           name: project-images-review
           path: artifacts/project-images/
+          if-no-files-found: ignore
+
+      - name: Save homepage review screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: homepage-review
+          path: artifacts/home-review/
           if-no-files-found: ignore

@@ -6,8 +6,13 @@ import { readProjects } from './project-content.mjs';
 
 const base = 'http://127.0.0.1:4321';
 const output = 'artifacts/work-review';
-const counts = { all: 10, websites: 5, 'customer-systems': 2, automation: 5, applications: 2, integrations: 7 };
+const counts = { all: 10, websites: 3, 'customer-systems': 2, automation: 5, applications: 2, integrations: 7 };
 const projects = readProjects();
+const expectedCatalog = [
+  'impex-automotive', 'divine-health-black-onyx', 'moving-company-crm', 'guideyusuf-ai-support',
+  'xans-operations-portal', 'jaycor-commerce', 'instantresidency-booking',
+  'wound-concierge', 'vera-skincare-concept', 'vortex-gym-concept',
+];
 // Astro applies smart typography; quotation-mark formatting does not alter copy.
 const normalize = (value) => value.replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/\s+/g, ' ').trim();
 const server = spawn('npm', ['run', 'preview', '--', '--host', '127.0.0.1', '--port', '4321'], { stdio: 'inherit' });
@@ -21,17 +26,28 @@ async function waitForServer() {
   throw new Error('Astro preview did not become ready.');
 }
 
-async function checkFilter(page, filter, count) {
-  await page.waitForFunction(({ filter, count }) =>
+async function checkFilter(page, filter, count, group = filter === 'all' ? 'all' : 'client') {
+  await page.waitForFunction(({ filter, count, group }) =>
     document.querySelectorAll('[data-project]:not([hidden])').length === count
-    && document.querySelector('[data-filter="' + filter + '"]').getAttribute('aria-pressed') === 'true',
-  { filter, count });
-  assert.equal(await page.locator('[data-filter][aria-pressed="true"]').count(), 1);
+    && document.querySelector('[data-group="' + group + '"]').getAttribute('aria-pressed') === 'true'
+    && (group === 'all' || document.querySelector('[data-category-filters="' + group + '"] [data-filter="' + filter + '"]').getAttribute('aria-pressed') === 'true'),
+  { filter, count, group });
+  assert.equal(await page.locator('[data-group][aria-pressed="true"]').count(), 1);
+  assert.equal(await page.locator('[data-category-filters]:visible').count(), group === 'all' ? 0 : 1);
+  const visible = await page.locator('[data-project]:not([hidden])').evaluateAll(cards => cards.map(card => card.dataset.project));
+  const expected = expectedCatalog.filter(slug => {
+    const project = projects.find(p => p.slug === slug);
+    if (group === 'all') return true;
+    const type = group === 'client' ? 'Client Project' : 'Independent Concept';
+    return project.projectType === type && (filter === 'all' || [project.primaryCategory, ...project.additionalCategories].includes(filter));
+  });
+  assert.deepEqual(visible, expected, 'Rendered group/category order: ' + group + '/' + filter);
+  assert.match(await page.locator('[data-result-count]').innerText(), new RegExp('^' + count + ' projects'));
 }
 
 async function checkOverflow(page) {
   const overflow = await page.evaluate(() => [...document.querySelectorAll(
-    '.work-intro .wrap, .intro-composition, .intro-note, .filters, .filters button, .project-card, .project-media, .card-copy, .nav'
+    '.work-intro .wrap, .intro-composition, .intro-note, .group-filters, .group-filters button, .filters, .filters button, .project-card, .project-media, .card-copy, .nav'
   )].filter((el) => {
     if (!el.getClientRects().length) return false;
     const rect = el.getBoundingClientRect();
@@ -49,49 +65,80 @@ try {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
 
+  // Direct group links, old category-only URLs, and explicit client category links.
   for (const [filter, count] of Object.entries(counts)) {
-    await page.goto(base + '/work/' + (filter === 'all' ? '' : '?category=' + filter));
-    await checkFilter(page, filter, count);
+    for (const prefix of filter === 'all' ? [''] : ['?category=', '?type=client&category=']) {
+      await page.goto(base + '/work/' + (filter === 'all' ? '' : prefix + filter));
+      await checkFilter(page, filter, count);
+    }
   }
-  await page.goto(base + '/work/?category=unknown');
-  await checkFilter(page, 'all', 10);
+  await page.goto(base + '/work/?type=client');
+  await checkFilter(page, 'all', 8, 'client');
+  await page.goto(base + '/work/?type=concepts');
+  await checkFilter(page, 'all', 2, 'concepts');
+  assert.deepEqual(await page.locator('[data-category-filters="concepts"] [data-filter]').evaluateAll(items => items.map(item => item.dataset.filter)), ['all']);
+  assert.equal(await page.locator('[data-category-filters="client"] [data-filter="integrations"]').count(), 1);
+  for (const suffix of ['?category=unknown', '?type=unknown']) {
+    await page.goto(base + '/work/' + suffix);
+    await checkFilter(page, 'all', 10);
+  }
+  await page.goto(base + '/work/?type=concepts&category=automation');
+  await checkFilter(page, 'all', 2, 'concepts');
+
   await page.goto(base + '/work/?source=review#projects');
-  await checkFilter(page, 'all', 10);
   await page.evaluate(() => { window.phaseOneMarker = 'same-document'; });
-  for (const [filter, count] of Object.entries(counts)) {
-    await page.locator('[data-filter="' + filter + '"]').click();
-    await checkFilter(page, filter, count);
+  await page.locator('[data-group="client"]').click();
+  await checkFilter(page, 'all', 8, 'client');
+  for (const [filter, count] of Object.entries({...counts, all: 8})) {
+    await page.locator('[data-category-filters="client"] [data-filter="' + filter + '"]').click();
+    await checkFilter(page, filter, count, 'client');
     assert.equal(await page.evaluate(() => window.phaseOneMarker), 'same-document', 'Filter reloaded the page.');
     assert.equal(new URL(page.url()).searchParams.get('source'), 'review');
     assert.equal(new URL(page.url()).hash, '#projects');
+    const before = await page.evaluate(() => history.length);
+    await page.locator('[data-category-filters="client"] [data-filter="' + filter + '"]').click();
+    assert.equal(await page.evaluate(() => history.length), before, 'Repeated selection created history.');
   }
   await page.locator('[data-filter="websites"]').click();
   await page.locator('[data-filter="customer-systems"]').click();
   await page.goBack();
-  await checkFilter(page, 'websites', 5);
+  await checkFilter(page, 'websites', 3);
   await page.goForward();
   await checkFilter(page, 'customer-systems', 2);
-
-  await page.locator('[data-filter="all"]').click();
+  await page.locator('[data-group="concepts"]').click();
+  await checkFilter(page, 'all', 2, 'concepts');
+  await page.goBack();
+  await checkFilter(page, 'customer-systems', 2);
+  await page.goForward();
+  await checkFilter(page, 'all', 2, 'concepts');
+  await page.locator('[data-group="all"]').click();
+  await checkFilter(page, 'all', 10);
   assert.equal(new URL(page.url()).searchParams.has('category'), false);
+  assert.equal(new URL(page.url()).searchParams.has('type'), false);
   assert.equal(await page.locator('[data-media-id]').count(), 10);
-  assert.equal(await page.locator('.media-placeholder').count(), projects.filter((project) => !project.cover.url).length);
-  assert.equal(await page.locator('.project-media img, .project-media video, .project-media canvas[data-gif-still]').count(), projects.filter((project) => project.cover.url).length);
-  assert.equal(await page.locator('[data-project] a[target="_blank"]').count(), projects.filter(p => p.externalUrl).length + projects.filter(p => p.projectType === 'Independent Concept' && p.externalLinks?.length).length);
+  assert.equal(await page.locator('.media-placeholder').count(), projects.filter(project => !project.cover.url).length);
   assert.equal(await page.locator('[data-project-open]').count(), 10);
   assert.equal(await page.locator('dialog').count(), 1);
   assert.equal(await page.locator('dialog').isVisible(), false);
+
   for (const width of [320, 390, 640, 768, 1000, 1440, 1920]) {
     await page.setViewportSize({ width, height: 1000 });
-    await checkOverflow(page);
+    for (const [group, count] of [['all',10],['client',8],['concepts',2]]) {
+      await page.locator('[data-group="' + group + '"]').click();
+      await checkFilter(page, 'all', count, group);
+      await checkOverflow(page);
+      if (width === 1440 || width === 390) {
+        await page.locator('[data-project]:not([hidden]) img').evaluateAll(images => Promise.all(images.map(img => { img.loading = 'eager'; return img.decode(); })));
+        await page.evaluate(() => document.fonts.ready);
+        await page.evaluate(() => scrollTo(0,0));
+        await page.waitForTimeout(250); // Let selection-color transitions settle before review captures.
+        await page.screenshot({ path: output + '/work-' + group + '-' + width + '.png', fullPage: true });
+      }
+    }
   }
-  await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.evaluate(() => document.fonts.ready);
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await page.screenshot({ path: output + '/work-desktop.png', fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.screenshot({ path: output + '/work-mobile.png', fullPage: true });
-
+  await page.locator('[data-group="client"]').click();
+  await checkFilter(page, 'all', 8, 'client');
   const keyboardButton = page.locator('[data-filter="applications"]');
   await keyboardButton.focus();
   await page.keyboard.press('Tab');
@@ -111,8 +158,8 @@ try {
   assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'), 'false');
 
   await page.goto(base + '/solutions/');
-  assert.equal(await page.locator('a[href^="/work/?category="]').count(), 5);
-  await page.locator('a[href="/work/?category=automation"]').click();
+  assert.equal(await page.locator('a[href^="/work/?type=client&category="]').count(), 5);
+  await page.locator('a[href="/work/?type=client&category=automation"]').click();
   await checkFilter(page, 'automation', 5);
   await page.goto(base + '/');
   assert.equal(await page.locator('h1').innerText(), 'Better systems.\nBetter business.');
@@ -128,6 +175,9 @@ try {
     await trigger.click();
     await dialog.waitFor({ state: 'visible' });
     assert.equal(await dialog.locator('h2').innerText(), project.title);
+    const number = String(expectedCatalog.indexOf(project.slug) + 1).padStart(2, '0');
+    assert.equal(await page.locator('[data-project="' + project.slug + '"] .project-number').innerText(), number);
+    assert.equal(await dialog.locator('.detail-controls .mono').innerText(), 'PROJECT / ' + number);
     assert.equal(await dialog.locator('.detail-headline').innerText(), project.headline);
     assert.equal(await dialog.locator('.detail-introduction').innerText(), project.description);
     assert.equal(normalize(await dialog.locator('.case-study-copy').innerText()), normalize(project.body.replace(/^### /gm, '')));
@@ -211,18 +261,39 @@ try {
   // Direct links can show a project outside the selected category; both parameters are retained.
   await page.goto(base + '/work/?category=websites&project=impex-automotive');
   await dialog.waitFor({ state: 'visible' });
-  await checkFilter(page, 'websites', 5);
+  await checkFilter(page, 'websites', 3);
   await close.click();
   await page.waitForFunction(() => !document.querySelector('dialog').open && !new URL(location.href).searchParams.has('project'));
-  await checkFilter(page, 'websites', 5);
+  await checkFilter(page, 'websites', 3);
   await page.goto(base + '/work/?category=websites&project=unknown');
-  await checkFilter(page, 'websites', 5);
+  await checkFilter(page, 'websites', 3);
   assert.equal(await dialog.isVisible(), false);
   for (const project of projects.filter((item) => item.aliases.length)) {
     await page.goto(base + '/work/?project=' + project.aliases[0]);
     await dialog.waitFor({ state: 'visible' });
     assert.equal(await dialog.locator('h2').innerText(), project.title);
   }
+  // Concepts preserve group state through popup history and dismissal.
+  await page.goto(base + '/work/?type=concepts&source=home');
+  await checkFilter(page, 'all', 2, 'concepts');
+  await page.locator('[data-project-open="vera-skincare-concept"]').click();
+  await dialog.waitFor({state:'visible'});
+  assert.equal(new URL(page.url()).searchParams.get('type'), 'concepts');
+  await page.goBack();
+  await dialog.waitFor({state:'hidden'});
+  await checkFilter(page, 'all', 2, 'concepts');
+  await page.goForward();
+  await dialog.waitFor({state:'visible'});
+  await close.click();
+  await dialog.waitFor({state:'hidden'});
+  await checkFilter(page, 'all', 2, 'concepts');
+  assert.ok(await page.locator('[data-project-open="vera-skincare-concept"]').evaluate(el => el === document.activeElement));
+  // A project outside the selected group returns focus to a visible collection control.
+  await page.goto(base + '/work/?type=client&project=vera-skincare-concept');
+  await dialog.waitFor({state:'visible'});
+  await close.click();
+  await dialog.waitFor({state:'hidden'});
+  await page.waitForFunction(() => document.activeElement?.getAttribute('data-group') === 'client');
   await page.goto(base + '/work/?project=vera-skincare-concept');
   await dialog.waitFor({ state: 'visible' });
   await page.screenshot({ path: output + '/concept-desktop.png' });
@@ -233,6 +304,7 @@ try {
   const noJsPage = await noJs.newPage();
   await noJsPage.goto(base + '/work/');
   assert.equal(await noJsPage.locator('[data-project]:visible').count(), 10);
+  assert.deepEqual(await noJsPage.locator('[data-project]').evaluateAll(cards => cards.map(card => card.dataset.project)), expectedCatalog);
   assert.equal(await noJsPage.locator('[data-filters]:visible').count(), 0);
   assert.ok(await noJsPage.locator('.no-script').isVisible());
   for (const project of projects.filter((item) => item.cover.url && item.cover.type === 'gif')) {

@@ -1,0 +1,55 @@
+---
+import { getEntry } from 'astro:content';
+import { mediaPreview } from '../../lib/media';
+import { solutionsHeroVisual } from '../../data/solutionsHero';
+
+const project = await getEntry('projects', solutionsHeroVisual.projectSlug);
+if (!project?.data.cover.url) throw new Error('The Solutions tablet needs an uploaded project cover.');
+const cover = project.data.cover;
+const preview = mediaPreview(cover.url);
+---
+
+<figure class="tablet-stage" data-solutions-tablet>
+  <div class="tablet-device">
+    <span class="tablet-camera" aria-hidden="true"></span>
+    <div class="tablet-screen" style={`--screen-ratio: ${solutionsHeroVisual.screenRatio}`}>
+      <img
+        src={preview?.src || cover.url}
+        srcset={preview?.srcset}
+        sizes="(max-width: 640px) calc(100vw - 88px), (max-width: 1000px) 480px, 38vw"
+        width={cover.width}
+        height={cover.height}
+        alt={`${project.data.title} website design preview.`}
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+      />
+    </div>
+  </div>
+</figure>
+
+<style>
+  .tablet-stage { position: relative; min-width: 0; width: 100%; margin: 0; padding: 36px 26px; perspective: 1400px; }
+  .tablet-device {
+    position: relative;
+    padding: 17px 20px;
+    border: 1px solid #484848;
+    border-radius: 30px;
+    background: #090909;
+    box-shadow: -7px 5px 0 #222, -8px 6px 0 #383838, 0 22px 34px -18px rgba(0,0,0,.85), inset 0 0 0 3px #171717;
+    transform: rotateX(4deg) rotateY(-12deg) rotateZ(4deg);
+  }
+  .tablet-camera { position: absolute; left: 7px; top: calc(50% - 2px); width: 5px; height: 5px; border: 1px solid #343434; border-radius: 50%; background: #15181b; }
+  .tablet-screen { position: relative; aspect-ratio: var(--screen-ratio); overflow: hidden; border: 1px solid #202020; border-radius: 12px; background: #080808; }
+  .tablet-screen img { position: absolute; top: 0; left: 0; display: block; width: 100%; height: auto; }
+  @media (max-width: 1000px) {
+    .tablet-stage { max-width: 560px; margin-inline: auto; padding: 28px 24px; perspective: none; }
+    .tablet-device { transform: none; box-shadow: 0 5px 0 #222, 0 6px 0 #383838, 0 18px 30px -18px rgba(0,0,0,.85), inset 0 0 0 3px #171717; }
+  }
+  @media (max-width: 640px) {
+    .tablet-stage { padding: 18px 12px; }
+    .tablet-device { padding: 11px 14px; border-radius: 22px; box-shadow: 0 3px 0 #222, 0 4px 0 #383838, 0 14px 24px -16px rgba(0,0,0,.85), inset 0 0 0 2px #171717; transform: none; }
+    .tablet-screen { border-radius: 9px; }
+    .tablet-camera { left: 5px; width: 4px; height: 4px; }
+  }
+</style>

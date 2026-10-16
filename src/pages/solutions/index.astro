@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { links } from '../../data/links';
 import { mediaPreview } from '../../lib/media';
+import SolutionsTablet from '../../components/solutions/SolutionsTablet.astro';
 
 const sectionImage = mediaPreview('/images/solutions/Solutions_img.jpg')!;
 
@@ -164,43 +165,36 @@ const steps = [
 >
   <!-- Hero -->
   <section class="dark hero-surface" aria-labelledby="page-title">
-    <div class="arc arc-hero" aria-hidden="true"></div>
-    <div class="arc arc-hero-2" aria-hidden="true"></div>
-
     <div class="wrap hero">
       <div class="hero-meta mono">
         <span>What I help businesses do</span>
         <span>Solutions / Aklov</span>
       </div>
-
-      <h1 id="page-title">
-        <span class="l1">Better ways</span>
-        <span class="l2">to run, <em>connect</em></span>
-        <span class="l3">and grow your</span>
-        <span class="l4">business.</span>
-      </h1>
-
-      <div class="hero-lower">
-        <div class="hero-copy-block">
-          <p class="hero-copy">
-            A business needs more than individual tools. It needs a website that communicates its value, workflows that keep work moving, and systems that help people stay organized.
-          </p>
-          <p class="hero-copy">
-            Aklov designs digital experiences and builds connected business solutions around the way your business actually works.
-          </p>
-
+      <div class="hero-composition">
+        <div class="hero-introduction">
+          <h1 id="page-title">
+            <span class="l1">Better ways to run,</span>
+            <span class="l2"><em>connect and grow</em></span>
+            <span class="l3">your business.</span>
+          </h1>
+          <div class="hero-copy-block">
+            <p class="hero-copy">
+              A business needs more than individual tools. It needs a website that communicates its value, workflows that keep work moving, and systems that help people stay organized.
+            </p>
+            <p class="hero-copy">
+              Aklov designs digital experiences and builds connected business solutions around the way your business actually works.
+            </p>
+          </div>
           <div class="hero-actions">
-            <a class="btn btn-gold" href={links.contact}>
-              Discuss Your Project <span aria-hidden="true">↗</span>
-            </a>
-            <a class="btn btn-ghost" href="#solutions">
-              Explore My Solutions <span aria-hidden="true">↓</span>
-            </a>
+            <a class="btn btn-gold" href={links.contact}>Discuss Your Project <span aria-hidden="true">↗</span></a>
+            <a class="hero-explore" href="#solutions">Explore My Solutions <span aria-hidden="true">↓</span></a>
           </div>
         </div>
-
-        <nav class="idx" aria-label="My solutions">
-          <div class="idx-top mono">Explore My Solutions</div>
+        <SolutionsTablet />
+      </div>
+      <nav class="idx" aria-label="My solutions">
+        <div class="idx-top mono">Explore My Solutions</div>
+        <div class="idx-links">
           {solutions.map((s) => (
             <a class="idx-row" href={`#${s.id}`}>
               <span class="idx-n">{s.number}</span>
@@ -208,8 +202,8 @@ const steps = [
               <span class="idx-a" aria-hidden="true">↓</span>
             </a>
           ))}
-        </nav>
-      </div>
+        </div>
+      </nav>
     </div>
   </section>
 
@@ -260,7 +254,7 @@ const steps = [
       <div class="wrap">
         <div class="sol-top">
           <span class="sol-num" aria-hidden="true">{s.number}</span>
-          <h3 class="sol-title" id={`${s.id}-title`}>{s.title}</h3>
+          <h2 class="sol-title" id={`${s.id}-title`}>{s.title}</h2>
         </div>
 
         <div class="sol-body">
@@ -270,7 +264,7 @@ const steps = [
           </div>
 
           <div class="sol-list">
-            <h4 class="mono">What this can include:</h4>
+            <h3 class="mono">What this can include:</h3>
             <ul>
               {s.includes.map((item) => <li>{item}</li>)}
             </ul>
@@ -325,7 +319,6 @@ const steps = [
 
   <!-- Choosing the right solution -->
   <section class="section choose" aria-labelledby="choose-title">
-    <div class="arc arc-choose" aria-hidden="true"></div>
 
     <div class="wrap">
       <div class="kicker mono">Not sure where to start?</div>
@@ -377,89 +370,32 @@ const steps = [
 <style>
   h1, h2, h3, h4, p, ul, figure { margin: 0; }
 
-  /* Hero */
-
-  .dark {
-    position: relative;
-    overflow: hidden;
-    background: var(--charcoal);
-    color: var(--ivory);
-  }
-
-  .dark > .wrap { position: relative; z-index: 1; }
-
-  .arc-hero { right: -20vw; top: -2vw; width: 74vw; max-width: 1200px; }
-  .arc-hero-2 { left: -26vw; bottom: -34vw; width: 60vw; max-width: 980px; opacity: .25; }
-
-  .hero { padding-block: 44px 0; }
-
-  .hero-meta {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    margin-bottom: 28px;
-    color: var(--gold);
-  }
-
+  /* A compact editorial opening, related to Home without repeating its graphic. */
+  .dark { background: var(--charcoal); color: var(--ivory); --focus-color: var(--gold); }
+  .hero { padding-block: clamp(40px, 4.5vw, 72px) 0; }
+  .hero-meta { display: flex; justify-content: space-between; gap: 24px; margin-bottom: 30px; color: var(--gold); }
   .hero-meta span:last-child { color: var(--on-dark-dim); text-align: right; }
-
-  .hero h1 {
-    position: relative;
-    z-index: 2;
-    font-family: var(--display);
-    font-size: clamp(62px, 9.2vw, 158px);
-    font-weight: 400;
-    line-height: .9;
-    letter-spacing: -.045em;
-  }
-
+  .hero h1 { font-family: var(--display); font-size: clamp(52px, 6.2vw, 108px); font-weight: 400; line-height: .94; letter-spacing: -.04em; }
   .hero h1 span { display: block; }
-  .hero h1 .l2 { padding-left: clamp(24px, 12vw, 230px); }
-  .hero h1 .l3 { padding-left: clamp(10px, 4vw, 80px); }
-  .hero h1 .l4 { padding-left: clamp(30px, 14vw, 270px); }
+  .hero h1 .l2 { padding-left: clamp(20px, 3.4vw, 60px); }
   .hero h1 em { color: var(--gold); font-style: italic; }
-
-  .hero-lower {
-    position: relative;
-    z-index: 2;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
-    gap: clamp(30px, 6vw, 100px);
-    align-items: start;
-    margin-top: 32px;
-    padding-bottom: 72px;
-  }
-
-  .hero-copy-block { max-width: 520px; }
-  .hero-copy { color: var(--on-dark); font-size: 15px; line-height: 1.9; }
-  .hero-copy + .hero-copy { margin-top: 18px; color: var(--ivory); }
-  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
-
-  .idx {
-    position: relative;
-    width: 100%;
-    max-width: 380px;
-    margin: 0 0 0 auto;
-    padding: 24px 28px 14px;
-    background: var(--ivory);
-    color: var(--charcoal);
-  }
-
-  .idx-top { padding-bottom: 16px; border-bottom: 1px solid var(--charcoal); color: var(--gold-dark); }
-
-  .idx-row {
-    display: grid;
-    grid-template-columns: 34px 1fr auto;
-    align-items: baseline;
-    gap: 10px;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .idx-row:last-child { border-bottom: 0; }
-  .idx-n { color: var(--gold-dark); font-size: 10px; font-weight: 600; letter-spacing: 1px; }
-  .idx-t { font-family: var(--display); font-size: 24px; line-height: 1.05; }
-  .idx-a { color: var(--stone); font-family: var(--display); font-size: 20px; }
+  .hero-composition { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: center; gap: clamp(40px, 5vw, 80px); padding-bottom: 42px; }
+  .hero-introduction { min-width: 0; }
+  .hero-copy-block { max-width: 620px; margin-top: 28px; }
+  .hero-copy { color: var(--on-dark); font-size: 16px; line-height: 1.8; }
+  .hero-copy + .hero-copy { margin-top: 14px; color: var(--ivory); }
+  .hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 16px 28px; margin-top: 26px; }
+  .hero-explore { display: inline-flex; align-items: center; gap: 20px; min-height: 44px; border-bottom: 1px solid var(--line-dark); font-size: 12px; font-weight: 600; }
+  .hero-explore span { font-size: 18px; }
+  .idx { width: 100%; min-width: 0; padding-block: 22px 26px; border-top: 1px solid var(--line-dark); color: var(--ivory); background: transparent; --focus-color: var(--gold); }
+  .idx-top { margin-bottom: 16px; color: var(--gold); font-size: 9px; }
+  .idx-links { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .idx-row { min-width: 0; display: grid; grid-template-columns: 20px minmax(0, 1fr) 20px; gap: 10px; align-items: baseline; min-height: 64px; padding: 8px 20px; border-left: 1px solid var(--line-dark); }
+  .idx-row:first-child { border-left: 0; padding-left: 0; }
+  .idx-row:last-child { padding-right: 0; }
+  .idx-n { color: var(--gold); font-size: 10px; }
+  .idx-t { overflow-wrap: anywhere; font-family: var(--display); font-size: clamp(20px, 1.7vw, 28px); line-height: 1.12; }
+  .idx-a { color: var(--gold); font-size: 16px; }
 
   /* Introduction */
 
@@ -475,19 +411,20 @@ const steps = [
     letter-spacing: -.04em;
   }
 
-  .intro h2 { max-width: 13ch; margin-top: 30px; font-size: clamp(50px, 7.5vw, 132px); line-height: .88; }
+  .intro { padding-block: clamp(44px, 4.5vw, 72px); }
+  .intro h2 { max-width: 18ch; margin-top: 24px; font-size: clamp(48px, 5.3vw, 88px); line-height: .98; }
   .intro h2 em, .sols-head h2 em { color: var(--gold-dark); font-style: italic; }
 
   .intro-grid {
     display: grid;
     grid-template-columns: 1.15fr .85fr;
     gap: clamp(40px, 7vw, 120px);
-    margin-top: clamp(32px, 4vw, 60px);
-    padding-top: 28px;
+    margin-top: 28px;
+    padding-top: 24px;
     border-top: 1px solid var(--charcoal);
   }
 
-  .intro-big { font-family: var(--display); font-size: clamp(26px, 2.9vw, 46px); line-height: 1.24; letter-spacing: -.02em; }
+  .intro-big { font-family: var(--display); font-size: clamp(26px, 2.4vw, 38px); line-height: 1.28; letter-spacing: -.02em; }
   .intro-side p { max-width: 460px; color: var(--body); font-size: 14.5px; line-height: 1.95; }
   .intro-side p + p { margin-top: 22px; color: var(--charcoal); }
 
@@ -558,14 +495,14 @@ const steps = [
 
   .is-dark .sol-num { -webkit-text-stroke-color: var(--gold); }
 
-  .sol-title { font-family: var(--display); font-size: clamp(44px, 5.6vw, 96px); font-weight: 400; line-height: .92; letter-spacing: -.04em; }
-  .sol-tag { margin-bottom: 28px; font-family: var(--display); font-size: clamp(28px, 3vw, 48px); line-height: 1.08; letter-spacing: -.025em; }
+  .sol-title { font-family: var(--display); font-size: clamp(42px, 4.8vw, 80px); font-weight: 400; line-height: .98; letter-spacing: -.04em; }
+  .sol-tag { margin-bottom: 28px; font-family: var(--display); font-size: clamp(28px, 2.6vw, 42px); line-height: 1.12; letter-spacing: -.025em; }
   .sol-lead p:not(.sol-tag) { max-width: 470px; color: var(--body); font-size: 14.5px; line-height: 1.95; }
   .sol-lead p + p { margin-top: 18px; }
   .is-dark .sol-lead p:not(.sol-tag) { color: var(--on-dark); }
 
-  .sol-list h4 { margin-bottom: 18px; color: var(--gold-dark); }
-  .is-dark .sol-list h4 { color: var(--gold); }
+  .sol-list h3 { margin-bottom: 18px; color: var(--gold-dark); }
+  .is-dark .sol-list h3 { color: var(--gold); }
 
   .sol-list ul { padding: 0; list-style: none; counter-reset: item; border-top: 1px solid currentColor; }
 
@@ -608,6 +545,7 @@ const steps = [
   .is-dark .sol-goal .btn-line { color: var(--gold); }
 
   /* Action group: one discussion button + one quieter project link */
+  .sol-actions .btn { height: auto; padding-block: 14px; line-height: 1.5; }
   .sol-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
 
   .text-link {
@@ -626,52 +564,39 @@ const steps = [
 
   /* 01 */
   .sol-1 .sol-top { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(20px, 3vw, 50px); align-items: end; margin-bottom: clamp(32px, 4vw, 56px); }
-  .sol-1 .sol-num { font-size: clamp(88px, 10vw, 160px); }
+  .sol-1 .sol-num { font-size: clamp(88px, 8.5vw, 136px); }
   .sol-1 .sol-body { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(40px, 8vw, 130px); }
 
   /* 02 */
   .sol-2 .sol-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 30px; margin-bottom: clamp(32px, 4vw, 56px); }
   .sol-2 .sol-title { max-width: 9ch; }
-  .sol-2 .sol-num { order: 2; margin-top: -.04em; font-size: clamp(100px, 12vw, 190px); }
+  .sol-2 .sol-num { order: 2; margin-top: -.04em; font-size: clamp(88px, 8.5vw, 136px); }
   .sol-2 .sol-body { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(40px, 8vw, 130px); }
   .sol-2 .sol-list { order: 1; }
   .sol-2 .sol-lead { order: 2; }
 
   /* 03 */
   .sol-3 .sol-top { display: flex; align-items: baseline; gap: clamp(20px, 3vw, 48px); margin-bottom: clamp(32px, 4vw, 56px); }
-  .sol-3 .sol-num { display: block; font-size: clamp(100px, 11vw, 180px); }
+  .sol-3 .sol-num { display: block; font-size: clamp(88px, 8.5vw, 136px); }
   .sol-3 .sol-title { max-width: 14ch; margin: 0; }
   .sol-3 .sol-body { display: grid; gap: clamp(40px, 5vw, 70px); }
   .sol-3 .sol-lead { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(30px, 6vw, 100px); align-items: start; }
   .sol-3 .sol-tag { grid-column: 1; grid-row: 1 / span 2; margin-bottom: 0; }
   .sol-3 .sol-lead p:not(.sol-tag) { grid-column: 2; max-width: none; }
   .sol-3 .sol-lead p + p { margin-top: 0; }
-  .sol-3 .sol-list ul { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
-
-  .sol-3 .sol-list li {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    min-height: 110px;
-    padding: 20px;
-    border-right: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
-    font-family: var(--display);
-    font-size: clamp(22px, 2vw, 30px);
-    line-height: 1.1;
-  }
+  .sol-3 .sol-list ul { display: grid; grid-template-columns: 1fr 1fr; column-gap: 40px; }
 
   /* 04 */
   .sol-4 .sol-top { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: clamp(20px, 3vw, 48px); margin-bottom: clamp(32px, 4vw, 56px); }
-  .sol-4 .sol-num { font-size: clamp(100px, 12vw, 190px); }
+  .sol-4 .sol-num { font-size: clamp(88px, 8.5vw, 136px); }
   .sol-4 .sol-title { max-width: 13ch; }
   .sol-4 .sol-body { display: grid; grid-template-columns: .8fr 1.2fr; gap: clamp(40px, 8vw, 130px); }
-  .sol-4 .sol-list li { padding-block: 20px; font-family: var(--display); font-size: clamp(24px, 2.6vw, 38px); line-height: 1.08; letter-spacing: -.02em; }
-  .sol-4 .sol-list li::before { padding-top: .5em; }
+
 
   /* 05 */
-  .sol-5 .sol-num { position: absolute; z-index: 0; top: -.12em; right: -3vw; font-size: clamp(160px, 22vw, 360px); opacity: .28; }
-  .sol-5 .sol-top { position: relative; z-index: 1; margin-bottom: clamp(32px, 4vw, 56px); }
+  .sol-5 .sol-num { font-size: clamp(88px, 8.5vw, 136px); }
+  .sol-5 .sol-top { display: flex; align-items: start; justify-content: space-between; gap: 32px; margin-bottom: clamp(32px, 4vw, 56px); }
+  .sol-5 .sol-num { order: 2; }
   .sol-5 .sol-title { max-width: 10ch; }
   .sol-5 .sol-body { display: grid; grid-template-columns: .85fr 1.15fr; gap: clamp(40px, 8vw, 130px); }
   .sol-5 .sol-list ul { display: grid; grid-template-columns: 1fr 1fr; column-gap: 36px; }
@@ -717,9 +642,9 @@ const steps = [
 
   .choose { position: relative; overflow: hidden; background: var(--charcoal); color: var(--ivory); }
   .choose > .wrap { position: relative; z-index: 1; }
-  .arc-choose { left: -18vw; top: -14vw; width: 62vw; max-width: 1000px; }
+  .choose { padding-block: clamp(48px, 5vw, 80px); }
   .choose .kicker { color: var(--gold); }
-  .choose h2 { max-width: 17ch; margin-top: 30px; font-size: clamp(46px, 6.2vw, 108px); line-height: .88; }
+  .choose h2 { max-width: 17ch; margin-top: 30px; font-size: clamp(42px, 4.8vw, 80px); line-height: 1; }
   .choose h2 em { color: var(--gold); font-style: italic; }
 
   .choose-grid {
@@ -739,7 +664,7 @@ const steps = [
 
   .closing { padding-block: clamp(56px, 6vw, 100px) 0; background: var(--gold); color: var(--charcoal); }
   .closing .kicker { color: var(--charcoal); }
-  .closing h2 { max-width: 12ch; margin-top: 30px; font-size: clamp(58px, 9vw, 160px); line-height: .84; letter-spacing: -.045em; }
+  .closing h2 { max-width: 19ch; margin-top: 26px; font-size: clamp(52px, 7.5vw, 120px); line-height: .96; letter-spacing: -.035em; }
   .closing h2 em { font-style: italic; }
 
   .closing-grid {
@@ -765,16 +690,21 @@ const steps = [
     .is-dark .text-link:hover { color: var(--gold); }
     .idx-a { transition: transform .2s ease; }
     .idx-row:hover .idx-a { transform: translateY(3px); }
-    .idx-row:hover .idx-t { color: var(--gold-dark); }
+    .idx-row:hover .idx-t { color: var(--gold); }
+    .hero-explore:hover { color: var(--gold); border-color: var(--gold); }
 
   }
 
   /* Tablet */
 
   @media (max-width: 1000px) {
-    .hero-lower { grid-template-columns: 1fr; }
-    .idx { max-width: none; margin-top: 0; }
-    .arc-hero { top: 40vw; right: -40vw; width: 120vw; }
+    .hero-composition { grid-template-columns: 1fr; gap: 16px; padding-bottom: 24px; }
+    .hero-copy-block { max-width: 720px; }
+    .hero-actions { flex-direction: row; flex-wrap: wrap; gap: 16px 24px; align-items: center; }
+    .idx-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .idx-row { border-left: 0; padding: 14px 0; border-bottom: 1px solid var(--line-dark); }
+    .idx-row:nth-child(even) { padding-left: 24px; }
+    .idx-t { font-size: 24px; }
 
     .intro-grid,
     .choose-grid,
@@ -809,19 +739,19 @@ const steps = [
 
   @media (max-width: 640px) {
     .hero { padding-top: 38px; }
-    .hero-meta { font-size: 8px; letter-spacing: 1.2px; }
-    .hero h1 { font-size: clamp(54px, 14.2vw, 84px); }
-    .hero h1 .l2 { padding-left: 18px; }
-    .hero h1 .l3 { padding-left: 0; }
-    .hero h1 .l4 { padding-left: 34px; }
-    .hero-actions { flex-direction: column; align-items: stretch; }
-    .hero-actions .btn { width: 100%; }
-
-    .idx { padding: 20px 20px 10px; }
-    .idx::before { inset: 10px -8px -10px 8px; }
+    .hero-meta { font-size: 9px; letter-spacing: 1.2px; }
+    .hero-meta span:last-child { display: none; }
+    .hero h1 { font-size: clamp(38px, 9.8vw, 66px); line-height: 1; }
+    .hero h1 .l2 { padding-left: clamp(16px, 5vw, 28px); }
+    .hero-copy { font-size: 15px; }
+    .hero-copy-block { margin-top: 24px; }
+    .hero-actions { gap: 14px 24px; }
+    .idx { width: 100%; min-width: 0; padding-block: 20px; }
+    .idx-links { grid-template-columns: 1fr; }
+    .idx-row, .idx-row:nth-child(even) { min-height: 52px; padding: 12px 0; }
     .idx-t { font-size: 22px; }
 
-    .intro h2 { font-size: clamp(50px, 13vw, 74px); }
+    .intro h2 { font-size: clamp(44px, 10.5vw, 64px); }
 
     .sols-figure { aspect-ratio: 1 / 1; }
     .sols-head-text h2 { font-size: clamp(46px, 12.4vw, 70px); }
@@ -834,10 +764,11 @@ const steps = [
     .sol-3 .sol-top, .sol-4 .sol-top { display: block; }
     .sol-3 .sol-num { font-size: 110px; margin-bottom: 18px; }
     .sol-3 .sol-list ul { grid-template-columns: 1fr; }
-    .sol-3 .sol-list li { min-height: 0; gap: 14px; }
+
     .sol-4 .sol-num { display: block; font-size: 110px; margin-bottom: 18px; }
     .sol-4 .sol-title { margin-top: 0; padding-top: 0; }
-    .sol-5 .sol-num { right: -8vw; font-size: 220px; opacity: .4; }
+    .sol-5 .sol-top { flex-direction: column; gap: 18px; }
+    .sol-5 .sol-num { order: 0; font-size: 110px; }
     .sol-5 .sol-list ul { grid-template-columns: 1fr; }
     .sol-goal { grid-template-columns: 1fr; gap: 26px; }
     .sol-actions { align-items: stretch; gap: 10px; }
@@ -853,3 +784,4 @@ const steps = [
     .closing h2 { font-size: clamp(48px, 13vw, 72px); }
   }
 </style>
+

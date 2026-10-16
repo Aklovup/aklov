@@ -88,45 +88,25 @@ try {
     }
     await page.keyboard.press('Escape');
   }
-  for (const route of ['/', '/about/']) {
-    await page.goto(base + route);
-    const portrait = page.locator(route === '/' ? '.portrait img' : '[data-about-portrait] img');
-    await portrait.evaluate(img => img.decode());
-    assert.ok((await portrait.getAttribute('src')).startsWith('/images/portraits/'));
-    for (const width of [1440,1001,1000,768,390,320]) {
-      await page.setViewportSize({width,height:1000});
-      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), route + ' at ' + width);
-      if (route === '/' && width <= 1000) {
-        const portraitBox = await portrait.boundingBox();
-        const copyBox = await page.locator('.hero-copy').boundingBox();
-        assert.ok(copyBox.y >= portraitBox.y + portraitBox.height, 'Portrait overlaps Home copy at ' + width);
-      }
-      if (route === '/') {
-        const mask = await portrait.evaluate(el => getComputedStyle(el).maskImage);
-        if (width <= 1000) assert.match(mask, /linear-gradient/);
-        else {
-          assert.equal(mask, 'none', 'Desktop portrait must remain crisp.');
-          const panel = page.locator('.panel'), copy = page.locator('.hero-copy-block');
-          const imageBox = await portrait.boundingBox(), panelBox = await panel.boundingBox(), copyBox = await copy.boundingBox();
-          assert.ok(copyBox.x + copyBox.width <= imageBox.x, 'Desktop copy overlaps the portrait.');
-          assert.ok(imageBox.x + imageBox.width <= panelBox.x, 'Desktop workflow overlaps the portrait.');
-          assert.equal(await panel.evaluate(el => getComputedStyle(el).backgroundColor), 'rgba(0, 0, 0, 0)');
-        }
-      }
-      else {
-        const frame = page.locator('.portrait-frame');
-        assert.equal(await frame.evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(216, 189, 120)');
-        assert.equal(await portrait.evaluate(el => getComputedStyle(el).maskImage), 'none');
-        const name = page.locator('.portrait-frame .portrait-name');
-        const frameBox = await frame.boundingBox(), nameBox = await name.boundingBox();
-        assert.ok(nameBox.x >= frameBox.x && nameBox.x + nameBox.width <= frameBox.x + frameBox.width + 1);
-        assert.ok(nameBox.y >= frameBox.y && nameBox.y + nameBox.height <= frameBox.y + frameBox.height + 1);
-        const fillContour = await page.locator('.signature-fill').getAttribute('d');
-        const edgeContour = await page.locator('.signature-edge').getAttribute('d');
-        assert.ok(fillContour.startsWith(edgeContour), 'Gold edge must follow the same continuous ivory contour.');
-      }
-      if (width === 1440 || width === 390) await page.screenshot({path:'artifacts/media-review/' + (route === '/' ? 'home' : 'about') + '-' + width + '.png'});
-    }
+  await page.goto(base + '/about/');
+  const portrait = page.locator('[data-about-portrait] img');
+  await portrait.evaluate(img => img.decode());
+  assert.ok((await portrait.getAttribute('src')).startsWith('/images/portraits/'));
+  for (const width of [1440,1001,1000,768,390,320]) {
+    await page.setViewportSize({width,height:1000});
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'About at ' + width);
+    const frame = page.locator('.portrait-frame');
+    assert.equal(await frame.evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(216, 189, 120)');
+    assert.equal(await portrait.evaluate(el => getComputedStyle(el).maskImage), 'none');
+    const name = page.locator('.portrait-frame .portrait-name');
+    const frameBox = await frame.boundingBox(), nameBox = await name.boundingBox();
+    assert.ok(nameBox.x >= frameBox.x && nameBox.x + nameBox.width <= frameBox.x + frameBox.width + 1);
+    assert.ok(nameBox.y >= frameBox.y && nameBox.y + nameBox.height <= frameBox.y + frameBox.height + 1);
+    const fillContour = await page.locator('.signature-fill').getAttribute('d');
+    const edgeContour = await page.locator('.signature-edge').getAttribute('d');
+    assert.ok(fillContour.startsWith(edgeContour), 'Gold edge must follow the same continuous ivory contour.');
+    if (width === 1440 || width === 390) await page.screenshot({path:'artifacts/media-review/about-' + width + '.png'});
   }
-  console.log('Passed: uploaded GIF/PNG/JPEG files, exact dimensions/types, 17 project media items, XANS four-item gallery, paused GIF playback, both portraits and responsive media.');
+  console.log('Passed: uploaded GIF/PNG/JPEG files, exact dimensions/types, 17 project media items, XANS four-item gallery, paused GIF playback, About portrait and responsive media.');
 } finally { await browser?.close(); server.kill('SIGTERM'); }
+

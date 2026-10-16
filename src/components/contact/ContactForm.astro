@@ -3,53 +3,55 @@ import { contact, inquiryDelivery } from '../../data/contact';
 import { links } from '../../data/links';
 import { inquiryLimits, inquiryServices } from '../../lib/inquiry';
 ---
-<section class="inquiry" aria-labelledby="inquiry-title">
+<section class="inquiry" data-contact-panel aria-labelledby="inquiry-title">
   <div class="form-heading">
     <h2 id="inquiry-title">{contact.formHeading}</h2>
     <p class="field-note">Required fields are marked <span aria-hidden="true">*</span>.</p>
   </div>
   <form action={inquiryDelivery.endpoint} method="post" data-inquiry-form>
-    <input type="hidden" name="access_key" value={inquiryDelivery.accessKey} />
-    <input type="hidden" name="subject" value={inquiryDelivery.subject} />
-    <input type="hidden" name="from_name" value={inquiryDelivery.fromName} />
-    <div class="field-pair">
-      <div class="field">
-        <label for="inquiry-name">Your name <span aria-hidden="true">*</span></label>
-        <input id="inquiry-name" name="name" autocomplete="name" required maxlength={inquiryLimits.name} aria-describedby="name-error" />
-        <p class="field-error" id="name-error" data-error="name" aria-live="polite"></p>
+    <div data-inquiry-fields>
+      <input type="hidden" name="access_key" value={inquiryDelivery.accessKey} />
+      <input type="hidden" name="subject" value={inquiryDelivery.subject} />
+      <input type="hidden" name="from_name" value={inquiryDelivery.fromName} />
+      <div class="field-pair">
+        <div class="field">
+          <label for="inquiry-name">Your name <span aria-hidden="true">*</span></label>
+          <input id="inquiry-name" name="name" autocomplete="name" required maxlength={inquiryLimits.name} aria-describedby="name-error" />
+          <p class="field-error" id="name-error" data-error="name" aria-live="polite"></p>
+        </div>
+        <div class="field">
+          <label for="inquiry-email">Email address <span aria-hidden="true">*</span></label>
+          <input id="inquiry-email" name="email" type="email" autocomplete="email" required maxlength={inquiryLimits.email} aria-describedby="email-error" />
+          <p class="field-error" id="email-error" data-error="email" aria-live="polite"></p>
+        </div>
       </div>
       <div class="field">
-        <label for="inquiry-email">Email address <span aria-hidden="true">*</span></label>
-        <input id="inquiry-email" name="email" type="email" autocomplete="email" required maxlength={inquiryLimits.email} aria-describedby="email-error" />
-        <p class="field-error" id="email-error" data-error="email" aria-live="polite"></p>
+        <label for="inquiry-service">What do you need help with? <span class="optional">Optional</span></label>
+        <select id="inquiry-service" name="service" aria-describedby="service-error">
+          <option value="">Select an option</option>
+          {inquiryServices.map((service) => <option value={service}>{service}</option>)}
+        </select>
+        <p class="field-error" id="service-error" data-error="service" aria-live="polite"></p>
       </div>
-    </div>
-    <div class="field">
-      <label for="inquiry-service">What do you need help with? <span class="optional">Optional</span></label>
-      <select id="inquiry-service" name="service" aria-describedby="service-error">
-        <option value="">Select an option</option>
-        {inquiryServices.map((service) => <option value={service}>{service}</option>)}
-      </select>
-      <p class="field-error" id="service-error" data-error="service" aria-live="polite"></p>
-    </div>
-    <div class="field">
-      <label for="inquiry-message">Tell me about your project <span aria-hidden="true">*</span></label>
-      <textarea id="inquiry-message" name="message" rows="6" required maxlength={inquiryLimits.message} aria-describedby="message-limit message-error"></textarea>
-      <p class="field-note" id="message-limit">Up to 5,000 characters.</p>
-      <p class="field-error" id="message-error" data-error="message" aria-live="polite"></p>
-    </div>
-    <div class="honey" aria-hidden="true" inert>
-      <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" />
-    </div>
-    <div class="captcha-region">
-      <div class="h-captcha" data-captcha="true" data-size="compact" data-theme="light" data-callback="aklovCaptchaVerified" data-expired-callback="aklovCaptchaExpired" data-error-callback="aklovCaptchaError"></div>
-      <p class="field-note">Complete the spam check before sending.</p>
-      <p class="field-error" data-captcha-error tabindex="-1" aria-live="polite"></p>
-    </div>
-    <noscript><p class="availability">Online submission requires JavaScript. Please <a href={links.email}>contact me by email</a>.</p></noscript>
-    <div class="submit-row">
-      <button class="btn btn-dark" type="submit" disabled>{contact.submitLabel}</button>
-      <p class="field-note" data-loading role="status" hidden>Sending inquiry…</p>
+      <div class="field">
+        <label for="inquiry-message">Tell me about your project <span aria-hidden="true">*</span></label>
+        <textarea id="inquiry-message" name="message" rows="6" required maxlength={inquiryLimits.message} aria-describedby="message-limit message-error"></textarea>
+        <p class="field-note" id="message-limit">Up to 5,000 characters.</p>
+        <p class="field-error" id="message-error" data-error="message" aria-live="polite"></p>
+      </div>
+      <div class="honey" aria-hidden="true" inert>
+        <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" />
+      </div>
+      <div class="captcha-region">
+        <div class="h-captcha" data-captcha="true" data-size="compact" data-theme="light" data-callback="aklovCaptchaVerified" data-expired-callback="aklovCaptchaExpired" data-error-callback="aklovCaptchaError"></div>
+        <p class="field-note">Complete the spam check before sending.</p>
+        <p class="field-error" data-captcha-error tabindex="-1" aria-live="polite"></p>
+      </div>
+      <noscript><p class="availability">Online submission requires JavaScript. Please <a href={links.email}>contact me by email</a>.</p></noscript>
+      <div class="submit-row">
+        <button class="btn btn-dark" type="submit" disabled>{contact.submitLabel}</button>
+        <p class="field-note" data-loading role="status" hidden>Sending inquiry…</p>
+      </div>
     </div>
     <div class="feedback" data-feedback tabindex="-1" aria-live="polite" hidden>
       <div data-success hidden><h3>{contact.success.heading}</h3><p>{contact.success.body}</p></div>
@@ -61,12 +63,12 @@ import { inquiryLimits, inquiryServices } from '../../lib/inquiry';
   import '../../scripts/contactForm';
 </script>
 <style>
-  .inquiry { padding: clamp(28px, 3.8vw, 64px); background: var(--ivory); color: var(--charcoal); }
-  h2 { margin: 0; max-width: 14ch; font: 400 clamp(38px, 3.6vw, 62px)/1.02 var(--display); letter-spacing: -.025em; }
-  .form-heading { padding-bottom: 30px; border-bottom: 1px solid var(--line); margin-bottom: 34px; }
-  .form-heading .field-note { margin-top: 18px; }
-  .field { min-width: 0; margin-bottom: 24px; }
-  .field-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .inquiry { padding: clamp(28px, 3vw, 48px); background: var(--ivory); color: var(--charcoal); }
+  h2 { margin: 0; max-width: 17ch; font: 400 clamp(36px, 3.1vw, 52px)/1.02 var(--display); letter-spacing: -.025em; }
+  .form-heading { padding-bottom: 22px; border-bottom: 1px solid var(--line); margin-bottom: 24px; }
+  .form-heading .field-note { margin-top: 12px; }
+  .field { min-width: 0; margin-bottom: 22px; }
+  .field-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
   label { display: flex; align-items: baseline; gap: 6px; margin-bottom: 10px; font-size: 12px; font-weight: 600; line-height: 1.6; }
   .optional { margin-left: auto; font-size: 11px; font-weight: 400; color: var(--body); }
   input, select, textarea { width: 100%; min-width: 0; min-height: 48px; padding: 12px; border: 1px solid var(--stone); border-radius: 0; background: transparent; color: var(--charcoal); font: 400 16px/1.5 var(--sans); transition: border-color .2s ease, background-color .2s ease; }
@@ -92,9 +94,13 @@ import { inquiryLimits, inquiryServices } from '../../lib/inquiry';
   .feedback { margin-top: 24px; padding: 20px 0; border-top: 1px solid var(--line); }
   .feedback h3 { margin: 0 0 12px; font: 400 28px/1.15 var(--display); }
   .feedback p { margin: 0; color: var(--body); font-size: 13px; line-height: 1.8; }
+  .inquiry.is-sent .form-heading { padding-bottom: 0; margin-bottom: 24px; border-bottom: 0; }
+  .inquiry.is-sent .form-heading .field-note { display: none; }
+  .inquiry.is-sent .feedback { margin-top: 0; padding: 0; border-top: 0; }
+  .inquiry.is-sent .feedback p { max-width: 48ch; font-size: 15px; line-height: 1.85; }
   [hidden] { display: none !important; }
-  @media (max-width: 1000px) { .field-pair { grid-template-columns: 1fr; gap: 0; } }
   @media (max-width: 640px) {
+    .field-pair { grid-template-columns: 1fr; gap: 0; }
     .inquiry { padding: 30px 20px; }
     .form-heading { padding-bottom: 24px; margin-bottom: 28px; }
     h2 { font-size: clamp(36px, 9vw, 46px); }

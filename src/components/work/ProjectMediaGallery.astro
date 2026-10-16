@@ -2,14 +2,13 @@
 import type { CollectionEntry } from 'astro:content';
 import ProjectMedia from './ProjectMedia.astro';
 
-interface Props { project: CollectionEntry<'projects'>; omitId?: string; }
-const { project: { data }, omitId } = Astro.props;
+interface Props { project: CollectionEntry<'projects'>; omitId?: string; number: string; }
+const { project: { data }, omitId, number } = Astro.props;
 const media = [...data.media].sort((a, b) => a.order - b.order);
 const available = media.filter((item) => item.url && item.id !== omitId);
 const pending = media.filter((item) => !item.url);
 const preview = media.some((item) => item.url) ? undefined : pending.find((item) => item.placeholder);
 const boundedMedia = media.filter((item) => item.url).length > 1;
-const number = String(data.order).padStart(2, '0');
 ---
 
 <section class="media-gallery" aria-labelledby="project-media-title">

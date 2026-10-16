@@ -10,6 +10,8 @@ type CaptchaWindow = Window & {
 const captchaWindow = window as CaptchaWindow;
 const form = document.querySelector<HTMLFormElement>('[data-inquiry-form]');
 if (form) {
+  const panel = form.closest<HTMLElement>('[data-contact-panel]')!;
+  const fieldsRegion = form.querySelector<HTMLElement>('[data-inquiry-fields]')!;
   const submit = form.querySelector<HTMLButtonElement>('[type="submit"]')!;
   const feedback = form.querySelector<HTMLElement>('[data-feedback]')!;
   const success = form.querySelector<HTMLElement>('[data-success]')!;
@@ -102,6 +104,12 @@ if (form) {
       sent = true;
       success.hidden = false;
       form.reset();
+      fieldsRegion.hidden = true;
+      panel.classList.add('is-sent');
+      const successHeading = success.querySelector<HTMLElement>('h3')!;
+      panel.querySelector<HTMLElement>('#inquiry-title')!.textContent = successHeading.textContent;
+      successHeading.hidden = true;
+      feedback.setAttribute('aria-labelledby', 'inquiry-title');
     } catch {
       failure.hidden = false;
     } finally {

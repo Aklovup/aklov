@@ -254,6 +254,12 @@ Unknown category values should fall back gracefully to All Projects.
 
 Filtering should work without full-page reloads and support browser history navigation.
 
+Two-level filter navigation
+
+The top level is All Projects, Client Projects, and Independent Concepts. All Projects has no category row. Client Projects and Independent Concepts show All plus populated category options. Hide empty categories. When a group contains fewer than two distinct primary categories, show only All; do not show a redundant category option merely because projects have additional category tags. Once two primary categories are populated, offer every nonempty category in that group's priority order, including additional-category matches. Category options and counts derive from content entries, without hand-maintained lists of projects.
+
+Use `?type=client` and `?type=concepts` for the group, with existing `category` parameters for capability. A valid legacy category-only URL selects Client Projects. Unknown filters fall back gracefully. Preserve project deep links, unrelated parameters, hash, and browser history. Keep cross-page destinations in `src/data/links.ts`; the homepage concepts link opens Independent Concepts directly. A live-demo link is optional project metadata, not a classification or a requirement for the concepts group.
+
 Project content structure
 
 Use Astro content collections for portfolio projects.
@@ -275,6 +281,14 @@ Project data should support:
 - Full case-study content when provided.
 
 Keep the schema extensible without overengineering it.
+
+Project ordering
+
+All Projects shows client work first, followed by independent concepts. Each group has its own deterministic rotation. Client priority: Custom Business Applications, Websites, Customer & Sales Systems, Workflow Automation, then Integrations & Reporting. Concept priority: Websites, Custom Business Applications, Customer & Sales Systems, Workflow Automation, then Integrations & Reporting. Take one project from each primary category per round within its group. Skip empty or exhausted categories; never duplicate a project because of additional categories.
+
+The existing project `order` field is internal ordering within its project type and primary category, not a global rank. Codex maintains these numbers when adding projects. Sort each category by `order`, then canonical slug for deterministic ties. Featured status and media availability must not move projects ahead of this rotation. Category filters match both primary and additional categories within the selected group and preserve the relative catalog order. Visible project numbers reflect the full catalog position and match their popups; internal category order numbers are not exposed separately.
+
+Adding content entries must not require changes to Work page markup or card layout. Preserve the existing responsive composition, media metadata workflow, and project URLs.
 
 Project types
 
@@ -322,6 +336,16 @@ The media system should support:
 - Optional captions.
 - Different aspect ratios.
 - Full-size inspection where appropriate.
+
+Media ownership and upload workflow
+
+The project owner uploads approved media to the appropriate `public/images/` folder and may identify the main/cover image. Codex handles integration and metadata: source paths, actual dimensions, media types, alternative text, concise descriptive captions, optional posters, and gallery order.
+
+Review the actual media alongside its filename and approved project content. Filenames are clues, not proof of functionality. Codex is authorized to write factual media captions and alternative text; this does not authorize rewriting approved case-study or page copy, inventing outcomes, or claiming functionality from screenshots.
+
+Preserve the owner's selected cover and stable media identifiers. If no cover is specified, preserve the existing cover; for a new project choose a representative supplied asset and report the choice. Keep missing sources pending and do not guess URLs or dimensions. Cover alternative text belongs in the cover metadata; visible gallery captions belong in media entries, without adding redundant captions to card covers.
+
+The owner does not need to edit content metadata. Check uploads for confidential information and flag uncertain mappings or sensitive details before publication.
 
 Store media references in structured project data.
 
