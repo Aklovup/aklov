@@ -81,12 +81,19 @@ try {
     assert.ok(await screenImage.evaluate(img=>img.complete&&img.naturalWidth>0));
     assert.ok(await screen.evaluate(el=>el.scrollHeight>el.clientHeight),'Full-page source is not cropped to the opening hero');
     for (const service of await page.locator('.sol').all()) {
-      const summary = await service.locator('.sol-summary').boundingBox();
-      const details = await service.locator('.sol-body').boundingBox();
+      // Measure both columns in one frame: anchor smooth-scrolling can otherwise
+      // change the viewport offset between separate boundingBox calls.
+      const { summary, details } = await service.evaluate(element => {
+        const bounds = selector => {
+          const box = element.querySelector(selector).getBoundingClientRect();
+          return { x: box.x, y: box.y, width: box.width, height: box.height };
+        };
+        return { summary: bounds('.sol-summary'), details: bounds('.sol-body') };
+      });
       if (width > 640) {
         assert.ok(details.x >= summary.x + summary.width, 'Service columns overlap at ' + width);
         assert.ok(Math.abs(details.y - summary.y) < 1, 'Service rows lose their shared top alignment');
-      } else assert.ok(details.y >= summary.y + summary.height, 'Service content overlaps on mobile');
+      } else assert.ok(details.y >= summary.y + summary.height, 'Service content overlaps at ' + width + ': ' + JSON.stringify({ summary, details }));
     }
     if (width > 1000) {
       const steps = await page.locator('.step').evaluateAll(items => items.map(el => el.getBoundingClientRect().top));
