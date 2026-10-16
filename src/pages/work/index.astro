@@ -1,11 +1,10 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { orderProjects } from '../../lib/projectOrder';
 import ProjectGallery from '../../components/work/ProjectGallery.astro';
 
-const projects = (await getCollection('projects')).sort((a, b) =>
-  Number(b.data.featured) - Number(a.data.featured) || a.data.order - b.data.order
-);
+const projects = orderProjects(await getCollection('projects'));
 ---
 
 <BaseLayout title="Work — Aklov®" description="Aklov portfolio: client projects and independent concepts across websites, customer and sales systems, workflow automation, custom applications, integrations and reporting.">

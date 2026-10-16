@@ -5,19 +5,24 @@ import test from 'node:test';
 import vm from 'node:vm';
 import { filterFromUrl, matchesFilter, urlForFilter } from '../src/scripts/projectFilter.ts';
 import { resolveProjectSlug, urlForProject } from '../src/scripts/projectState.ts';
+import { orderProjects } from '../src/lib/projectOrder.ts';
+import { categoryIds } from '../src/data/projectCategories.ts';
 import { readProjects } from './project-content.mjs';
 
-const projects = readProjects();
+const projects = orderProjects(readProjects().map(data => ({ data }))).map(({ data }) => data);
 
 const expectedCounts = {
   all: 10, websites: 5, 'customer-systems': 2, automation: 5, applications: 2, integrations: 7,
 };
 
-test('all ten projects have unique slugs, ordered entries and stable media identifiers', () => {
+test('all ten projects have unique slugs, category-local ordering and stable media identifiers', () => {
   assert.equal(projects.length, 10);
   assert.equal(new Set(projects.map((p) => p.slug)).size, 10);
   assert.equal(new Set(projects.map((p) => p.cover.id)).size, 10);
-  assert.deepEqual(projects.map((p) => p.order), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  for (const category of categoryIds) {
+    const orders = projects.filter(p => p.primaryCategory === category).map(p => p.order);
+    assert.deepEqual(orders, Array.from({ length: orders.length }, (_, i) => i + 1));
+  }
   assert.ok(projects.every((p) => p.headline && p.body && (!p.cover.url || (p.cover.alt.trim() && p.cover.url.startsWith('/images/')))));
   assert.equal(projects.filter((p) => p.cover.type === 'gif').length, 2);
   assert.equal(projects.filter((p) => p.projectType === 'Independent Concept').length, 2);
@@ -183,4 +188,59 @@ test('unknown category initializes All Projects and can be normalized by its but
   assert.equal(fixture.visibleCount, 10);
   fixture.click('all');
   assert.equal(fixture.url, 'https://aklov.example/work/?source=solutions');
+});
+
+const entry = (primaryCategory, order, slug = primaryCategory + '-' + order) =>
+  ({ data: { primaryCategory, order, slug } });
+
+test('ten projects in every category interleave in ten complete rounds', () => {
+  const input = categoryIds.flatMap(category =>
+    Array.from({ length: 10 }, (_, i) => entry(category, i + 1))).reverse();
+  const result = orderProjects(input);
+  assert.equal(result.length, 50);
+  assert.equal(new Set(result.map(p => p.data.slug)).size, 50);
+  for (let round = 0; round < 10; round++) {
+    assert.deepEqual(result.slice(round * 5, round * 5 + 5).map(p => p.data.primaryCategory), categoryIds);
+    assert.ok(result.slice(round * 5, round * 5 + 5).every(p => p.data.order === round + 1));
+  }
+});
+
+test('empty and exhausted categories are skipped without dropping or repeating projects', () => {
+  assert.deepEqual(orderProjects([]), []);
+  const apps = Array.from({ length: 10 }, (_, i) => entry('applications', i + 1));
+  const web = entry('websites', 1), automation = entry('automation', 1);
+  const input = [...apps, web, automation];
+  const snapshot = structuredClone(input);
+  assert.deepEqual(orderProjects(input).map(p => p.data.slug),
+    [web.data.slug, automation.data.slug, ...apps.map(p => p.data.slug)]);
+  assert.deepEqual(input, snapshot, 'Ordering mutated collection entries or their input array.');
+});
+
+test('tied category positions resolve by slug independent of input order or featured/media state', () => {
+  const a = entry('applications', 1, 'alpha');
+  const z = entry('applications', 1, 'zeta');
+  z.data.featured = true;
+  z.data.cover = { url: '/images/example.png' };
+  const web = entry('websites', 1);
+  assert.deepEqual(orderProjects([z, a, web]), [web, a, z]);
+  assert.deepEqual(orderProjects([web, a, z]), [web, a, z]);
+});
+
+test('new projects enter their category position automatically and secondary categories do not duplicate them', () => {
+  const web = entry('websites', 1), app = entry('applications', 1);
+  app.data.additionalCategories = ['websites', 'integrations'];
+  assert.deepEqual(orderProjects([app, web]), [web, app]);
+  const nextWeb = entry('websites', 2), crm = entry('customer-systems', 1);
+  assert.deepEqual(orderProjects([app, nextWeb, web, crm]), [web, crm, app, nextWeb]);
+});
+
+test('filters preserve the rotated catalog order while including secondary categories', () => {
+  const fixture = galleryFixture('https://aklov.example/work/');
+  const allSlugs = fixture.cards.map(card => card.dataset.project);
+  for (const filter of Object.keys(expectedCounts)) {
+    fixture.click(filter);
+    const expected = projects.filter(p => matchesFilter([p.primaryCategory, ...p.additionalCategories], filter)).map(p => p.slug);
+    assert.deepEqual(fixture.cards.filter(card => !card.hidden).map(card => card.dataset.project), expected);
+    assert.deepEqual(fixture.cards.map(card => card.dataset.project), allSlugs);
+  }
 });

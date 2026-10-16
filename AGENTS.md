@@ -276,6 +276,14 @@ Project data should support:
 
 Keep the schema extensible without overengineering it.
 
+Project ordering
+
+All Projects uses a deterministic rotation: Websites, Customer & Sales Systems, Workflow Automation, Custom Business Applications, then Integrations & Reporting. Take one project from each primary category per round. Skip empty or exhausted categories; never duplicate a project because of additional categories.
+
+The existing project `order` field is internal ordering within its primary category, not a global rank. Codex maintains these numbers when adding projects. Sort each category by `order`, then canonical slug for deterministic ties. Featured status and media availability must not move projects ahead of this rotation. Category filters match both primary and additional categories and preserve the relative catalog order. Visible project numbers reflect the full catalog position and match their popups; internal category order numbers are not exposed separately.
+
+Adding content entries must not require changes to Work page markup or card layout. Preserve the existing responsive composition, media metadata workflow, and project URLs.
+
 Project types
 
 Distinguish between:

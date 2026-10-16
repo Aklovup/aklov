@@ -40,7 +40,7 @@
   ],
   "externalUrl": "https://www.jaycor.co.za/",
   "featured": false,
-  "order": 4
+  "order": 2
 }
 ---
 ### Overview

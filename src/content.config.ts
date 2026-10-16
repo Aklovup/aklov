@@ -40,6 +40,7 @@ const projects = defineCollection({
     externalUrl: z.string().url().optional(),
     externalLinks: z.array(z.object({ label: z.string(), url: z.string().url() })).default([]),
     featured: z.boolean().default(false),
+    // Internal position within primaryCategory; the Work catalog interleaves categories.
     order: z.number().int().nonnegative(),
   }),
 });

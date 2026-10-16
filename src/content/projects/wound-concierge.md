@@ -51,7 +51,7 @@
     }
   ],
   "featured": false,
-  "order": 5
+  "order": 3
 }
 ---
 ### Overview

@@ -5,8 +5,8 @@ import ProjectImageViewer from './ProjectImageViewer.astro';
 
 interface Props { projects: CollectionEntry<'projects'>[]; }
 const { projects } = Astro.props;
-const details = await Promise.all(projects.map(async (project) => ({
-  project, Content: (await render(project)).Content,
+const details = await Promise.all(projects.map(async (project, index) => ({
+  project, index, Content: (await render(project)).Content,
 })));
 ---
 
@@ -14,9 +14,9 @@ const details = await Promise.all(projects.map(async (project) => ({
   <div data-dialog-content></div>
 </dialog>
 <ProjectImageViewer />
-{details.map(({ project, Content }) => (
+{details.map(({ project, index, Content }) => (
   <template data-project-detail={project.data.slug} data-project-aliases={project.data.aliases.join(' ')}>
-    <ProjectDetail project={project}><Content /></ProjectDetail>
+    <ProjectDetail project={project} index={index}><Content /></ProjectDetail>
   </template>
 ))}
 

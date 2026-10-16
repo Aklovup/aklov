@@ -31,10 +31,9 @@
     }
   ],
   "featured": false,
-  "order": 7
+  "order": 1
 }
 ---
-
 ### Overview
 
 An intelligent customer-support workflow connecting conversational AI with tour knowledge, pickup information, reservation resources, and contextual search.

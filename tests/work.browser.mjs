@@ -8,6 +8,11 @@ const base = 'http://127.0.0.1:4321';
 const output = 'artifacts/work-review';
 const counts = { all: 10, websites: 5, 'customer-systems': 2, automation: 5, applications: 2, integrations: 7 };
 const projects = readProjects();
+const expectedCatalog = [
+  'divine-health-black-onyx', 'moving-company-crm', 'guideyusuf-ai-support', 'impex-automotive',
+  'jaycor-commerce', 'instantresidency-booking', 'xans-operations-portal',
+  'wound-concierge', 'vera-skincare-concept', 'vortex-gym-concept',
+];
 // Astro applies smart typography; quotation-mark formatting does not alter copy.
 const normalize = (value) => value.replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/\s+/g, ' ').trim();
 const server = spawn('npm', ['run', 'preview', '--', '--host', '127.0.0.1', '--port', '4321'], { stdio: 'inherit' });
@@ -27,6 +32,12 @@ async function checkFilter(page, filter, count) {
     && document.querySelector('[data-filter="' + filter + '"]').getAttribute('aria-pressed') === 'true',
   { filter, count });
   assert.equal(await page.locator('[data-filter][aria-pressed="true"]').count(), 1);
+  const visible = await page.locator('[data-project]:not([hidden])').evaluateAll(cards => cards.map(card => card.dataset.project));
+  const expected = expectedCatalog.filter(slug => {
+    const project = projects.find(p => p.slug === slug);
+    return filter === 'all' || [project.primaryCategory, ...project.additionalCategories].includes(filter);
+  });
+  assert.deepEqual(visible, expected, 'Rendered category order: ' + filter);
 }
 
 async function checkOverflow(page) {
@@ -128,6 +139,9 @@ try {
     await trigger.click();
     await dialog.waitFor({ state: 'visible' });
     assert.equal(await dialog.locator('h2').innerText(), project.title);
+    const number = String(expectedCatalog.indexOf(project.slug) + 1).padStart(2, '0');
+    assert.equal(await page.locator('[data-project="' + project.slug + '"] .project-number').innerText(), number);
+    assert.equal(await dialog.locator('.detail-controls .mono').innerText(), 'Project / ' + number);
     assert.equal(await dialog.locator('.detail-headline').innerText(), project.headline);
     assert.equal(await dialog.locator('.detail-introduction').innerText(), project.description);
     assert.equal(normalize(await dialog.locator('.case-study-copy').innerText()), normalize(project.body.replace(/^### /gm, '')));
@@ -233,6 +247,7 @@ try {
   const noJsPage = await noJs.newPage();
   await noJsPage.goto(base + '/work/');
   assert.equal(await noJsPage.locator('[data-project]:visible').count(), 10);
+  assert.deepEqual(await noJsPage.locator('[data-project]').evaluateAll(cards => cards.map(card => card.dataset.project)), expectedCatalog);
   assert.equal(await noJsPage.locator('[data-filters]:visible').count(), 0);
   assert.ok(await noJsPage.locator('.no-script').isVisible());
   for (const project of projects.filter((item) => item.cover.url && item.cover.type === 'gif')) {
