@@ -133,7 +133,11 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
 </BaseLayout>
 
 <style>
-  .about-page { --about-accent: color-mix(in srgb, var(--gold-dark) 85%, var(--charcoal)); }
+  .about-page {
+    --about-accent: color-mix(in srgb, var(--gold-dark) 85%, var(--charcoal));
+    /* Richer display gold: 3.13:1 on ivory for these large text accents. */
+    --about-display-gold: #a5852e;
+  }
   h1, h2, h3, p { margin: 0; }
   h1, h2, h3 { font-family: var(--display); font-weight: 400; }
   h2 { font-size: clamp(46px, 5vw, 76px); line-height: 1; letter-spacing: -.035em; }
@@ -157,7 +161,7 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
   .section { padding-bottom: clamp(44px, 5vw, 72px); }
   .section-heading { min-width: 0; }
   .section-heading h2 { max-width: 14ch; font-size: clamp(42px, 4.4vw, 68px); line-height: 1.02; }
-  .section-heading h2 em { display: block; color: var(--about-accent); font-style: italic; }
+  .section-heading h2 em { display: block; color: var(--about-display-gold); font-style: italic; }
   .reading-copy { max-width: 66ch; color: var(--body); font-size: 16px; line-height: 1.85; }
   .reading-copy p + p { margin-top: 20px; }
   .lead { color: var(--charcoal); font-family: var(--display); font-size: clamp(25px, 2.3vw, 34px); line-height: 1.3; letter-spacing: -.02em; }
@@ -177,14 +181,14 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
   .stage-list { list-style: none; margin: 0; padding: 0; }
   .stage-list li { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 10px 20px; padding-block: 28px; border-bottom: 1px solid var(--line); }
   .stage-list li:first-child { padding-top: 0; }
-  .stage-number { grid-column: 1; grid-row: 1 / span 2; color: var(--about-accent); font-family: var(--display); font-size: 48px; font-style: italic; line-height: 1; }
+  .stage-number { grid-column: 1; grid-row: 1 / span 2; color: var(--about-display-gold); font-family: var(--display); font-size: 48px; font-style: italic; line-height: 1; }
   .stage-list h3 { grid-column: 2; font-size: clamp(28px, 2.3vw, 36px); font-style: italic; line-height: 1.1; letter-spacing: -.025em; }
   .stage-list p { grid-column: 2; max-width: 56ch; color: var(--body); font-size: 16px; line-height: 1.8; }
 
   /* The only centred element is the deliberate pull statement, not the body copy. */
   .profile-story > .approach > .statement { max-width: 1180px; padding-top: clamp(40px, 5vw, 72px); }
   .approach-closing { max-width: 26ch; margin: 0 auto; color: var(--charcoal); font-family: var(--display); font-size: clamp(38px, 5vw, 76px); font-style: italic; line-height: 1.08; letter-spacing: -.025em; }
-  .approach-closing em { color: var(--about-accent); font-style: inherit; }
+  .approach-closing em { color: var(--about-display-gold); font-style: inherit; }
 
   /* Personal experience remains prose, without a second services or project grid. */
   .experience-story .lead { margin-bottom: 24px; }

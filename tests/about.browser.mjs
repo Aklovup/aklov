@@ -140,7 +140,7 @@ try {
       const value = channel / 255;
       return value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4;
     }).reduce((sum, value, index) => sum + value * [.2126, .7152, .0722][index], 0);
-    return [...document.querySelectorAll('[data-approved-copy], .about-page h1, .about-page h2, .about-page h3, .designation, .portrait-name, .fallback-name, .about-page a')].flatMap((element) => {
+    return [...document.querySelectorAll('[data-approved-copy], .about-page h1, .about-page h2, .about-page h3, .section-heading h2 em, .approach-closing em, .stage-number, .designation, .portrait-name, .fallback-name, .about-page a')].flatMap((element) => {
       const style = getComputedStyle(element);
       let background = element;
       while (background && rgba(getComputedStyle(background).backgroundColor)[3] === 0) background = background.parentElement;

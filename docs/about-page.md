@@ -16,6 +16,8 @@ Selective gold italic emphasis uses existing heading words. A centred pull state
 
 The gold invitation is compact, with its headline on the left and approved text and actions on the right. It stacks on mobile. The existing portrait, shared footer, metadata, link destinations and Solutions service catalogue remain unchanged.
 
+Large italic heading accents, process numbers and highlighted quote phrases use a page-local richer gold, `#a5852e`, with 3.13:1 contrast on ivory. This colour is restricted to large text; body copy and small-link feedback retain their darker tones. The portrait background and closing band keep the established `--gold`. The browser contrast check includes the actual nested gold text, not only its parent heading.
+
 ## Portrait
 
 The supplied transparent portrait is `public/images/portraits/Portrait_about.png`, referenced through `profile.portrait` in `src/data/about.ts`. Its actual dimensions are 438 × 570px.
