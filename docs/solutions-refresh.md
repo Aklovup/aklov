@@ -1,15 +1,22 @@
-# Solutions editorial refresh
+# Solutions service catalogue
 
-This change extends the homepage review branch to align Solutions with the approved editorial direction. No approved service copy, inclusions, goals, project destinations or contact destinations are removed or rewritten.
+Review branch: `feat/about-solutions-rhythm`, created from main after PR #9 merged. Do not merge without owner approval.
 
-- The original headline is recomposed into three lines. The two introductory paragraphs are retained. The hero’s rings and ivory index container are removed; the five anchor links remain in a transparent ruled index below the introduction.
-- Problem framing uses a smaller headline and tighter spacing. The previously approved image-and-heading section remains unchanged, including its 4:5 desktop, 4:3 tablet and square mobile composition, local optimized asset and inset border.
-- Services retain their alternating surfaces and varied compositions. Numbers have comparable proportions, integrations uses a positioned heading number instead of a background overlay, automation inclusions become ruled lists, and application inclusions use the same readable body scale as other services.
-- Major services use h2 headings; inclusion headings use h3. Existing anchor IDs and the shared links.ts destinations remain intact.
-- The four-stage stepped approach is retained. The reassurance section loses its ring and takes a quieter scale; the gold closing invitation has the final visual emphasis. All approved content and CTAs remain.
-- The existing browser suite checks all nine widths and image compositions, with additional checks for complete headline visibility, service heading hierarchy, index destinations/keyboard focus and actual anchor navigation.
+## Composition
 
-Preview `/solutions/` on the homepage branch. Review screenshots are saved in the `solutions-page-review` Actions artifact. Home and Solutions remain unmerged until the project owner approves.
+The existing dark hero, headline indentation, Vortex tablet and five-service anchor index remain. The problem introduction and local workspace photograph now lead into a continuous ivory service catalogue, rather than a sequence of alternating full-width colour bands. The photograph keeps its approved 4:5 desktop, 4:3 tablet and square mobile crop, optimized source and inset border.
+
+Each service uses a stable two-column reference row: title and approved description on the left; inclusions, goal and actions on the right. Rows share alignment, fine dividing rules and compact service numbers. Below 641px, each row stacks in reading order with comfortable controls. There are no hidden accordion panels and no added page JavaScript.
+
+All five service names, descriptions, 30 inclusion items, goals, CTA labels, anchor IDs and shared destinations remain unchanged. No new problem lists, tool claims or case-study summaries are invented. The old per-service colour/variant settings and duplicated layout rules are removed.
+
+The four-stage process becomes a level horizontal sequence on desktop, two columns on tablet, and a numbered vertical sequence on mobile. It shares one grey surface with the existing reassurance content. The gold closing invitation and shared footer remain the site's familiar final landmarks. The homepage's approved stepped approach is unchanged.
+
+## Validation and preview
+
+The existing browser suite checks ten widths including the 640/641 breakpoint, complete service headings, column alignment and stacking, horizontal process alignment, anchor navigation, focus, image loading and crops, tablet transforms, no-JavaScript navigation and overflow. Review captures are uploaded in the `solutions-page-review` Actions artifact. Use the confirmed Cloudflare branch deployment's `/solutions/` route; no separate HTML mockup is produced.
+
+The changes are scoped to About/Solutions page composition, their existing browser tests and documentation. They do not change Home, Work, Contact, shared navigation/footer, project content, media assets, dependencies or hosting configuration.
 
 ## Tablet hero refinement
 
@@ -21,3 +28,4 @@ The Solutions browser audit additionally verifies the actual image loads, the sc
 
 
 The gold “connect and grow” line retains a responsive editorial inset. The tablet keeps its desktop angle above 1000px and is completely straight at 1000px and below, with centered casing depth. Browser checks verify those transforms and the indented headline's text-column bounds.
+

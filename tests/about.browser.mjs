@@ -40,10 +40,21 @@ async function checkLayout(page, width) {
     return box.left < -1 || box.right > innerWidth + 1 || element.scrollWidth > element.clientWidth + 1;
   }).map((element) => element.className || element.tagName));
   assert.deepEqual(overflow, [], 'Overflow at ' + width + 'px: ' + overflow.join(', '));
-  const introduction = await page.locator('.approach-introduction').boundingBox();
-  const sequence = await page.locator('.approach-sequence').boundingBox();
-  if (width > 1000) assert.ok(sequence.x >= introduction.x + introduction.width, 'Approach must pair narrative and stages on desktop.');
-  else assert.ok(sequence.y >= introduction.y + introduction.height, 'Approach must stack without overlap at ' + width);
+  // Measure paired columns atomically, independent of viewport scrolling.
+  const layout = await page.evaluate(() => {
+    const box = selector => {
+      const b = document.querySelector(selector).getBoundingClientRect();
+      return { x: b.x, y: b.y, right: b.right, bottom: b.bottom };
+    };
+    return { introduction: box('.approach-introduction'), sequence: box('.approach-sequence'),
+      pairs: [['.biography .section-heading', '.biography-copy'], ['.experience-heading', '.experience-story'], ['.together .section-heading', '.together-story']].map(([heading, copy]) => ({ heading: box(heading), copy: box(copy) })) };
+  });
+  for (const { heading, copy } of layout.pairs) {
+    if (width > 640) assert.ok(copy.x >= heading.right, 'Story should occupy the right column at ' + width);
+    else assert.ok(copy.y >= heading.bottom, 'Mobile heading and story overlap at ' + width);
+  }
+  if (width > 1000) assert.ok(layout.sequence.x >= layout.introduction.right, 'Desktop stages must sit beside the narrative');
+  else assert.ok(layout.sequence.y >= layout.introduction.bottom, 'Stacked stages must follow the narrative');
   const closingSize = await page.locator('.closing h2').evaluate(el => parseFloat(getComputedStyle(el).fontSize));
   assert.ok(closingSize <= 120, 'Closing headline exceeds the established range.');
   const secondary = page.locator('[data-about-work-secondary]');
@@ -84,6 +95,18 @@ try {
   assert.equal(await page.locator('.together-story .reading-copy [data-approved-copy]').count(), 5);
   assert.deepEqual(await page.locator('.stage-list h3').allInnerTexts(), about.approach.stages.map((stage) => stage.title));
   assert.equal(await page.locator('.stage-list li').count(), 4);
+  // The portrait appears once; only the meaningful process retains numbering.
+  assert.equal(await page.locator('[data-about-portrait]').count(), 1);
+  assert.equal(await page.locator('.section-number').count(), 0);
+  assert.equal(await page.locator('.stage-list .stage-number').count(), 4);
+  assert.equal(await page.locator('.stage-list li').first().evaluate(element => getComputedStyle(element).borderBottomStyle), 'solid');
+  assert.equal(await page.locator('.approach-closing').innerText(), about.approach.closing);
+  const storySurface = await page.locator('.profile-story').evaluate(element => getComputedStyle(element).backgroundColor);
+  assert.equal(storySurface, 'rgb(245, 242, 234)');
+  for (const chapter of ['.biography', '.approach', '.experience', '.together']) {
+    assert.equal(await page.locator(chapter).evaluate(element => getComputedStyle(element).backgroundColor), 'rgba(0, 0, 0, 0)');
+    assert.equal(await page.locator(chapter + ' > .wrap').first().evaluate(element => getComputedStyle(element).borderTopStyle), chapter === '.approach' ? 'solid' : 'none');
+  }
   assert.equal(await page.locator('.designation').innerText(), profile.designation);
   assert.equal(normalize(await page.locator('.portrait-name').innerText()), profile.name);
   assert.equal(await page.locator('.portrait-frame .portrait-name').count(), 1);
@@ -117,7 +140,7 @@ try {
       const value = channel / 255;
       return value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4;
     }).reduce((sum, value, index) => sum + value * [.2126, .7152, .0722][index], 0);
-    return [...document.querySelectorAll('[data-approved-copy], .about-page h1, .about-page h2, .about-page h3, .designation, .portrait-name, .fallback-name, .about-page a')].flatMap((element) => {
+    return [...document.querySelectorAll('[data-approved-copy], .about-page h1, .about-page h2, .about-page h3, .section-heading h2 em, .approach-closing em, .stage-number, .designation, .portrait-name, .fallback-name, .about-page a')].flatMap((element) => {
       const style = getComputedStyle(element);
       let background = element;
       while (background && rgba(getComputedStyle(background).backgroundColor)[3] === 0) background = background.parentElement;
@@ -189,3 +212,4 @@ try {
   await browser?.close();
   server.kill('SIGTERM');
 }
+
