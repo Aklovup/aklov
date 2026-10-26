@@ -158,14 +158,14 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   function resize(){const r=root.getBoundingClientRect();camera.aspect=r.width/r.height;camera.updateProjectionMatrix();renderer.setSize(r.width,r.height,false);composer.setSize(r.width,r.height);pose();if(paused){currentEye.copy(targetEye);currentLook.copy(targetLook);}camera.position.copy(currentEye);camera.lookAt(currentLook);draw();if(!paused&&root.dataset.renderer==='webgl')sync();}
   function tick(now:number){
     frame=0;if(paused||document.hidden||lost||options.projectDialog.open||indexDialog?.open)return;
-    const dt=last?Math.min((now-last)/1000,.05):.016;last=now;elapsed+=dt;intro=Math.max(0,intro-dt*.38);yaw=THREE.MathUtils.damp(yaw,targetYaw,8,dt);
+    const dt=last?Math.min((now-last)/1000,.1):.016;last=now;elapsed+=dt;intro=Math.max(0,intro-dt*.38);yaw=THREE.MathUtils.damp(yaw,targetYaw,8,dt);
     updateModels(dt);pose();currentEye.lerp(targetEye,1-Math.exp(-5*dt));currentLook.lerp(targetLook,1-Math.exp(-5*dt));camera.position.copy(currentEye);camera.lookAt(currentLook);draw();
     const roofMoving=exhibitModels.some(m=>m.group.visible&&Math.abs(m.open-(m===activeModel?1:(hoverModel===m.data.category? .06:0)))>.002);
     if(intro>.001||currentEye.distanceTo(targetEye)>.015||currentLook.distanceTo(targetLook)>.015||Math.abs(yaw-targetYaw)>.001||roofMoving)frame=requestAnimationFrame(tick);
   }
   function sync(){cancelAnimationFrame(frame);frame=0;last=0;root.dataset.motion=paused?'paused':'playing';pause.textContent=paused?'Play motion':'Pause motion';pause.setAttribute('aria-pressed',String(paused));if(!paused&&!document.hidden&&!lost&&!options.projectDialog.open&&!indexDialog?.open)frame=requestAnimationFrame(tick);}
   function settle(){updateModels(.016);pose();currentEye.copy(targetEye);currentLook.copy(targetLook);camera.position.copy(currentEye);camera.lookAt(currentLook);draw();}
-  function setState(next:ShowroomState){const changed=state.group!==next.group||state.model!==next.model||state.room!==next.room;state=next;if(changed)targetYaw=0;updateLayout();if(paused){yaw=0;settle();}else sync();}
+  function setState(next:ShowroomState){const changed=state.group!==next.group||state.model!==next.model||state.room!==next.room;state=next;if(changed){targetYaw=0;if(next.model)intro=0;}updateLayout();if(paused){yaw=0;settle();}else sync();}
   updateLayout();pose();currentEye.copy(targetEye);currentLook.copy(targetLook);resize();root.dataset.renderer='webgl';pause.hidden=false;sync();
   pause.addEventListener('click',()=>{paused=!paused;if(paused){intro=0;yaw=targetYaw;settle();}sync();});
   motion.addEventListener('change',()=>{paused=motion.matches;intro=0;if(paused)settle();sync();});
