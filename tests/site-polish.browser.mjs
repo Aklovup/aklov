@@ -27,7 +27,7 @@ try {
  assert.equal(await page.locator('.hero-actions .btn-gold').getAttribute('href'),'/contact/');
  await services.first().click();await page.waitForURL('**/solutions/#website');assert.ok(await page.locator('#website-title').isVisible());
  await page.setViewportSize({width:390,height:844});await page.goto(base+'/work/?project=impex-automotive');
- const dialog=page.locator('dialog');await dialog.waitFor({state:'visible'});
+ const dialog=page.locator('[data-project-dialog]');await dialog.waitFor({state:'visible'});
  const lead=dialog.locator('.detail-lead'),copy=dialog.locator('.detail-copy');
  assert.ok((await lead.boundingBox()).y < (await copy.boundingBox()).y,'Mobile project proof must precede case-study copy');
  assert.equal(await dialog.getByText('View full size',{exact:true}).count(),0);
@@ -40,3 +40,4 @@ try {
  writeFileSync(output+'/media-delivery.json',JSON.stringify(savings,null,2));
  assert.deepEqual(errors,[]);console.log('Passed: five-page responsive review, service and inquiry journeys, theme-aware focus, menu restoration, earlier project media, metadata and static delivery.');
 } finally {await browser?.close();server.kill('SIGTERM');}
+

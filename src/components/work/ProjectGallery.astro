@@ -4,8 +4,8 @@ import { categoryFilters, projectGroups, matchesSelection } from '../../scripts/
 import ProjectCard from './ProjectCard.astro';
 import ProjectDialog from './ProjectDialog.astro';
 
-interface Props { projects: CollectionEntry<'projects'>[]; }
-const { projects } = Astro.props;
+interface Props { projects: CollectionEntry<'projects'>[]; renderDialog?: boolean; }
+const { projects, renderDialog = true } = Astro.props;
 const data = projects.map(project => project.data);
 const groups = projectGroups.map(group => ({
   ...group, count: data.filter(project => matchesSelection(project, { group: group.id, category: 'all' })).length,
@@ -50,7 +50,7 @@ const categories = (['client', 'concepts'] as const).map(group => ({
     <p class="empty-state" hidden data-empty-state>No projects in this category yet.</p>
   </div>
 </section>
-<ProjectDialog projects={projects} />
+{renderDialog && <ProjectDialog projects={projects} />}
 
 <script>
   import { matchesSelection, normalizeSelection, selectionFromUrl, urlForSelection, projectGroups } from '../../scripts/projectFilter';
@@ -169,3 +169,4 @@ const categories = (['client', 'concepts'] as const).map(group => ({
     .project-grid { grid-template-columns: 1fr; }
   }
 </style>
+

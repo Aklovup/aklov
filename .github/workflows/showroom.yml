@@ -1,0 +1,31 @@
+name: Model showroom review
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/showroom*'
+      - 'package.json'
+      - '.github/workflows/showroom.yml'
+permissions:
+  contents: read
+jobs:
+  review:
+    if: github.head_ref == 'experiment/model-showroom'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --no-save --package-lock=false playwright
+      - run: npm run build
+      - run: node --test --test-isolation=none tests/work.test.mjs tests/contact.test.mjs tests/showroom.test.mjs
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/showroom.browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: model-showroom-review
+          path: artifacts/showroom/
+          if-no-files-found: warn
