@@ -8,7 +8,7 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
 <section class="project-exhibit" data-exhibit hidden aria-label="Project exhibition">
   <header class="exhibit-header"><p data-exhibit-type></p><h2 data-exhibit-title tabindex="-1"></h2><p data-exhibit-intro></p><p class="exhibit-summary" data-exhibit-summary></p></header>
   <div class="exhibit-installation" data-exhibit-installation>
-    <div class="installation-label"><span>Project display</span><span data-media-position></span></div>
+    <div class="installation-label"><span>Project display</span><span data-media-position></span><button type="button" data-exhibit-expand aria-pressed="false">Expand display ↗</button></div>
     <div class="installation-media" data-exhibit-stage></div>
     <nav class="installation-controls" aria-label="Project media" data-exhibit-media-controls></nav>
   </div>
@@ -57,10 +57,14 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   .installation-media .gif-preview { aspect-ratio:var(--media-ratio);max-height:35dvh; }
   .installation-media video { max-height:35dvh; }
   .installation-media figcaption { margin:0;padding:12px 18px;color:#cbd1c7;font-size:11px;background:#0e1b1f; }
+  .installation-label button { min-height:44px;margin-left:auto;padding:0;border:0;color:var(--gold);font-size:11px; }
+  .project-exhibit[data-expanded='true'] .exhibit-installation { grid-column:1/-1;margin-inline:6vw; }
+  .project-exhibit[data-expanded='true'] .installation-media { max-height:none; }
+  .project-exhibit[data-expanded='true'] .exhibit-story { display:none; }
   .installation-controls { display:flex;gap:3px;overflow:auto;padding:4px 12px;border-top:1px solid #d8bd7830; }
   .installation-controls button { flex:0 0 auto;min-width:44px;min-height:44px;border:0;color:#b9c2ba!important; }
   .installation-controls button[aria-pressed='true'] { color:var(--gold)!important;border-bottom:1px solid var(--gold); }
-  .exhibit-story { min-height:0;pointer-events:auto;display:flex;flex-direction:column;border-left:1px solid #d8bd7870;padding:0 0 0 clamp(20px,2.5vw,40px);background:linear-gradient(90deg,#142226ee,#102023e8);box-shadow:25px 0 50px #102023e8; }
+  .exhibit-story { align-self:center;max-height:100%;min-height:0;pointer-events:auto;display:flex;flex-direction:column;border-left:1px solid #d8bd7870;padding:0 0 0 clamp(20px,2.5vw,40px);background:linear-gradient(90deg,#142226ee,#102023e8);box-shadow:25px 0 50px #102023e8; }
   .chapter-nav { display:flex;flex-wrap:wrap;gap:0 16px;padding:0 12px 12px 0;border-bottom:1px solid #ffffff25; }
   .chapter-nav button { min-height:40px;border:0;border-bottom:1px solid transparent;color:#bcc6bd!important;font-size:11px!important; }
   .chapter-nav button[aria-pressed='true'] { color:var(--gold)!important;border-color:var(--gold); }

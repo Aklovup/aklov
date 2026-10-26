@@ -76,7 +76,7 @@ export function mountShowroom(root:HTMLElement) {
   document.addEventListener('keydown',event=>{
     if(event.key!=='Escape'||(event.target as Element)?.closest?.('#site-header'))return;
     if(!index.hidden){setIndex(false);return;}
-    retreat();
+    if(exhibit.collapse())return;retreat();
   });
   const rescue=root.querySelector<HTMLAnchorElement>('[data-arrival-rescue]')!;
   rescue.addEventListener('click',event=>{event.preventDefault();root.dataset.arrival='ready';setIndex(true);});

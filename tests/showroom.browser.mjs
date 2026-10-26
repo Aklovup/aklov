@@ -13,7 +13,16 @@ try{
  for(let i=0;i<100;i++){try{if((await fetch(base+'/work/')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
  await mkdir(out,{recursive:true});browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
- page.on('pageerror',e=>errors.push(e.message));await goto(page);
+ page.on('pageerror',e=>errors.push(e.message));
+ let releaseScripts;const scriptGate=new Promise(resolve=>{releaseScripts=resolve;});
+ await context.route('**/_astro/*.js',async route=>{await scriptGate;await route.continue();});
+ try {
+  await page.goto(base+'/work/',{waitUntil:'commit'});await page.locator('[data-showroom-arrival]').waitFor({state:'visible'});
+  assert.equal(await page.locator('.showroom-fallback').isVisible(),false,'The SVG fallback must not flash while scripts load');
+  await page.screenshot({path:out+'/arrival-desktop.png'});
+ } finally {releaseScripts();}
+ await page.waitForSelector('[data-showroom][data-ready="true"][data-arrival="ready"]');await context.unroute('**/_astro/*.js');
+ report.checks.push('Cold arrival shows the branded preparation state until the live scene is ready, without flashing fallback artwork');
  assert.equal(await page.locator('dialog').count(),0,'The showroom must not contain project or index modals');
  assert.equal(await page.locator('[data-showroom-model]').count(),4);
  assert.equal(await page.locator('.showroom-fallback').isVisible(),false);
@@ -28,6 +37,7 @@ try{
  const play=page.locator('[data-exhibit-stage] [data-gif-toggle]');await play.click();await page.waitForFunction(()=>document.querySelector('[data-exhibit-stage] [data-gif-toggle]').getAttribute('aria-pressed')==='true');await play.click();
  await page.locator('[data-exhibit-media-controls] button').nth(1).click();assert.equal(await page.locator('[data-exhibit-stage] [data-media-id]').getAttribute('data-media-id'),'impex-product-cart');
  await page.screenshot({path:out+'/impex-room-desktop.png'});
+ await page.locator('[data-exhibit-expand]').click();assert.equal(await page.locator('[data-scene-reading]').isVisible(),false);await page.keyboard.press('Escape');assert.equal(await page.locator('[data-scene-reading]').isVisible(),true);assert.equal(await page.locator('[data-showroom]').getAttribute('data-room'),'impex-automotive');
  // Reading is isolated from travel, even for strong trackpad gestures.
  await page.locator('[data-exhibit-chapter]').hover();await page.mouse.wheel(0,-900);assert.equal(await page.locator('[data-showroom]').getAttribute('data-room'),'impex-automotive');
  // A partial backward gesture moves the camera before changing route; forward reverses it.
@@ -40,6 +50,8 @@ try{
  await wheel(page,-800);await view(page,'category');await page.waitForTimeout(300);
  await wheel(page,-800);await view(page,'showroom');
  await page.goBack();await view(page,'category');await page.goForward();await view(page,'showroom');
+ const orbitX=Number(await page.locator('[data-showroom]').getAttribute('data-camera-x'));await wheel(page,0,180);await page.waitForFunction(x=>Number(document.querySelector('[data-showroom]').dataset.cameraX)!==x,orbitX);
+ await page.waitForTimeout(300);await wheel(page,800);await view(page,'category');await page.waitForTimeout(300);await wheel(page,800);await view(page,'project');await roomReady(page);
  report.checks.push('Direct 3D model and room picking, all Impex chapters/media, GIF playback, reading isolation, reversible trackpad travel, spatial doorway, history and zero modals');
  await page.locator('[data-showroom-index-open]').click();await page.locator('[data-group="all"]').click();assert.equal(await page.locator('[data-project]:not([hidden])').count(),10);
  await page.locator('[data-group="client"]').click();

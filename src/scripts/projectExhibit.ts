@@ -7,6 +7,9 @@ export function createProjectExhibit(root:HTMLElement) {
   const stage=exhibit.querySelector<HTMLElement>('[data-exhibit-stage]')!;
   const mediaControls=exhibit.querySelector<HTMLElement>('[data-exhibit-media-controls]')!;
   let slug='',activeChapter=0,mediaIndex=0,sections:HTMLElement[]=[],assets:HTMLElement[]=[];
+  const expand=exhibit.querySelector<HTMLButtonElement>('[data-exhibit-expand]')!;
+  function setExpanded(value:boolean){exhibit.dataset.expanded=String(value);expand.setAttribute('aria-pressed',String(value));expand.textContent=value?'Return to story ↙':'Expand display ↗';}
+  expand.addEventListener('click',()=>setExpanded(exhibit.dataset.expanded!=='true'));
   const stopMedia=()=>{stage.querySelectorAll('video').forEach(v=>v.pause());};
   function showMedia(index:number){
     stopMedia();mediaIndex=index;stage.replaceChildren();
@@ -27,7 +30,7 @@ export function createProjectExhibit(root:HTMLElement) {
       if(!next){stopMedia();stage.replaceChildren();exhibit.hidden=true;slug='';return;}
       if(next===slug)return;
       const template=document.querySelector<HTMLElement>(`[data-exhibit-template="${next}"]`);if(!template)return;
-      slug=next;const content=template.cloneNode(true) as HTMLElement;
+      slug=next;setExpanded(false);const content=template.cloneNode(true) as HTMLElement;
       const meta=content.querySelector<HTMLElement>('[data-exhibit-metadata]')!;
       title.textContent=meta.dataset.title!;exhibit.querySelector('[data-exhibit-type]')!.textContent=meta.dataset.type!;exhibit.querySelector('[data-exhibit-intro]')!.textContent=meta.dataset.intro!;exhibit.querySelector('[data-exhibit-summary]')!.textContent=meta.dataset.summary!;
       sections=[];let current:HTMLElement|undefined;
@@ -42,6 +45,7 @@ export function createProjectExhibit(root:HTMLElement) {
       exhibit.hidden=false;if(sections.length)showChapter(0);showMedia(0);
     },
     focus(){title.focus({preventScroll:true});},
+    collapse(){if(exhibit.dataset.expanded!=='true')return false;setExpanded(false);expand.focus({preventScroll:true});return true;},
     nextChapter(direction:number){const index=Math.max(0,Math.min(sections.length-1,activeChapter+direction));if(sections.length)showChapter(index,true);},
     get mediaIndex(){return mediaIndex;},
   };

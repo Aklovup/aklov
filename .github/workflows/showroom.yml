@@ -8,6 +8,10 @@ on:
       - '.github/workflows/showroom.yml'
 permissions:
   contents: read
+concurrency:
+  group: model-showroom-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   review:
     if: github.head_ref == 'experiment/model-showroom'
