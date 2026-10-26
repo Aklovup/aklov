@@ -13,7 +13,7 @@ async function station(page,name){await page.locator('[data-showroom]').evaluate
 try{
  for(let i=0;i<100;i++){try{if((await fetch(base+'/work/')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
  await mkdir(out,{recursive:true});browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
- const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
+ const context=await browser.newContext({viewport:{width:1440,height:1000},hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));
  let release;const gate=new Promise(r=>release=r);await context.route('**/_astro/*.js',async route=>{await gate;await route.continue();});
  try{await page.goto(base+'/work/',{waitUntil:'commit'});await page.locator('[data-showroom-arrival]').waitFor({state:'visible'});assert.equal(await page.locator('.showroom-fallback').isVisible(),false);await page.screenshot({path:out+'/arrival.png'});}finally{release();}
@@ -40,16 +40,39 @@ try{
   for(let i=0;i<20;i++){assert.ok(await page.locator('[data-exhibit-chapter]').evaluate(e=>e.scrollHeight<=e.clientHeight+2),'The story must fit on its physical page');if(await page.locator('[data-story-next]').isDisabled())break;await page.locator('[data-story-next]').click();}
  }
  await page.screenshot({path:out+'/story-wall.png'});
+ const chapterButton=page.locator('[data-exhibit-chapters] button').first();
+ const headingBefore=Number(await page.locator('[data-showroom]').getAttribute('data-room-heading'));
+ await chapterButton.hover();await page.mouse.wheel(60,0);await page.waitForFunction(before=>Number(document.querySelector('[data-showroom]').dataset.roomHeading)!==before,headingBefore);
+ await station(page,'story');const beforeX=Number(await page.locator('[data-showroom]').getAttribute('data-room-x'));
+ await chapterButton.hover();await page.mouse.wheel(0,-80);await page.waitForFunction(before=>Number(document.querySelector('[data-showroom]').dataset.roomX)<before,beforeX);
+ assert.equal(await page.locator('[data-showroom]').getAttribute('data-view'),'project');
+ // Touch and pen are independent of the previous wheel or mouse sequence.
+ const cdp=await context.newCDPSession(page);
+ const touchHeading=Number(await page.locator('[data-showroom]').getAttribute('data-room-heading'));
+ await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:400,y:350}]});
+ await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:470,y:350}]});
+ await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ assert.notEqual(Number(await page.locator('[data-showroom]').getAttribute('data-room-heading')),touchHeading);
+ const penHeading=Number(await page.locator('[data-showroom]').getAttribute('data-room-heading'));
+ await cdp.send('Input.dispatchMouseEvent',{type:'mousePressed',x:400,y:350,button:'left',buttons:1,clickCount:1,pointerType:'pen'});
+ await cdp.send('Input.dispatchMouseEvent',{type:'mouseMoved',x:470,y:350,button:'left',buttons:1,pointerType:'pen'});
+ await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',x:470,y:350,button:'left',buttons:0,clickCount:1,pointerType:'pen'});
+ assert.notEqual(Number(await page.locator('[data-showroom]').getAttribute('data-room-heading')),penHeading);
+ await cdp.detach();await page.waitForTimeout(400);
+ await station(page,'story');
  const cameraMatrix=await page.locator('[data-wall-media]').evaluate(e=>getComputedStyle(e.parentElement).transform);
  await wheel(page,0,150);await page.waitForFunction(previous=>getComputedStyle(document.querySelector('[data-wall-media]').parentElement).transform!==previous,cameraMatrix);
- // No gesture lock: one uninterrupted backward sequence crosses the physical door and reaches the table.
- for(let i=0;i<5;i++){if(await page.locator('[data-showroom]').getAttribute('data-view')==='showroom')break;await wheel(page,-350);}
+ // Turn back toward the front wall before retreating through the actual rear doorway.
+ await station(page,'media');
+ for(let i=0;i<8;i++){if(await page.locator('[data-showroom]').getAttribute('data-view')==='showroom')break;await wheel(page,-350);}
  await view(page,'showroom');assert.equal(new URL(page.url()).searchParams.has('room'),false);assert.equal(new URL(page.url()).searchParams.has('model'),false);
  await page.goBack();assert.ok(new URL(page.url()).searchParams.has('model'));await page.goForward();await view(page,'showroom');
  await page.locator('[data-showroom-index-open]').click();await page.locator('[data-group="all"]').click();assert.equal(await page.locator('[data-project]:not([hidden])').count(),10);
  await page.locator('[data-group="client"]').click();for(const [category,count]of [['applications',2],['websites',3],['customer-systems',2],['automation',5],['integrations',7]]){await page.locator(`[data-category-filters="client"] [data-filter="${category}"]`).click();assert.equal(await page.locator('[data-project]:not([hidden])').count(),count);}
  const projects=await page.locator('#showroom-data').evaluate(e=>JSON.parse(e.textContent));
- for(const project of projects){if(!await page.locator('[data-showroom-index]').isVisible())await page.locator('[data-showroom-index-open]').click();await page.locator('[data-group="all"]').click();await page.locator(`[data-project-open="${project.slug}"]`).click();await ready(page);assert.equal(await page.locator('[data-exhibit-title]').innerText(),project.title);assert.equal(await page.locator('[data-showroom]').getAttribute('data-visible-room'),project.slug);if(project.slug==='vera-skincare-concept'){await page.locator('[data-media-inspect]').click();assert.equal(await page.locator('[data-exhibit-stage]').getAttribute('data-inspecting'),'true');await page.keyboard.press('Escape');assert.equal(await page.locator('[data-showroom]').getAttribute('data-room'),project.slug);}assert.equal(await page.locator('[data-media-choice]').count(),Math.max(0,(project.media?.length||1)-1));assert.equal(await page.locator('dialog').count(),0);}
+ for(const project of projects){if(!await page.locator('[data-showroom-index]').isVisible())await page.locator('[data-showroom-index-open]').click();await page.locator('[data-group="all"]').click();await page.locator(`[data-project-open="${project.slug}"]`).click();await ready(page);assert.equal(await page.locator('[data-exhibit-title]').innerText(),project.title);assert.equal(await page.locator('[data-showroom]').getAttribute('data-visible-room'),project.slug);if(project.slug==='vera-skincare-concept'){await station(page,'media');await page.locator('[data-exhibit-stage]').click();await page.waitForSelector('[data-media-lift]:not([hidden])');assert.equal(await page.locator('[data-showroom]').getAttribute('data-media-lift'),'open');const scroll=page.locator('[data-media-lift-scroll]');assert.ok(await scroll.evaluate(e=>e.scrollHeight>e.clientHeight));await scroll.evaluate(e=>{e.scrollTop=600;});assert.ok(await scroll.evaluate(e=>e.scrollTop)>0);await page.screenshot({path:out+'/lifted-image.png'});await page.keyboard.press('Escape');await page.waitForFunction(()=>document.querySelector('[data-showroom]').dataset.mediaLift==='closed');assert.equal(await page.locator('[data-showroom]').getAttribute('data-room'),project.slug);await page.locator('[data-exhibit-stage]').click();await page.mouse.click(15,400);await page.waitForFunction(()=>document.querySelector('[data-showroom]').dataset.mediaLift==='closed');}assert.equal(await page.locator('[data-media-choice]').count(),Math.max(0,(project.media?.length||1)-1));assert.equal(await page.locator('dialog').count(),0);
+  if(project.slug==='divine-health-black-onyx'){for(let n=0;n<5;n++){assert.equal(await page.locator('[data-media-choice]').count(),3);assert.equal(await page.locator('[data-exhibit-stage] [data-media-id]').count(),1);const fit=await page.locator('[data-exhibit-media-controls]').evaluate(e=>{const bottom=e.getBoundingClientRect().bottom;return [...e.children].every(b=>b.getBoundingClientRect().bottom<=bottom+2&&b.clientHeight>0);});assert.ok(fit,'All three Divine thumbnails must stay inside the rail');await page.locator('[data-media-choice]').nth(n%3).click();}}
+ }
  assert.deepEqual(errors,[]);await context.close();
  report.checks.push('Cold loading, physical wall matrices/90-degree placement, 75/25 thumbnails and exact swap, per-project session memory, matching miniature texture, GIF playback, paged story without scrolling, perspective, room isolation, finite uninterrupted retreat, history, all ten projects and filters');
  for(const width of [1440,1024,768,390,320]){

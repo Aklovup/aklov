@@ -8,18 +8,22 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
 ---
 <section class="project-exhibit" data-exhibit hidden aria-label="Project exhibition">
   <section class="room-panel media-wall" data-wall-media aria-label="Wall-mounted project media">
-    <header class="wall-heading"><div><p data-exhibit-type></p><h2 data-exhibit-title tabindex="-1"></h2></div><div class="media-wall-actions"><button type="button" data-room-station="media">Approach ↗</button><button type="button" data-media-inspect hidden aria-pressed="false">Inspect image</button></div></header>
+    <header class="wall-heading"><div><p data-exhibit-type></p><h2 data-exhibit-title tabindex="-1"></h2></div></header>
     <div class="wall-media-layout" data-media-layout>
-      <div class="media-primary"><div class="installation-label"><span>Project display</span><span data-media-position></span></div><div class="installation-media" data-exhibit-stage></div></div>
+      <div class="media-primary"><div class="installation-label"><span>Project display</span><span data-media-position></span></div><div class="installation-media" data-exhibit-stage tabindex="0" role="button" aria-label="Enlarge selected project media" aria-haspopup="dialog"></div></div>
       <nav class="media-rail" aria-label="Other project media" data-exhibit-media-controls></nav>
     </div>
   </section>
   <section class="room-panel story-wall" data-wall-story aria-label="Project story on the adjacent wall">
-    <header class="story-heading"><span>Project story</span><button type="button" data-room-station="story">Read this wall ↗</button></header>
+    <header class="story-heading"><span>Project story</span></header>
     <nav class="chapter-nav" aria-label="Case-study chapters" data-exhibit-chapters></nav>
     <div class="chapter-content" data-exhibit-chapter tabindex="0" role="region" aria-label="Selected project chapter"></div>
     <nav class="story-pages" aria-label="Chapter pages"><button type="button" data-story-prev>← Previous</button><span data-story-position></span><button type="button" data-story-next>Next →</button></nav>
     <nav class="exhibit-links" aria-label="External project links" data-exhibit-links></nav>
+  </section>
+  <section class="lifted-media" data-media-lift hidden role="dialog" aria-modal="true" aria-label="Full project media" tabindex="-1">
+    <button type="button" class="lift-close" data-media-lift-close>Return image to wall</button>
+    <div class="lift-scroll" data-media-lift-scroll tabindex="0" role="region" aria-label="Full project image; scroll to explore"></div>
   </section>
   <button type="button" class="door-plaque" data-wall-door data-room-door>Showroom ↗</button>
 </section>
@@ -29,7 +33,7 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
     <div data-exhibit-copy><Content /></div>
     <div data-exhibit-assets>
       {project.data.media.map((item) => (
-        <section data-exhibit-asset data-label={item.caption || item.alt} data-available={Boolean(item.url)} data-id={item.id} data-preview={item.poster || mediaPreview(item.url)?.src || (item.type === 'image' ? item.url : undefined)}>
+        <section data-exhibit-asset data-label={item.caption || item.alt} data-available={Boolean(item.url)} data-id={item.id} data-source={item.url} data-preview={item.poster || mediaPreview(item.url)?.src || (item.type === 'image' ? item.url : undefined)}>
           <ProjectMedia cover={item} title={project.data.title} number={String(index + 1).padStart(2, '0')} presentation="detail" bounded={false} />
         </section>
       ))}
@@ -48,12 +52,11 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   .project-exhibit { position:absolute;inset:0;z-index:0;pointer-events:none; }
   .project-exhibit[hidden] { display:none; }
   .room-panel { box-sizing:border-box;width:1080px;height:760px;padding:30px;background:#102124;color:var(--ivory);border:3px solid #bfa363;box-shadow:inset 0 0 0 9px #0a171a;backface-visibility:hidden;pointer-events:auto; }
-  .wall-heading { height:106px;display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid #d8bd7855;margin-bottom:20px; }
+  .wall-heading { height:88px;display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid #d8bd7855;margin-bottom:20px; }
   .wall-heading p { margin:0 0 7px;color:var(--gold);font:20px/1.3 var(--sans);letter-spacing:2px;text-transform:uppercase; }
   .wall-heading h2 { margin:0;color:var(--ivory);font:400 var(--project-title-size,48px)/1 var(--display);letter-spacing:-1px; }
   .showroom .room-panel button { min-height:48px;border:1px solid #d8bd7860;padding:9px 16px;color:var(--gold);font:500 23px/1.3 var(--sans);cursor:pointer;background:#102124; }
-  .media-wall-actions { display:flex;gap:12px;flex-shrink:0; }
-  .wall-media-layout { height:574px;display:grid;grid-template-columns:3fr 1fr;gap:18px; }
+  .wall-media-layout { height:592px;display:grid;grid-template-columns:3fr 1fr;gap:18px; }
   .wall-media-layout[data-single='true'] { grid-template-columns:1fr; }
   .media-primary { min-width:0;display:flex;flex-direction:column;border:1px solid #d8bd7840; }
   .installation-label { display:flex;justify-content:space-between;gap:12px;padding:12px 16px;color:var(--gold);font:20px/1.3 var(--sans);border-bottom:1px solid #d8bd7840; }
@@ -61,15 +64,12 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   .installation-media>[data-exhibit-asset],.installation-media .project-media { height:100%;min-height:0;display:flex;flex-direction:column; }
   .showroom .installation-media .gif-preview { flex:1;min-height:0;max-height:none;aspect-ratio:auto; }
   .showroom .installation-media .project-media>img,.showroom .installation-media video { flex:1;min-height:0;width:100%;height:0;max-height:none;aspect-ratio:auto;object-fit:cover;object-position:center top; }
-  .installation-media[data-inspecting='true'] { overflow:auto;overscroll-behavior:contain;display:block; }
-  .installation-media[data-inspecting='true']>[data-exhibit-asset],.installation-media[data-inspecting='true'] .project-media { display:block;height:auto; }
-  .showroom .installation-media[data-inspecting='true'] .project-media>img { display:block;width:100%;height:auto;max-height:none; }
   .showroom .installation-media figcaption { flex:0 0 auto;margin:0;padding:12px 16px;color:#d6ded3;background:#102124;font:20px/1.35 var(--sans); }
   .showroom .room-panel .gif-toggle { font-size:24px;min-height:52px;background:#102124; }
-  .media-rail { min-height:0;display:grid;grid-template-rows:repeat(var(--rail-count,1),minmax(0,1fr));gap:14px;transform:perspective(1400px) rotateY(-8deg) translateZ(-8px);transform-origin:left; }
+  .media-rail { height:100%;min-width:0;min-height:0;display:grid;gap:14px;overflow:hidden; }
   .media-rail[hidden] { display:none; }
   .showroom .media-rail button { padding:7px;min-height:0;display:flex;flex-direction:column;gap:4px;text-align:left;border:1px solid #d8bd7880;background:#091a1e;overflow:hidden; }
-  .media-rail img { width:100%;min-height:0;flex:1;object-fit:cover;object-position:center top; }
+  .media-rail img { display:block;width:100%;height:0;min-height:0;flex:1 1 0;aspect-ratio:auto;object-fit:cover;object-position:center top; }
   .media-rail span { flex:0 0 auto;color:#dce2d7;font:18px/1.3 var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%; }
   .story-wall { display:flex;flex-direction:column; }
   .story-heading { display:flex;justify-content:space-between;align-items:center;gap:20px;font:22px var(--sans);color:var(--gold);margin-bottom:18px; }
@@ -85,6 +85,19 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   .exhibit-links:empty { display:none; }
   .exhibit-links a { color:var(--gold);font:22px/1.5 var(--sans);min-height:40px; }
   .door-plaque { box-sizing:border-box;width:500px;height:180px;padding:20px!important;background:#102124!important;color:var(--gold)!important;font:500 55px/1.2 var(--sans)!important;border:4px solid var(--gold)!important;backface-visibility:hidden;pointer-events:auto; }
+  .installation-media[data-available='true'] { cursor:zoom-in; }
+  .room-panel,.lifted-media { font-family:var(--sans);font-stretch:normal; }
+  .lifted-media { box-sizing:border-box;width:1000px;height:700px;padding:10px;background:var(--charcoal);border:2px solid var(--gold);box-shadow:0 18px 70px #0007;backface-visibility:hidden;pointer-events:auto; }
+  .lift-scroll { height:100%;overflow:auto;overscroll-behavior:contain;touch-action:pan-y pinch-zoom;scrollbar-width:thin;scrollbar-color:var(--gold) var(--charcoal); }
+  .lift-scroll .project-media { margin:0;width:100%; }
+  .showroom .lift-scroll .project-media>img { display:block;width:100%;height:auto;max-height:none;aspect-ratio:auto;object-fit:contain; }
+  .showroom .lift-scroll figcaption { padding:14px 20px;margin:0;color:var(--on-dark);font:20px/1.5 var(--sans); }
+  .showroom .lift-scroll .gif-preview { aspect-ratio:var(--media-ratio);max-height:none; }
+  .lift-close { position:absolute;left:8px;top:8px;z-index:2;clip-path:inset(50%);width:1px;height:1px;overflow:hidden; }
+  .lift-close:focus-visible { clip-path:none;width:auto;height:auto;padding:12px;background:var(--charcoal);color:var(--ivory); }
+  .showroom[data-media-lift='open'] { touch-action:pan-y pinch-zoom; }
+  .showroom[data-media-lift='open'] .room-panel,.showroom[data-media-lift='closing'] .room-panel { pointer-events:none; }
+  .showroom:is([data-renderer='fallback'],[data-surface-mode='flat']) .lifted-media { position:fixed!important;inset:110px 4vw 85px;transform:none!important;width:92vw;height:calc(100dvh - 195px);z-index:10; }
   .world-surfaces { position:absolute;inset:0;pointer-events:none; }
   .showroom:is([data-renderer='fallback'],[data-surface-mode='flat']) .project-exhibit { inset:225px var(--pad) 85px;z-index:4;display:flex;gap:24px;overflow:auto;pointer-events:auto; }
   .showroom:is([data-renderer='fallback'],[data-surface-mode='flat']) .room-panel { position:relative!important;transform:none!important;width:50%;height:100%;padding:18px;flex-shrink:0; }

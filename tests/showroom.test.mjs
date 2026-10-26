@@ -52,3 +52,15 @@ test('one through five media have one primary item and no duplicate or empty thu
   for(const id of ids){selection.swap('project',id);assert.equal(new Set([state.main,...state.rail]).size,n);assert.deepEqual([...new Set([state.main,...state.rail])].sort(),ids);}
  }
 });
+
+const {moveOnFloor,gesturePixels}=await import('../src/scripts/showroomNavigation.ts');
+test('backward movement follows the viewing direction; the side wall can be faced and approached squarely',()=>{
+ const backing=moveOnFloor(.1,.65,-Math.PI/2,-200);
+ assert.ok(backing.x<.1);assert.ok(Math.abs(backing.z-.65)<.0001);assert.equal(backing.exit,false);
+ const forwards=moveOnFloor(backing.x,backing.z,-Math.PI/2,100);assert.ok(forwards.x>backing.x);
+ for(const heading of [0,Math.PI/2,Math.PI,-Math.PI/2]){const p=moveOnFloor(0,1,heading,100);assert.ok(Number.isFinite(p.x)&&Number.isFinite(p.z));}
+ assert.equal(moveOnFloor(0,2.6,0,-100).exit,true);
+ assert.equal(moveOnFloor(.8,2.6,0,-100).exit,false,'The rear wall outside the opening is not an exit');
+ assert.equal(moveOnFloor(0,1,Math.PI,600).exit,true,'Walking forward toward the doorway also exits');
+ assert.equal(gesturePixels(.25,0,900),.25);assert.equal(gesturePixels(2,1,900),32);assert.equal(gesturePixels(3000,0,900),600);
+});
