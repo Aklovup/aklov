@@ -62,7 +62,7 @@ export function mountShowroom(root:HTMLElement) {
   back.addEventListener('click',()=>navigate(state.room?{group:state.group,model:state.model}:{group:state.group}));caseButton.addEventListener('click',openProject);
   indexOpen.addEventListener('click',()=>{index.dataset.userOpen='';index.showModal();document.dispatchEvent(new CustomEvent('aklov:showroom-index'));indexClose.focus();});
   indexClose.addEventListener('click',()=>index.close());
-  index.addEventListener('close',()=>{delete index.dataset.userOpen;state=stateFromUrl(new URL(location.href),projects);apply();});
+  index.addEventListener('close',()=>{if(index.open)return;delete index.dataset.userOpen;state=stateFromUrl(new URL(location.href),projects);apply();});
   let outside=false;
   const isOutside=(e:MouseEvent)=>{const b=index.getBoundingClientRect();return e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom;};
   index.addEventListener('pointerdown',event=>{outside=event.target===index&&isOutside(event);});
