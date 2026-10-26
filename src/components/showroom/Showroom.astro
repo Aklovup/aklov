@@ -12,11 +12,11 @@ const models=modelsFor(entries,'client');
 <script is:inline>document.documentElement.dataset.showroomJs='';</script>
 <section class="showroom" data-showroom data-view="showroom" aria-labelledby="work-title">
   <svg class="showroom-fallback" viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-    <defs><radialGradient id="room-light"><stop stop-color="#52605a"/><stop offset="1" stop-color="#101b1e"/></radialGradient><linearGradient id="table-light"><stop stop-color="#b9ad89"/><stop offset="1" stop-color="#655d46"/></linearGradient></defs>
+    <defs><radialGradient id="room-light"><stop stop-color="#55534e"/><stop offset="1" stop-color="#151515"/></radialGradient><linearGradient id="table-light"><stop stop-color="#b9ad89"/><stop offset="1" stop-color="#655d46"/></linearGradient></defs>
     <rect width="1440" height="1000" fill="url(#room-light)"/>
-    <path d="M260 600L780 410L1220 650L680 865Z" fill="#111b1c"/>
+    <path d="M260 600L780 410L1220 650L680 865Z" fill="#1b1b1b"/>
     <path d="M230 560L780 350L1240 590L680 810Z" fill="url(#table-light)"/>
-    {[{x:430,y:460},{x:770,y:430},{x:590,y:600},{x:920,y:580}].map(({x,y})=><g transform={`translate(${x} ${y})`}><path d="M0 0L120 -45L220 10L100 65Z" fill="#eee9db"/><path d="M0 0V80L100 145V65Z" fill="#c7c3b8"/><path d="M100 65L220 10V90L100 145Z" fill="#7e8e88"/><path d="M120 65L200 28V78L120 115Z" fill="#263b3b"/></g>)}
+    {[{x:430,y:460},{x:770,y:430},{x:590,y:600},{x:920,y:580}].map(({x,y})=><g transform={`translate(${x} ${y})`}><path d="M0 0L120 -45L220 10L100 65Z" fill="#eee9db"/><path d="M0 0V80L100 145V65Z" fill="#c7c3b8"/><path d="M100 65L220 10V90L100 145Z" fill="#8c8880"/><path d="M120 65L200 28V78L120 115Z" fill="#292929"/></g>)}
   </svg>
   <canvas data-showroom-canvas aria-hidden="true"></canvas>
   <div class="showroom-shade" aria-hidden="true"></div>
@@ -61,9 +61,9 @@ const models=modelsFor(entries,'client');
 </script>
 <style is:global>
   html:has(.showroom),body:has(.showroom) { height:100%;overflow:hidden; }
-  body:has(.showroom) .header-surface { position:absolute;z-index:10;top:0;left:0;width:100%;background:linear-gradient(#101b1ee6,transparent); }
+  body:has(.showroom) .header-surface { position:absolute;z-index:10;top:0;left:0;width:100%;background:linear-gradient(#151515e6,transparent); }
   body:has(.showroom) .footer { display:none; }
-  .showroom { touch-action:none;position:relative;isolation:isolate;width:100%;height:100dvh;min-height:0;overflow:hidden;background:#132124;color:var(--ivory);--focus-color:var(--gold); }
+  .showroom { touch-action:none;position:relative;isolation:isolate;width:100%;height:100dvh;min-height:0;overflow:hidden;background:#151515;color:var(--ivory);--focus-color:var(--gold); }
   .showroom[data-surface-mode='flat'] { touch-action:pan-y pinch-zoom; }
   .showroom canvas[data-showroom-canvas],.showroom-fallback { position:absolute;inset:0;width:100%;height:100%; }
   .showroom canvas[data-showroom-canvas] { z-index:1;opacity:0;transition:opacity .65s;touch-action:none;cursor:grab; }
@@ -72,14 +72,14 @@ const models=modelsFor(entries,'client');
   .showroom[data-renderer='fallback'] .showroom-fallback,html:not([data-showroom-js]) .showroom-fallback { visibility:visible; }
   .showroom[data-renderer='fallback'] canvas[data-showroom-canvas] { visibility:hidden;pointer-events:none; }
   .showroom[data-dragging] canvas { cursor:grabbing; }
-  .showroom-shade { z-index:2;position:absolute;inset:0;pointer-events:none;background:linear-gradient(0deg,#081215fa 0%,#081215eb 18%,#081215aa 36%,transparent 60%,#08121545); }
-  .showroom[data-view='project'] .showroom-shade { background:linear-gradient(0deg,#08121588,transparent 16%,transparent 86%,#08121588); }
+  .showroom-shade { z-index:2;position:absolute;inset:0;pointer-events:none;background:linear-gradient(0deg,#111111fa 0%,#111111eb 18%,#111111aa 36%,transparent 60%,#11111145); }
+  .showroom[data-view='project'] .showroom-shade { background:linear-gradient(0deg,#11111188,transparent 16%,transparent 86%,#11111188); }
   .showroom-toolbar { position:absolute;z-index:3;top:112px;left:var(--pad);right:var(--pad);display:flex;justify-content:space-between;align-items:center;gap:20px; }
-  .showroom-toolbar>.mono { color:#c3c6b8; }
+  .showroom-toolbar>.mono { color:#c6c1b7; }
   .showroom-types { display:flex;gap:8px; }
   .showroom button { color:inherit;cursor:pointer;background:none;font:500 12px/1.4 var(--sans); }
   .showroom-types button { min-height:44px;padding:0 18px;border:1px solid #ffffff35;border-radius:99px; }
-  .showroom-types button[aria-pressed='true'] { color:#162021;background:var(--gold);border-color:var(--gold); }
+  .showroom-types button[aria-pressed='true'] { color:#151515;background:var(--gold);border-color:var(--gold); }
   .showroom-path { position:absolute;top:170px;left:var(--pad);right:var(--pad);z-index:3;display:flex;align-items:center;gap:14px;font-size:12px; }
   .showroom-path button { min-height:44px;padding:0;border:0;border-bottom:1px solid #ffffff35; }
   .showroom-path [data-model-path] { display:inline-flex;align-items:center;gap:14px; }
@@ -93,7 +93,7 @@ const models=modelsFor(entries,'client');
   .showroom-info { position:absolute;right:var(--pad);bottom:220px;z-index:3;width:clamp(260px,25vw,360px);max-height:40dvh;overflow:auto;scrollbar-width:thin; }
   .showroom-eyebrow { display:block;margin-bottom:13px;color:var(--gold);font:500 10px/1.5 var(--sans);letter-spacing:1.3px;text-transform:uppercase; }
   .showroom-info h2 { margin:0 0 14px;font:400 clamp(32px,3.5vw,52px)/1.02 var(--display);letter-spacing:-.025em; }
-  .showroom-info p { margin:0;color:#d5d7cc;font:400 14px/1.75 var(--sans); }
+  .showroom-info p { margin:0;color:#d9d5cc;font:400 14px/1.75 var(--sans); }
   .showroom-case { display:flex;align-items:center;justify-content:space-between;gap:40px;min-height:48px;margin-top:20px;padding:0!important;border:0;border-bottom:1px solid var(--gold); }
   .showroom-options { position:absolute;z-index:3;bottom:78px;left:var(--pad);right:var(--pad);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px; }
   .showroom-options button { display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;min-height:76px;padding:14px 0;border:0;border-top:1px solid #ffffff55;text-align:left; }
@@ -101,7 +101,7 @@ const models=modelsFor(entries,'client');
   .option-number,.option-count { color:var(--gold);font-size:10px;font-variant-numeric:tabular-nums; }
   .showroom-bottom { position:absolute;z-index:3;bottom:max(14px,env(safe-area-inset-bottom));left:var(--pad);right:var(--pad);display:flex;align-items:center;justify-content:space-between;gap:18px;border-top:1px solid #ffffff25;padding-top:6px; }
   .showroom-bottom button { min-height:44px;padding:0;border:0; }
-  .showroom-bottom>span { font-size:10px;color:#b8bfb4; }
+  .showroom-bottom>span { font-size:10px;color:#c0bbb1; }
   .sr-status { position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%); }
   .showroom-index { position:fixed;z-index:8;inset:96px 0 0;width:100%;max-width:none;height:calc(100dvh - 96px);max-height:none;margin:0;padding:0;overflow:auto;overscroll-behavior:contain;border:1px solid var(--line);background:var(--ivory);color:var(--charcoal); }
 
@@ -139,7 +139,7 @@ const models=modelsFor(entries,'client');
   }
   @media(max-height:650px) { .showroom-toolbar { top:84px; } .showroom-path { top:135px; } .showroom-title { display:none; } .showroom-info { bottom:150px;max-height:30dvh; } .showroom-options { bottom:60px; } .showroom-options button { min-height:44px; } }
 
-  .showroom-arrival { position:absolute;inset:0;z-index:7;display:none;place-content:center;justify-items:center;gap:22px;background:#101b1e;opacity:1;transition:opacity .7s,visibility .7s; }
+  .showroom-arrival { position:absolute;inset:0;z-index:7;display:none;place-content:center;justify-items:center;gap:22px;background:#151515;opacity:1;transition:opacity .7s,visibility .7s; }
   html[data-showroom-js] .showroom-arrival { display:grid; }
   .arrival-brand { color:var(--ivory);font:600 48px/1 var(--sans);letter-spacing:-3px; }
   .arrival-brand>span { color:var(--gold); }

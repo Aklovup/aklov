@@ -42,10 +42,10 @@ export function createRoomSurfaces(root:HTMLElement,scene:THREE.Scene,camera:THR
     liftMask.position.copy(liftObject.position);liftMask.quaternion.copy(liftObject.quaternion);liftMask.scale.copy(liftObject.scale);
   }
   root.addEventListener('aklov:media-lift',event=>{
-    const {open,immediate}=(event as CustomEvent).detail;
+    const {open,immediate,kind}=(event as CustomEvent).detail;
     if(flat||failed||!node){root.dispatchEvent(new CustomEvent('aklov:media-lift-settled',{detail:{open}}));return;}
     if(open){
-      const wall=surfaces[0],source=root.querySelector<HTMLElement>('[data-exhibit-stage]')!;
+      const wall=surfaces[kind==='story'?1:0],source=root.querySelector<HTMLElement>(kind==='story'?'[data-wall-story]':'[data-exhibit-stage]')!;
       let x=0,y=0,element:HTMLElement|null=source;
       while(element&&element!==wall.element){x+=element.offsetLeft;y+=element.offsetTop;element=element.offsetParent as HTMLElement|null;}
       wall.object.updateWorldMatrix(true,false);const scale=wall.object.getWorldScale(new THREE.Vector3()).x;
