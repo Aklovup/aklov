@@ -6,7 +6,7 @@ import ProjectGallery from '../work/ProjectGallery.astro';
 import ProjectExhibit from './ProjectExhibit.astro';
 interface Props { projects:CollectionEntry<'projects'>[]; }
 const { projects }=Astro.props;
-const entries:ShowroomProject[]=projects.map(({data})=>({slug:data.slug,aliases:data.aliases,title:data.title,description:data.description,projectType:data.projectType,primaryCategory:data.primaryCategory,src:data.cover.poster||mediaPreview(data.cover.url)?.src||(data.cover.type==='image'?data.cover.url:undefined)}));
+const entries:ShowroomProject[]=projects.map(({data})=>({slug:data.slug,aliases:data.aliases,title:data.title,description:data.description,projectType:data.projectType,primaryCategory:data.primaryCategory,src:data.cover.poster||mediaPreview(data.cover.url)?.src||(data.cover.type==='image'?data.cover.url:undefined),initialMedia:data.media.find(item=>item.url&&item.url===data.cover.url)?.id,media:data.media.filter(item=>item.url).sort((a,b)=>a.order-b.order).map(item=>({id:item.id,type:item.type,label:item.caption||item.alt,src:item.poster||mediaPreview(item.url)?.src||(item.type==='image'?item.url:undefined)}))}));
 const models=modelsFor(entries,'client');
 ---
 <script is:inline>document.documentElement.dataset.showroomJs='';</script>
@@ -65,14 +65,14 @@ const models=modelsFor(entries,'client');
   body:has(.showroom) .footer { display:none; }
   .showroom { position:relative;isolation:isolate;width:100%;height:100dvh;min-height:0;overflow:hidden;background:#132124;color:var(--ivory);--focus-color:var(--gold); }
   .showroom canvas[data-showroom-canvas],.showroom-fallback { position:absolute;inset:0;width:100%;height:100%; }
-  .showroom canvas[data-showroom-canvas] { opacity:0;transition:opacity .65s;touch-action:pan-y pinch-zoom;cursor:grab; }
+  .showroom canvas[data-showroom-canvas] { z-index:1;opacity:0;transition:opacity .65s;touch-action:pan-y pinch-zoom;cursor:grab; }
   .showroom[data-arrival='ready'][data-renderer='webgl'] canvas[data-showroom-canvas] { opacity:1; }
   .showroom-fallback { visibility:hidden; }
   .showroom[data-renderer='fallback'] .showroom-fallback,html:not([data-showroom-js]) .showroom-fallback { visibility:visible; }
   .showroom[data-renderer='fallback'] canvas[data-showroom-canvas] { visibility:hidden;pointer-events:none; }
   .showroom[data-dragging] canvas { cursor:grabbing; }
-  .showroom-shade { position:absolute;inset:0;pointer-events:none;background:linear-gradient(0deg,#081215fa 0%,#081215eb 18%,#081215aa 36%,transparent 60%,#08121545); }
-  .showroom[data-view='project'] .showroom-shade { background:linear-gradient(0deg,#081215f0,transparent 55%),linear-gradient(180deg,#081215ef,#081215b8 36%,transparent 65%); }
+  .showroom-shade { z-index:2;position:absolute;inset:0;pointer-events:none;background:linear-gradient(0deg,#081215fa 0%,#081215eb 18%,#081215aa 36%,transparent 60%,#08121545); }
+  .showroom[data-view='project'] .showroom-shade { background:linear-gradient(0deg,#08121588,transparent 16%,transparent 86%,#08121588); }
   .showroom-toolbar { position:absolute;z-index:3;top:112px;left:var(--pad);right:var(--pad);display:flex;justify-content:space-between;align-items:center;gap:20px; }
   .showroom-toolbar>.mono { color:#c3c6b8; }
   .showroom-types { display:flex;gap:8px; }
@@ -153,8 +153,10 @@ const models=modelsFor(entries,'client');
   .travel-indicator { position:absolute;left:var(--pad);bottom:68px;z-index:5;width:100px;height:1px;background:#ffffff25;pointer-events:none; }
   .travel-indicator>span { display:block;width:100%;height:100%;background:var(--gold);transform:scaleX(var(--travel,0));transform-origin:left; }
   .showroom[data-index-open='true'] .spatial-exit,.showroom[data-index-open='true'] .project-exhibit { visibility:hidden; }
-  .showroom[data-room-ready='false'] .project-exhibit { pointer-events:none; }
-  .showroom[data-room-ready='false'] .project-exhibit>* { pointer-events:none; }
+
+
   @media(max-width:800px) { .spatial-exit { top:185px;left:auto;right:var(--pad);min-height:44px;padding:5px 10px; } .exit-threshold { display:none; } .showroom[data-view='project'] .showroom-path [data-model-path] { max-width:53%; } }
   @media(prefers-reduced-motion:reduce) { .showroom-arrival,.showroom canvas[data-showroom-canvas] { transition:none; } }
+  .showroom[data-view='project'][data-renderer='webgl'] .showroom-toolbar { display:none; }
+  .showroom[data-view='project'][data-renderer='webgl'] .showroom-path { top:94px; }
 </style>

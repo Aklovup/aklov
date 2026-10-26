@@ -48,6 +48,7 @@ export function mountShowroom(root:HTMLElement) {
       button.append(number,label,count);return button;
     }));
     exhibit.setProject(room?.slug);scene?.setState(state);
+    root.querySelector('[data-showroom-hint]')!.textContent=room?'Scroll to walk · Sideways to turn · Select a wall display':'Move to look · Scroll to travel · Select a model';
     status.textContent=room?`${room.title}. Project exhibition.`:model?`${model.label}. ${model.projects.length} project rooms.`:`${state.group==='concepts'?'Independent concepts':'Client projects'}. ${models.length} category models.`;
     if(focus){if(room)exhibit.focus();else if(model){heading.tabIndex=-1;heading.focus({preventScroll:true});}else options.querySelector<HTMLButtonElement>('button')?.focus({preventScroll:true});}
   }

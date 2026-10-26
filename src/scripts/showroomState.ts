@@ -1,6 +1,6 @@
 import { categoryIds, conceptCategoryIds, categoryLabel, type ProjectCategory } from '../data/projectCategories.ts';
 export type CollectionGroup='client'|'concepts';
-export interface ShowroomProject { slug:string; title:string; description:string; projectType:string; primaryCategory:ProjectCategory; aliases?:string[]; src?:string; }
+export interface ShowroomProject { slug:string; title:string; description:string; projectType:string; primaryCategory:ProjectCategory; aliases?:string[]; src?:string; initialMedia?:string; media?:{id:string;type:string;label:string;src?:string}[]; }
 export interface ShowroomModel { key:string; category:ProjectCategory; label:string; group:CollectionGroup; projects:ShowroomProject[]; }
 export interface ShowroomState { group:CollectionGroup; model?:ProjectCategory; room?:string; }
 export function modelsFor(projects:ShowroomProject[],group:CollectionGroup):ShowroomModel[] {

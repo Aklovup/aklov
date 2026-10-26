@@ -24,13 +24,31 @@ test('showroom navigation round-trips its state and preserves unrelated paramete
  assert.deepEqual(stateFromUrl(url,projects),state);
 });
 
-const {previousLocation,wheelDistance,travelProgress}=await import('../src/scripts/showroomTravel.ts');
+const {previousLocation,wheelDistance,routeDistance,roomExitPixels}=await import('../src/scripts/showroomTravel.ts');
 test('spatial back navigation removes exactly one level and retains the collection',()=>{
  assert.deepEqual(previousLocation({group:'client',model:'applications',room:'impex-automotive'}),{group:'client',model:'applications'});
  assert.deepEqual(previousLocation({group:'concepts',model:'websites'}),{group:'concepts'});
 });
-test('trackpad travel normalizes wheel units, reverses continuously and stays bounded',()=>{
+test('travel follows finite measured distances, reverses and clamps at the physical endpoint',()=>{
  assert.equal(wheelDistance(2,1,900),32);assert.equal(wheelDistance(1,2,900),900);
- const partial=travelProgress(0,325);assert.equal(partial,.5);assert.equal(travelProgress(partial,-162.5),.25);
- assert.equal(travelProgress(.8,500),1);assert.equal(travelProgress(-.8,-500),-1);
+ assert.equal(routeDistance(0,100,20),7.5);assert.equal(routeDistance(7.5,-50,20),3.75);
+ assert.equal(routeDistance(19,100,20),20);assert.equal(routeDistance(1,-100,20),0);
+ assert.ok(roomExitPixels(-.12,1.95)<150);assert.equal(roomExitPixels(0,2.82),0);
+});
+
+const {MediaSelection}=await import('../src/scripts/mediaSelection.ts');
+test('media selection swaps only the clicked slot and remembers each project until reload',()=>{
+ const selection=new MediaSelection();
+ assert.deepEqual(selection.get('impex',['a','b','c'],'a'),{main:'a',rail:['b','c']});
+ assert.deepEqual(selection.swap('impex','c'),{main:'c',rail:['b','a']});
+ selection.get('xans',['x','y'],'x');selection.swap('xans','y');
+ assert.deepEqual(selection.get('impex',['a','b','c'],'a'),{main:'c',rail:['b','a']});
+ assert.deepEqual(new MediaSelection().get('impex',['a','b','c'],'a'),{main:'a',rail:['b','c']});
+});
+test('one through five media have one primary item and no duplicate or empty thumbnail slots',()=>{
+ for(let n=1;n<=5;n++){
+  const selection=new MediaSelection(),ids=Array.from({length:n},(_,i)=>String(i));
+  const state=selection.get('project',ids);assert.equal(state.rail.length,n-1);
+  for(const id of ids){selection.swap('project',id);assert.equal(new Set([state.main,...state.rail]).size,n);assert.deepEqual([...new Set([state.main,...state.rail])].sort(),ids);}
+ }
 });
