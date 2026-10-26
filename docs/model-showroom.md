@@ -1,29 +1,33 @@
-# Model showroom experiment
+# Architectural Work exhibition
 
-Branch `experiment/model-showroom` starts from the verified circular-catalogue experiment, which remains unchanged on its own branch. This branch replaces only Work's presentation with a single-viewport architectural showroom.
+Review branch: `experiment/model-showroom`, draft PR #12. Main and the previous kinetic experiment remain unchanged.
 
-## Experience
+## Spatial navigation
 
-- A model table exhibits nonempty primary-category buildings, with client projects and independent concepts kept separate.
-- Selecting a building moves the camera and lifts its roof to reveal project rooms.
-- Selecting a room focuses its interior and shows the approved project description. View project opens the existing complete case study, including original media controls and image inspection.
-- A project-index overlay retains the original filters and offers direct access to every project. Secondary categories remain index filters rather than duplicated physical rooms.
-- Model and room buttons provide keyboard/touch access alongside physical model picking and drag-to-orbit viewing. Browser history restores the scene.
+The table exposes populated primary-category models, with client work and concepts separate. Select a model to open its roof, then a room to enter its exhibition. Every project has one physical home. The original index retains complete primary/additional-category filtering.
 
-The data is derived from content entries. Each project has one physical home under its primary category; empty categories create no model. `model` and `room` parameters encode spatial navigation, while existing `type`, `category` and `project` links remain supported. Invalid model/room parameters fall back to the showroom. Direct case-study links focus the matching room behind the existing dialog.
+Pointer movement gives bounded camera parallax without a held button. Horizontal trackpad gestures orbit the table. Vertical gestures over architecture advance or retreat along a guided route, with proportional preview before committing a location. Reversing a partial gesture reverses travel. A gesture must end before momentum can commit another level. Browser pinch zoom remains native.
 
-## Implementation
+Project-room camera routes pass through a side doorway. The physical doorway and its projected Leave room control return to the category; Leave building returns to the table. Breadcrumbs, Escape, index links and browser history offer parallel routes. Reading/media surfaces consume their own scroll rather than triggering travel.
 
-Three.js, introduced on the parent experiment, supplies lighting, geometry, planar reflection and post-processing. Models are procedural exhibition artwork, not representations of client buildings. Actual approved project images appear only in room displays and case studies; textures load when a category is inspected and use bounded GPU crops. No new dependencies or paid services are added here.
+## Integrated projects
 
-The gallery's new optional `renderDialog` prop defaults to true. This page mounts its case-study dialog outside the index overlay, avoiding hidden-ancestor and nested-focus problems. Shared header/footer source and other page source remain unchanged; page-scoped styles give Work a full-viewport shell.
+`ProjectExhibit.astro` renders all existing approved Markdown and media into inert templates. `projectExhibit.ts` divides that rendered content at existing headings, preserving every paragraph. The selected room presents an ivory/gold-on-charcoal glass-like media installation and readable HTML story wall. Chapters, media, captions, external URLs and explicit pending slots come from collection entries. GIFs reuse the existing intentional play/pause controller; images scroll within the installation at their natural ratio. No project or image dialogs are mounted on this Work route. The original shared dialog components remain unchanged for other uses.
 
-Reduced motion uses immediate poses; Pause stops animated transitions. Once motion settles, the renderer becomes idle until interaction or resizing. The static fallback retains category/room selection and case studies without WebGL. Without JavaScript, the complete original project index is available.
+The index is a full-page alternate view, not a modal. The background stage is inert while it is shown. Category/project URLs remain compatible; `model` and `room` encode spatial locations. Unknown locations fall back gracefully.
+
+## Arrival, life and performance
+
+The static SVG is reserved for unavailable/lost WebGL. JavaScript-capable visitors first see a charcoal branded preparation state. It reveals the actual first rendered frame after font readiness (bounded wait), then starts the entrance camera. No artificial percentage or forced Enter click. A delayed rescue link opens the usable index if scene startup fails.
+
+Subtle camera drift, architectural light breathing and sparse exhibition dust keep the idle scene alive. Pointer parallax is bounded. Rendering is capped at 30fps, suspends in hidden tabs/index, and settles while the user reads. Pause and reduced motion stop ambient movement and use immediate travel. Covers are cached and loaded when inspected; detailed media only enter live DOM for the selected project.
+
+No new dependencies, paid services, remote imagery or invented client content. Models are procedural exhibition artwork, not client buildings.
 
 ## Validation
 
-The new Model showroom review builds Astro, runs original unit tests plus showroom grouping/URL tests, and tests physical model picking, roof opening, room selection, original case studies and GIF playback, focus return, history, concepts, all index categories, deep links, viewport overflow, animated transitions, native mobile taps and fallback modes. Screenshots cover showroom/category/room states at desktop, tablet and mobile widths.
+The dedicated review builds Astro and runs content/contact unit checks plus grouping, URL and trackpad-state tests. Browser coverage checks direct model/room picking, unclicked pointer response, horizontal/vertical wheel behavior, proportional reverse travel, doorway exits, all ten case studies, chapters/media, GIF controls, no modals, filter preservation, history, deep links, reduced motion, touch, fallback and 320–1440px overflow. Screenshot capture uses isolated GPU sessions; the animated check uses a smaller drawing buffer for the software renderer.
 
-The original kinetic-world browser workflow is skipped on this branch because its circular-catalogue UI is deliberately replaced. Four direct-gallery browser steps in the existing site workflow are likewise replaced by the showroom/index/case-study checks. Home, Solutions, About, Contact and sitewide checks still run; the sitewide dialog selector is made explicit now that Work contains an index dialog as well as its project dialog. These exceptions are limited to this experiment branch.
+Existing Home, Solutions, About, Contact and sitewide browser checks remain enabled. Legacy direct-gallery browser checks are replaced only on this experiment branch by the showroom/index/exhibition tests.
 
-This is a procedural prototype for review. Do not merge without the owner's approval.
+Do not merge without the owner's review and approval.

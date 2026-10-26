@@ -3,7 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import { mediaPreview } from '../../lib/media';
 import { modelsFor, type ShowroomProject } from '../../scripts/showroomState';
 import ProjectGallery from '../work/ProjectGallery.astro';
-import ProjectDialog from '../work/ProjectDialog.astro';
+import ProjectExhibit from './ProjectExhibit.astro';
 interface Props { projects:CollectionEntry<'projects'>[]; }
 const { projects }=Astro.props;
 const entries:ShowroomProject[]=projects.map(({data})=>({slug:data.slug,aliases:data.aliases,title:data.title,description:data.description,projectType:data.projectType,primaryCategory:data.primaryCategory,src:data.cover.poster||mediaPreview(data.cover.url)?.src||(data.cover.type==='image'?data.cover.url:undefined)}));
@@ -20,6 +20,7 @@ const models=modelsFor(entries,'client');
   </svg>
   <canvas data-showroom-canvas aria-hidden="true"></canvas>
   <div class="showroom-shade" aria-hidden="true"></div>
+  <div class="showroom-arrival" data-showroom-arrival><span class="arrival-brand">aklov<span>.</span></span><p role="status">Preparing the showroom</p><a href="#showroom-index" data-arrival-rescue hidden>Explore the project index →</a></div>
   <div class="showroom-toolbar">
     <span class="mono">Portfolio / Aklov</span>
     <div class="showroom-types" role="group" aria-label="Choose showroom collection">
@@ -37,20 +38,22 @@ const models=modelsFor(entries,'client');
     <span class="showroom-eyebrow" data-showroom-eyebrow>{projects.filter(p=>p.data.projectType==='Client Project').length} client projects</span>
     <h2 data-showroom-heading>Select a model.</h2>
     <p data-showroom-description>Choose a category model to explore its project rooms.</p>
-    <button type="button" class="showroom-case" data-showroom-case hidden aria-haspopup="dialog" aria-controls="project-dialog">View project <span aria-hidden="true">↗</span></button>
+
   </section>
   <div class="showroom-options" role="group" aria-label="Choose a category model" data-showroom-options>
     {models.map((model,index)=><button type="button" data-showroom-model={model.category}><span class="option-number">{String(index+1).padStart(2,'0')}</span><span>{model.label}</span><span class="option-count">{String(model.projects.length).padStart(2,'0')}</span></button>)}
   </div>
-  <div class="showroom-bottom"><button type="button" data-showroom-index-open>Project index ↗</button><button type="button" data-showroom-motion hidden aria-pressed="false">Pause motion</button><span data-showroom-hint>Drag to look around · Select a model</span></div>
+  <button type="button" class="spatial-exit" data-showroom-exit hidden><span class="exit-threshold" aria-hidden="true"></span><span data-exit-label>Leave room</span><span aria-hidden="true">↙</span></button>
+  <ProjectExhibit projects={projects}/>
+  <div class="travel-indicator" aria-hidden="true"><span data-travel-progress></span></div>
+  <div class="showroom-bottom"><button type="button" data-showroom-index-open>Project index ↗</button><button type="button" data-showroom-motion hidden aria-pressed="false">Pause motion</button><span data-showroom-hint>Move to look · Scroll to travel · Select a model</span></div>
   <p class="sr-status" role="status" aria-live="polite" data-showroom-status></p>
   <script id="showroom-data" type="application/json" set:html={JSON.stringify(entries).replace(/</g,'\u003c')}/>
 </section>
-<dialog class="showroom-index" id="showroom-index" open aria-labelledby="showroom-index-title" data-showroom-index>
-  <div class="index-bar"><h2 id="showroom-index-title">Project index</h2><button type="button" data-showroom-index-close hidden>Close index ×</button></div>
+<section class="showroom-index" id="showroom-index" tabindex="-1" aria-labelledby="showroom-index-title" data-showroom-index>
+  <div class="index-bar"><h2 id="showroom-index-title">Project index</h2><button type="button" data-showroom-index-close hidden>Return to showroom ↙</button></div>
   <ProjectGallery projects={projects} renderDialog={false}/>
-</dialog>
-<ProjectDialog projects={projects}/>
+</section>
 <script>
   import { mountShowroom } from '../../scripts/showroom';
   const root=document.querySelector<HTMLElement>('[data-showroom]');
@@ -60,11 +63,12 @@ const models=modelsFor(entries,'client');
   html:has(.showroom),body:has(.showroom) { height:100%;overflow:hidden; }
   body:has(.showroom) .header-surface { position:absolute;z-index:10;top:0;left:0;width:100%;background:linear-gradient(#101b1ee6,transparent); }
   body:has(.showroom) .footer { display:none; }
-  .showroom { position:relative;isolation:isolate;width:100%;height:100dvh;min-height:480px;overflow:hidden;background:#132124;color:var(--ivory);--focus-color:var(--gold); }
-  .showroom canvas,.showroom-fallback { position:absolute;inset:0;width:100%;height:100%; }
-  .showroom canvas { opacity:0;transition:opacity .65s;touch-action:pan-y pinch-zoom;cursor:grab; }
-  .showroom[data-renderer='webgl'] canvas { opacity:1; }
-  .showroom[data-renderer='webgl'] .showroom-fallback { visibility:hidden; }
+  .showroom { position:relative;isolation:isolate;width:100%;height:100dvh;min-height:0;overflow:hidden;background:#132124;color:var(--ivory);--focus-color:var(--gold); }
+  .showroom canvas[data-showroom-canvas],.showroom-fallback { position:absolute;inset:0;width:100%;height:100%; }
+  .showroom canvas[data-showroom-canvas] { opacity:0;transition:opacity .65s;touch-action:pan-y pinch-zoom;cursor:grab; }
+  .showroom[data-arrival='ready'][data-renderer='webgl'] canvas[data-showroom-canvas] { opacity:1; }
+  .showroom-fallback { visibility:hidden; }
+  .showroom[data-renderer='fallback'] .showroom-fallback,html:not([data-showroom-js]) .showroom-fallback { visibility:visible; }
   .showroom[data-dragging] canvas { cursor:grabbing; }
   .showroom-shade { position:absolute;inset:0;pointer-events:none;background:linear-gradient(0deg,#081215fa 0%,#081215eb 18%,#081215aa 36%,transparent 60%,#08121545); }
   .showroom-toolbar { position:absolute;z-index:3;top:112px;left:var(--pad);right:var(--pad);display:flex;justify-content:space-between;align-items:center;gap:20px; }
@@ -96,8 +100,8 @@ const models=modelsFor(entries,'client');
   .showroom-bottom button { min-height:44px;padding:0;border:0; }
   .showroom-bottom>span { font-size:10px;color:#b8bfb4; }
   .sr-status { position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%); }
-  .showroom-index { position:fixed;inset:24px;width:calc(100% - 48px);max-width:1440px;max-height:calc(100dvh - 48px);margin:auto;padding:0;overflow:auto;overscroll-behavior:contain;border:1px solid var(--line);background:var(--ivory);color:var(--charcoal); }
-  .showroom-index::backdrop { background:#071012d9; }
+  .showroom-index { position:fixed;z-index:8;inset:96px 0 0;width:100%;max-width:none;height:calc(100dvh - 96px);max-height:none;margin:0;padding:0;overflow:auto;overscroll-behavior:contain;border:1px solid var(--line);background:var(--ivory);color:var(--charcoal); }
+
   html[data-showroom-js] .showroom-index:not([data-user-open]) { display:none; }
   .index-bar { position:sticky;top:0;z-index:4;display:flex;justify-content:space-between;align-items:center;gap:24px;padding:18px var(--pad);background:var(--ivory);border-bottom:1px solid var(--line); }
   .index-bar h2 { margin:0;font:400 32px var(--display); }
@@ -128,7 +132,27 @@ const models=modelsFor(entries,'client');
     .showroom-bottom { gap:12px; }
     .showroom-bottom button { font-size:11px; }
     .showroom-bottom>span { display:none; }
-    .showroom-index { inset:0;width:100%;height:100dvh;max-height:100dvh;border:0; }
+    .showroom-index { inset:82px 0 0;width:100%;height:calc(100dvh - 82px);max-height:none;border:0; }
   }
   @media(max-height:650px) { .showroom-toolbar { top:84px; } .showroom-path { top:135px; } .showroom-title { display:none; } .showroom-info { bottom:150px;max-height:30dvh; } .showroom-options { bottom:60px; } .showroom-options button { min-height:44px; } }
+
+  .showroom-arrival { position:absolute;inset:0;z-index:7;display:none;place-content:center;justify-items:center;gap:22px;background:#101b1e;opacity:1;transition:opacity .7s,visibility .7s; }
+  html[data-showroom-js] .showroom-arrival { display:grid; }
+  .arrival-brand { color:var(--ivory);font:600 48px/1 var(--sans);letter-spacing:-3px; }
+  .arrival-brand>span { color:var(--gold); }
+  .showroom-arrival p { color:var(--gold);font:10px/1.5 var(--sans);letter-spacing:2px;text-transform:uppercase; }
+  .showroom-arrival a { color:var(--ivory);font-size:12px;min-height:44px;align-content:center; }
+  .showroom[data-arrival='ready'] .showroom-arrival { opacity:0;visibility:hidden;pointer-events:none; }
+  .showroom:not([data-arrival='ready'])>.showroom-toolbar,.showroom:not([data-arrival='ready'])>.showroom-path,.showroom:not([data-arrival='ready'])>.showroom-title,.showroom:not([data-arrival='ready'])>.showroom-info,.showroom:not([data-arrival='ready'])>.showroom-options,.showroom:not([data-arrival='ready'])>.showroom-bottom { opacity:0; }
+  .showroom[data-view='project']>.showroom-info,.showroom[data-view='project']>.showroom-options { display:none; }
+  .spatial-exit { position:absolute;z-index:5;left:clamp(20px,var(--exit-x,4vw),calc(100% - 160px));top:clamp(230px,var(--exit-y,60%),calc(100% - 160px));display:flex;align-items:center;gap:12px;min-height:64px;padding:12px 16px;border:1px solid #d8bd7880!important;background:#0e2023ed!important;box-shadow:0 0 30px #d8bd7815;color:var(--gold)!important; }
+  .spatial-exit:hover { border-color:var(--gold)!important;background:#172e30!important; }
+  .exit-threshold { display:block;width:16px;height:27px;border:1px solid var(--gold);border-bottom:0;box-shadow:inset 3px 0 #d8bd7850; }
+  .travel-indicator { position:absolute;left:var(--pad);bottom:68px;z-index:5;width:100px;height:1px;background:#ffffff25;pointer-events:none; }
+  .travel-indicator>span { display:block;width:100%;height:100%;background:var(--gold);transform:scaleX(var(--travel,0));transform-origin:left; }
+  .showroom[data-index-open='true'] .spatial-exit,.showroom[data-index-open='true'] .project-exhibit { visibility:hidden; }
+  .showroom[data-room-ready='false'] .project-exhibit { pointer-events:none; }
+  .showroom[data-room-ready='false'] .project-exhibit>* { pointer-events:none; }
+  @media(max-width:800px) { .spatial-exit { top:185px;left:auto;right:var(--pad);min-height:44px;padding:5px 10px; } .exit-threshold { display:none; } .showroom[data-view='project'] .showroom-path [data-model-path] { max-width:53%; } }
+  @media(prefers-reduced-motion:reduce) { .showroom-arrival,.showroom canvas[data-showroom-canvas] { transition:none; } }
 </style>

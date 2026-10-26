@@ -1,86 +1,75 @@
 import assert from 'node:assert/strict';
-import { mkdir,writeFile } from 'node:fs/promises';
-import { spawn } from 'node:child_process';
-import { chromium } from 'playwright';
+import {mkdir,writeFile} from 'node:fs/promises';
+import {spawn} from 'node:child_process';
+import {chromium} from 'playwright';
 const base='http://127.0.0.1:4321',out='artifacts/showroom';
 const server=spawn('npm',['run','preview','--','--host','127.0.0.1','--port','4321'],{stdio:'inherit'});
-let browser;
-const report={checks:[],viewports:[]};
-async function goto(page,url){await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});}
-async function ready(page){await page.waitForSelector('[data-showroom][data-ready="true"]');}
+let browser;const report={checks:[],viewports:[]};
+async function goto(page,path='/work/'){await page.goto(base+path,{waitUntil:'domcontentloaded',timeout:60000});await page.waitForSelector('[data-showroom][data-ready="true"][data-arrival="ready"]');}
 async function view(page,value){await page.waitForFunction(v=>document.querySelector('[data-showroom]').dataset.view===v,value);}
+async function roomReady(page){await page.waitForSelector('[data-showroom][data-room-ready="true"]');}
+async function wheel(page,dy,dx=0){await page.mouse.move(20,350);await page.mouse.wheel(dx,dy);}
 try{
  for(let i=0;i<100;i++){try{if((await fetch(base+'/work/')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
  await mkdir(out,{recursive:true});browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
- let context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'}),page=await context.newPage();const errors=[];
- page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error'&&/Shader Error|WebGLProgram/.test(m.text()))errors.push(m.text());});
- await goto(page,base+'/work/');await ready(page);await page.evaluate(()=>document.fonts.ready);
- await page.waitForSelector('[data-showroom][data-renderer="webgl"][data-rendered="true"]');
+ const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));await goto(page);
+ assert.equal(await page.locator('dialog').count(),0,'The showroom must not contain project or index modals');
  assert.equal(await page.locator('[data-showroom-model]').count(),4);
- assert.equal(await page.locator('[data-showroom-model="integrations"]').count(),0);
- assert.equal(await page.locator('[data-showroom-motion]').getAttribute('aria-pressed'),'true');
+ assert.equal(await page.locator('.showroom-fallback').isVisible(),false);
  await page.screenshot({path:out+'/showroom-desktop.png'});
- // Pick a physical model at its projected centre, rather than only using its index button.
- const point=await page.locator('[data-showroom-model="applications"]').evaluate(b=>({x:Number(b.dataset.worldX),y:Number(b.dataset.worldY)}));
- assert.ok(Number.isFinite(point.x)&&Number.isFinite(point.y));
- await page.mouse.click(point.x,point.y);await view(page,'category');
- assert.equal(await page.locator('[data-showroom]').getAttribute('data-model'),'applications');
- assert.equal(await page.locator('[data-showroom-room]').count(),2);
- await page.waitForFunction(()=>Number(document.querySelector('[data-showroom]').dataset.roofOpen)>.98);
+ const point=await page.locator('[data-showroom-model="applications"]').evaluate(b=>({x:Number(b.dataset.worldX),y:Number(b.dataset.worldY)}));await page.mouse.click(point.x,point.y);await view(page,'category');
  await page.waitForFunction(()=>Number(document.querySelector('[data-showroom]').dataset.readyPreviews)>=2);
- await page.screenshot({path:out+'/category-desktop.png'});
- const roomPoint=await page.locator('[data-showroom-room="impex-automotive"]').evaluate(b=>({x:Number(b.dataset.worldX),y:Number(b.dataset.worldY)}));await page.mouse.click(roomPoint.x,roomPoint.y);await view(page,'project');
- await page.screenshot({path:out+'/room-desktop.png'});
- await page.locator('[data-showroom-case]').click();await page.waitForSelector('[data-project-dialog][open]');
- assert.ok((await page.locator('[data-project-dialog]').innerText()).includes('A B2B ordering experience built around the business'));
- const play=page.locator('[data-project-dialog] [data-gif-toggle]').first();await play.click();await page.waitForFunction(()=>document.querySelector('[data-project-dialog] [data-gif-toggle]').getAttribute('aria-pressed')==='true');await play.click();
- await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.querySelector('[data-project-dialog]').open);
- await page.waitForFunction(()=>document.activeElement?.hasAttribute('data-showroom-case'));
- await page.locator('[data-showroom-back]').click();await view(page,'category');
- await page.locator('[data-showroom-back]').click();await view(page,'showroom');
+ const rp=await page.locator('[data-showroom-room="impex-automotive"]').evaluate(b=>({x:Number(b.dataset.worldX),y:Number(b.dataset.worldY)}));await page.mouse.click(rp.x,rp.y);await view(page,'project');await roomReady(page);
+ assert.ok((await page.locator('[data-exhibit-title]').innerText()).includes('Impex Automotive'));
+ const chapterButtons=page.locator('[data-exhibit-chapters] button');assert.equal(await chapterButtons.count(),5);
+ for(let i=0;i<5;i++){await chapterButtons.nth(i).click();assert.equal(await page.locator('[data-exhibit-chapter] h3').innerText(),await chapterButtons.nth(i).innerText());}
+ assert.equal(await page.locator('[data-exhibit-media-controls] button').count(),3);
+ const play=page.locator('[data-exhibit-stage] [data-gif-toggle]');await play.click();await page.waitForFunction(()=>document.querySelector('[data-exhibit-stage] [data-gif-toggle]').getAttribute('aria-pressed')==='true');await play.click();
+ await page.locator('[data-exhibit-media-controls] button').nth(1).click();assert.equal(await page.locator('[data-exhibit-stage] [data-media-id]').getAttribute('data-media-id'),'impex-product-cart');
+ await page.screenshot({path:out+'/impex-room-desktop.png'});
+ // Reading is isolated from travel, even for strong trackpad gestures.
+ await page.locator('[data-exhibit-chapter]').hover();await page.mouse.wheel(0,-900);assert.equal(await page.locator('[data-showroom]').getAttribute('data-room'),'impex-automotive');
+ // A partial backward gesture moves the camera before changing route; forward reverses it.
+ const initialZ=Number(await page.locator('[data-showroom]').getAttribute('data-camera-z'));
+ await wheel(page,-260);assert.equal(await page.locator('[data-showroom]').getAttribute('data-view'),'project');
+ assert.notEqual(Number(await page.locator('[data-showroom]').getAttribute('data-camera-z')),initialZ);
+ await wheel(page,130);assert.ok(Number(await page.locator('[data-showroom]').getAttribute('data-travel'))<0);
+ await page.locator('[data-showroom-exit]').click();await view(page,'category');
+ await page.locator('[data-showroom-room="impex-automotive"]').click();await roomReady(page);
+ await wheel(page,-800);await view(page,'category');await page.waitForTimeout(300);
+ await wheel(page,-800);await view(page,'showroom');
  await page.goBack();await view(page,'category');await page.goForward();await view(page,'showroom');
- const beforeOrbit=await page.screenshot();await page.mouse.move(650,380);await page.mouse.down();await page.mouse.move(830,380,{steps:8});await page.mouse.up();const afterOrbit=await page.screenshot();assert.notDeepEqual(beforeOrbit,afterOrbit,'Dragging should change the model-table viewpoint');assert.equal(await page.locator('[data-showroom]').getAttribute('data-view'),'showroom');
- report.checks.push('Physical model picking, cutaway roof, canonical project rooms, uploaded previews, case study, GIF controls, focus return and history');
- for(const [category,count] of [['websites',3],['customer-systems',1],['automation',2]]){
-  await page.locator(`[data-showroom-model="${category}"]`).click();await view(page,'category');assert.equal(await page.locator('[data-showroom-room]').count(),count);await page.locator('[data-showroom-home]').click();
+ report.checks.push('Direct 3D model and room picking, all Impex chapters/media, GIF playback, reading isolation, reversible trackpad travel, spatial doorway, history and zero modals');
+ await page.locator('[data-showroom-index-open]').click();await page.locator('[data-group="all"]').click();assert.equal(await page.locator('[data-project]:not([hidden])').count(),10);
+ await page.locator('[data-group="client"]').click();
+ for(const [category,count]of [['applications',2],['websites',3],['customer-systems',2],['automation',5],['integrations',7]]){await page.locator(`[data-category-filters="client"] [data-filter="${category}"]`).click();assert.equal(await page.locator('[data-project]:not([hidden])').count(),count);}
+ const projects=await page.locator('#showroom-data').evaluate(e=>JSON.parse(e.textContent));
+ for(const project of projects){
+  await page.locator('[data-showroom-index-open]').click();await page.locator('[data-group="all"]').click();await page.locator(`[data-project-open="${project.slug}"]`).click();await roomReady(page);assert.equal(await page.locator('[data-exhibit-title]').innerText(),project.title);assert.ok(await page.locator('[data-exhibit-chapters] button').count()>=4);assert.equal(await page.locator('dialog').count(),0);
  }
- await page.locator('[data-showroom-type="concepts"]').click();assert.equal(await page.locator('[data-showroom-model]').count(),1);
- await page.locator('[data-showroom-model="websites"]').click();assert.equal(await page.locator('[data-showroom-room]').count(),2);
- await page.locator('[data-showroom-room="vera-skincare-concept"]').click();await page.locator('[data-showroom-case]').click();await page.waitForSelector('[data-project-dialog][open]');
- assert.ok((await page.locator('[data-project-dialog]').innerText()).includes('Independent Concept'));await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.querySelector('[data-project-dialog]').open);
- await page.locator('[data-showroom-type="client"]').click();
- await page.locator('[data-showroom-index-open]').click();await page.waitForSelector('[data-showroom-index][open][data-user-open]');
- await page.locator('[data-group="all"]').click();assert.equal(await page.locator('[data-project]:not([hidden])').count(),10);
- await page.locator('[data-group="client"]').click();assert.equal(await page.locator('[data-project]:not([hidden])').count(),8);
- for(const [category,count] of [['applications',2],['websites',3],['customer-systems',2],['automation',5],['integrations',7]]){
-  await page.locator(`[data-category-filters="client"] [data-filter="${category}"]`).click();assert.equal(await page.locator('[data-project]:not([hidden])').count(),count);
- }
- await page.locator('[data-project-open="impex-automotive"]').click();await page.waitForSelector('[data-project-dialog][open]');await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.querySelector('[data-project-dialog]').open);
- assert.equal(await page.locator('[data-showroom-index]').isVisible(),true);
- await page.locator('[data-showroom-index-close]').click();
- report.checks.push('All category buildings, separate concepts, complete index, all original multi-category filters and nested case-study dialog');
- await context.close();
+ await goto(page,'/work/?type=client&category=automation');await page.locator('[data-showroom-index]:not([hidden])').waitFor();assert.equal(await page.locator('[data-project]:not([hidden])').count(),5);
+ await page.keyboard.press('Escape');assert.equal(await page.locator('[data-showroom-index]').isVisible(),false);
+ assert.deepEqual(errors,[]);await context.close();report.checks.push('All ten project exhibitions, concepts, original filters, external URLs and legacy category links');
+ // Fresh GPU sessions avoid software-renderer readback stalls between viewport captures.
  for(const width of [1440,1024,768,390,320]){
-  console.log('Reviewing showroom viewport',width);context=await browser.newContext({viewport:{width,height:width<800?844:1000},reducedMotion:'reduce'});page=await context.newPage();await goto(page,base+'/work/');await ready(page);
-  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'Horizontal overflow at '+width);
-  assert.ok(await page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+1),'The experiment must stay inside one viewport');
-  await page.screenshot({path:`${out}/showroom-${width}.png`});
-  await page.locator('[data-showroom-model="applications"]').click();await page.screenshot({path:`${out}/category-${width}.png`});
-  await page.locator('[data-showroom-room="impex-automotive"]').click();await page.screenshot({path:`${out}/room-${width}.png`});
-  report.viewports.push({width,overflow:false});await context.close();
+  const c=await browser.newContext({viewport:{width,height:width<800?844:1000},reducedMotion:'reduce'}),p=await c.newPage();await goto(p,'/work/?model=applications&room=impex-automotive');await roomReady(p);
+  assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  assert.ok(await p.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+1));
+  if([1440,390].includes(width))await p.screenshot({path:`${out}/room-${width}.png`});
+  await p.locator('[data-showroom-exit]').click();await view(p,'category');await p.keyboard.press('Escape');await view(p,'showroom');
+  report.viewports.push({width,overflow:false});await c.close();
  }
- context=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});page=await context.newPage();
- await goto(page,base+'/work/?project=jaycor-commerce');await ready(page);await page.waitForSelector('[data-project-dialog][open]');assert.equal(await page.locator('[data-showroom]').getAttribute('data-room'),'jaycor-commerce');await page.keyboard.press('Escape');
- await goto(page,base+'/work/?type=client&category=integrations');await ready(page);await page.waitForSelector('[data-showroom-index][open][data-user-open]');assert.equal(await page.locator('[data-project]:not([hidden])').count(),7);
- await goto(page,base+'/work/?type=client&category=automation');await ready(page);await page.waitForSelector('[data-showroom-index][open][data-user-open]');assert.equal(await page.locator('[data-project]:not([hidden])').count(),5);
- assert.deepEqual(errors,[]);await context.close();
- const moving=await browser.newContext({viewport:{width:1024,height:768},deviceScaleFactor:.7}),mp=await moving.newPage();await goto(mp,base+'/work/');await ready(mp);await mp.locator('[data-showroom-model="applications"]').click();await view(mp,'category');
- await mp.waitForFunction(()=>Number(document.querySelector('[data-showroom]').dataset.roofOpen)>.05&&Number(document.querySelector('[data-showroom]').dataset.roofOpen)<.98);
- await mp.waitForFunction(()=>document.querySelector('[data-showroom]').dataset.transitionSettled==='true');await mp.screenshot({path:out+'/animated-cutaway-settled.png'});await moving.close();
- const touch=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),tp=await touch.newPage();await goto(tp,base+'/work/');await ready(tp);await tp.locator('[data-showroom-model="applications"]').tap();await view(tp,'category');await tp.locator('[data-showroom-room="impex-automotive"]').tap();await view(tp,'project');await tp.locator('[data-showroom-case]').tap();await tp.waitForSelector('[data-project-dialog][open]');await tp.keyboard.press('Escape');await tp.waitForFunction(()=>!document.querySelector('[data-project-dialog]').open);await touch.close();
- const fallback=await browser.newContext({viewport:{width:390,height:844}});await fallback.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){if(type==='webgl'||type==='webgl2')return null;return original.call(this,type,...args);};});
- const fp=await fallback.newPage();await goto(fp,base+'/work/');await ready(fp);assert.equal(await fp.locator('.showroom-fallback').isVisible(),true);await fp.locator('[data-showroom-model="applications"]').click();await fp.locator('[data-showroom-room="impex-automotive"]').click();await fp.locator('[data-showroom-case]').click();await fp.waitForSelector('[data-project-dialog][open]');await fallback.close();
- const nojs=await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}}),np=await nojs.newPage();await goto(np,base+'/work/');assert.equal(await np.locator('[data-showroom-index]').isVisible(),true);assert.equal(await np.locator('[data-project]').count(),10);await nojs.close();
- report.checks.push('Desktop/tablet/mobile single-screen layouts, deep links, animated roof/camera transition, native touch selection, reduced motion, no-WebGL and no-JavaScript access');
+ const moving=await browser.newContext({viewport:{width:1024,height:768},deviceScaleFactor:.7}),mp=await moving.newPage();await goto(mp);
+ const canvas=mp.locator('[data-showroom-canvas]');const before=Number(await mp.locator('[data-showroom]').getAttribute('data-camera-x'));
+ await mp.mouse.move(900,360);await mp.waitForFunction(x=>Math.abs(Number(document.querySelector('[data-showroom]').dataset.cameraX)-x)>.02,before);
+ const t=Number(await mp.locator('[data-showroom]').getAttribute('data-ambient-time'));await mp.waitForFunction(t=>Number(document.querySelector('[data-showroom]').dataset.ambientTime)>t+.3,t);
+ await mp.locator('[data-showroom-model="applications"]').click();await mp.locator('[data-showroom-room="impex-automotive"]').click();await roomReady(mp);await mp.screenshot({path:out+'/animated-room.png'});
+ await mp.locator('[data-showroom-motion]').click();const frozen=await mp.locator('[data-showroom]').getAttribute('data-ambient-time');await mp.waitForTimeout(250);assert.equal(await mp.locator('[data-showroom]').getAttribute('data-ambient-time'),frozen);await moving.close();
+ const touch=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),tp=await touch.newPage();await goto(tp);await tp.locator('[data-showroom-model="applications"]').tap();await tp.locator('[data-showroom-room="impex-automotive"]').tap();await roomReady(tp);await tp.locator('[data-showroom-exit]').tap();await view(tp,'category');await touch.close();
+ const fallback=await browser.newContext({viewport:{width:390,height:844}});await fallback.addInitScript(()=>{const old=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){if(type==='webgl'||type==='webgl2')return null;return old.call(this,type,...args);};});
+ const fp=await fallback.newPage();await goto(fp,'/work/?project=impex-automotive');await roomReady(fp);assert.equal(await fp.locator('[data-showroom]').getAttribute('data-renderer'),'fallback');assert.equal(await fp.locator('.showroom-fallback').isVisible(),true);await fallback.close();
+ const nojs=await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}}),np=await nojs.newPage();await np.goto(base+'/work/');assert.equal(await np.locator('[data-showroom-index]').isVisible(),true);assert.equal(await np.locator('[data-project]').count(),10);await nojs.close();
+ report.checks.push('Pointer camera response without clicking, living ambient motion and pause, doorway camera travel, native touch, reduced motion, WebGL fallback and no-JavaScript index');
  await writeFile(out+'/report.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));
 }finally{await browser?.close();server.kill('SIGTERM');}

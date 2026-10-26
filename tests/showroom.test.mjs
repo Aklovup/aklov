@@ -23,3 +23,14 @@ test('showroom navigation round-trips its state and preserves unrelated paramete
  assert.equal(url.searchParams.get('utm_source'),'review');assert.equal(url.hash,'#main');assert.equal(url.searchParams.has('project'),false);assert.equal(url.searchParams.has('category'),false);
  assert.deepEqual(stateFromUrl(url,projects),state);
 });
+
+const {previousLocation,wheelDistance,travelProgress}=await import('../src/scripts/showroomTravel.ts');
+test('spatial back navigation removes exactly one level and retains the collection',()=>{
+ assert.deepEqual(previousLocation({group:'client',model:'applications',room:'impex-automotive'}),{group:'client',model:'applications'});
+ assert.deepEqual(previousLocation({group:'concepts',model:'websites'}),{group:'concepts'});
+});
+test('trackpad travel normalizes wheel units, reverses continuously and stays bounded',()=>{
+ assert.equal(wheelDistance(2,1,900),32);assert.equal(wheelDistance(1,2,900),900);
+ const partial=travelProgress(0,325);assert.equal(partial,.5);assert.equal(travelProgress(partial,-162.5),.25);
+ assert.equal(travelProgress(.8,500),1);assert.equal(travelProgress(-.8,-500),-1);
+});
