@@ -128,8 +128,8 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     if(room.node.userData.previewVersion!==version)return;
     const c=document.createElement('canvas');c.width=1080;c.height=760;const ctx=c.getContext('2d')!;ctx.fillStyle='#102124';ctx.fillRect(0,0,1080,760);
     ctx.fillStyle='#d8bd78';ctx.font=`22px ${sansFont}`;ctx.fillText(p.projectType,32,38);ctx.fillStyle='#f5f2ea';ctx.font=`40px ${displayFont}`;ctx.fillText(p.title,32,88,1000);
-    function imageFit(image:HTMLImageElement|undefined,x:number,y:number,w:number,h:number){if(!image)return;const scale=Math.min(w/image.width,h/image.height);ctx.drawImage(image,x+(w-image.width*scale)/2,y,image.width*scale,image.height*scale);}
-    const mainWidth=media.length>1?760:1016;imageFit(images[0],32,160,mainWidth,540);
+    function imageFit(image:HTMLImageElement|undefined,x:number,y:number,w:number,h:number,cover=true){if(!image)return;const scale=(cover?Math.max:Math.min)(w/image.width,h/image.height);ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();ctx.drawImage(image,x+(w-image.width*scale)/2,y,image.width*scale,image.height*scale);ctx.restore();}
+    const mainWidth=media.length>1?760:1016;imageFit(images[0],32,160,mainWidth,540,media[0]?.type==='image');
     if(media.length>1){const h=540/(media.length-1);for(let i=1;i<media.length;i++){ctx.strokeStyle='#bfa363';ctx.strokeRect(818,160+(i-1)*h,230,h-12);imageFit(images[i],824,166+(i-1)*h,218,h-24);}}
     const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;room.material.map=texture;room.material.needsUpdate=true;room.ready=true;room.node.userData.previewId=layout.main;root.dataset.previewMedia=JSON.stringify(Object.fromEntries(exhibitModels.flatMap(m=>m.rooms).filter(r=>r.node.userData.previewId).map(r=>[r.project.slug,r.node.userData.previewId])));
     root.dataset.readyPreviews=String(exhibitModels.flatMap(m=>m.rooms).filter(r=>r.ready).length);draw();
@@ -145,7 +145,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   const currentEye=new THREE.Vector3(-13,16,38),currentLook=new THREE.Vector3(0,4.3,0),targetEye=new THREE.Vector3(),targetLook=new THREE.Vector3();
   type Flight={curve:THREE.CatmullRomCurve3;fromLook:THREE.Vector3;toLook:THREE.Vector3;progress:number;room?:string;};
   let flight:Flight|undefined;
-  let walking:{curve:THREE.CatmullRomCurve3;length:number;distance:number;sign:number;fromLook:THREE.Vector3;toLook:THREE.Vector3;destination:ShowroomState}|undefined;
+  let walking:{curve:THREE.CatmullRomCurve3;length:number;distance:number;sign:number;yawStart:number;fromLook:THREE.Vector3;toLook:THREE.Vector3;destination:ShowroomState}|undefined;
   function modelFor(location:ShowroomState){return exhibitModels.find(m=>m.data.group===location.group&&m.data.category===location.model);}
   function roomFor(location:ShowroomState){return modelFor(location)?.rooms.find(r=>r.project.slug===location.room);}
   function worldPoint(room:NonNullable<ReturnType<typeof roomFor>>,x:number,y:number,z:number){return room.node.localToWorld(new THREE.Vector3(x,y,z));}
@@ -176,7 +176,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   function pose(){
     const base=basePose(state);targetEye.copy(base.eye);targetLook.copy(base.look);
     if(flight){const t=THREE.MathUtils.smoothstep(flight.progress,0,1);targetEye.copy(flight.curve.getPoint(t));targetLook.lerpVectors(flight.fromLook,flight.toLook,t);}
-    if(walking){const t=walking.distance/walking.length;targetEye.copy(walking.curve.getPointAt(t));targetLook.lerpVectors(walking.fromLook,walking.toLook,t);}
+    if(walking){const t=walking.distance/walking.length;targetEye.copy(walking.curve.getPointAt(t));targetLook.lerpVectors(walking.fromLook,walking.toLook,t);targetLook.sub(targetEye).applyAxisAngle(new THREE.Vector3(0,1,0),yaw-walking.yawStart).add(targetEye);}
     if(!state.room&&!paused&&!reading){targetEye.x+=pointerCurrent.x*.12+Math.sin(elapsed*.16)*.035;targetLook.x+=pointerCurrent.x*.06;targetEye.y+=Math.sin(elapsed*.21)*.025;}
   }
   function updateModels(dt:number){
@@ -210,7 +210,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     const settled=currentEye.distanceTo(targetEye)+currentLook.distanceTo(targetLook)<.06&&!flight&&intro<.01;
     root.dataset.transitionSettled=String(settled);root.dataset.roomReady=String(!!state.room&&settled);
     root.dataset.roomX=roomEye.x.toFixed(4);root.dataset.roomZ=roomEye.z.toFixed(4);root.dataset.roomHeading=roomHeading.toFixed(4);
-    root.dataset.cameraX=currentEye.x.toFixed(4);root.dataset.cameraZ=currentEye.z.toFixed(4);root.dataset.ambientTime=elapsed.toFixed(2);
+    root.dataset.cameraHeading=Math.atan2(currentLook.x-currentEye.x,currentLook.z-currentEye.z).toFixed(5);root.dataset.cameraX=currentEye.x.toFixed(4);root.dataset.cameraZ=currentEye.z.toFixed(4);root.dataset.ambientTime=elapsed.toFixed(2);
     for(const model of exhibitModels.filter(m=>m.group.visible)){
       const anchor=model.group.position.clone();anchor.y+=1.1;anchor.project(camera);const b=root.querySelector<HTMLElement>(`[data-showroom-model="${model.data.category}"]`);
       if(b){b.dataset.worldX=((anchor.x*.5+.5)*canvas.clientWidth).toFixed(1);b.dataset.worldY=((-anchor.y*.5+.5)*canvas.clientHeight).toFixed(1);}
@@ -245,7 +245,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     if(!frame){last=0;frame=requestAnimationFrame(tick);}
   }
   function settle(){flight=undefined;viewHeading=roomHeading;pose();currentEye.copy(targetEye);currentLook.copy(targetLook);camera.position.copy(currentEye);camera.lookAt(currentLook);updateModels(1/60);draw();}
-  function respond(){if(motion.matches)settle();else{pose();sync();}}
+  function respond(){if(motion.matches){yaw=targetYaw;settle();}else{pose();sync();}}
   function setState(next:ShowroomState){
     if(lost){state=next;root.dataset.roomReady='true';return;}
     const previous=state,changed=previous.group!==next.group||previous.model!==next.model||previous.room!==next.room,previousRoom=roomFor(previous);
@@ -279,10 +279,10 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
       const destination=pixels<0?(state.model?previousLocation(state):undefined):forwardLocation();if(!destination)return;
       if(destination.room){options.selectRoom(destination.room);return;}
       const dest=basePose(destination),from=currentEye.clone(),points=[from,from.clone().lerp(dest.eye,.5),dest.eye];flight=undefined;
-      const curve=new THREE.CatmullRomCurve3(points,false,'centripetal');walking={curve,length:Math.max(curve.getLength(),.01),distance:0,sign:Math.sign(pixels),fromLook:currentLook.clone(),toLook:dest.look,destination};
+      const curve=new THREE.CatmullRomCurve3(points,false,'centripetal');walking={curve,length:Math.max(curve.getLength(),.01),distance:0,sign:Math.sign(pixels),yawStart:yaw,fromLook:currentLook.clone(),toLook:dest.look,destination};
     }
     walking.distance=routeDistance(walking.distance,pixels*walking.sign,walking.length);root.style.setProperty('--travel',String(walking.distance/walking.length));
-    const complete=walking.distance>=walking.length,atStart=walking.distance===0&&pixels*walking.sign<0,destination=walking.destination;
+    const complete=walking.distance>=walking.length,atStart=walking.distance===0&&pixels*walking.sign<0;
     respond();if(complete&&motion.matches)finishWalking();else if(atStart)walking=undefined;
   }
   updateLayout();pose();currentEye.copy(targetEye);currentLook.copy(targetLook);resize();root.dataset.renderer='webgl';pause.hidden=false;
@@ -297,14 +297,14 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   root.addEventListener('pointerover',event=>{const next=!!(event.target as Element).closest('.story-wall');if(next!==reading){reading=next;sync();}});
   const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
   function pick(x:number,y:number){const r=canvas.getBoundingClientRect();pointer.set((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1);raycaster.setFromCamera(pointer,camera);const hits=raycaster.intersectObjects(exhibitModels.filter(m=>m.group.visible).map(m=>m.group),true).filter(hit=>{let n:THREE.Object3D|null=hit.object;while(n){if(!n.visible)return false;n=n.parent;}return true;});if(!hits[0])return;let n:THREE.Object3D|null=hits[0].object,room:string|undefined,category:string|undefined,exit=false;while(n){room ||= n.userData.room;category ||= n.userData.model;exit ||= !!n.userData.exit;n=n.parent;}return {room,category,exit};}
-  let gesture:{id:number;x:number;y:number;lastX:number;lastY:number;dragged:boolean;target:Element}|undefined,keyboardNavigation=false,suppressClickUntil=0;
+  let gesture:{id:number;x:number;y:number;lastX:number;lastY:number;dragged:boolean}|undefined,keyboardNavigation=false,suppressClickUntil=0;
   const interactive=(e:Event)=>(e.target as Element).closest('button,a,input,select,textarea,video');
   const lifted=()=>root.dataset.mediaLift==='open'||root.dataset.mediaLift==='closing';
   const flat=()=>root.dataset.surfaceMode==='flat'||root.dataset.renderer==='fallback';
   function clearGesture(){if(gesture&&root.hasPointerCapture(gesture.id))root.releasePointerCapture(gesture.id);gesture=undefined;dragging=false;delete root.dataset.dragging;}
   root.addEventListener('pointerdown',event=>{
     keyboardNavigation=false;if(lifted()||flat()||(event.pointerType==='mouse'&&event.button!==0)||(event.target as Element).closest('input,select,textarea'))return;
-    clearGesture();gesture={id:event.pointerId,x:event.clientX,y:event.clientY,lastX:event.clientX,lastY:event.clientY,dragged:false,target:event.target as Element};
+    clearGesture();gesture={id:event.pointerId,x:event.clientX,y:event.clientY,lastX:event.clientX,lastY:event.clientY,dragged:false};
   });
   root.addEventListener('pointermove',event=>{
     if(lifted())return;

@@ -21,6 +21,12 @@ try{
  assert.equal(await page.locator('dialog').count(),0);assert.equal(await page.locator('[data-showroom-model]').count(),4);
  // Repeated vertical wheel events continue to travel instead of locking after the first gesture.
  for(const delta of [80,80,-80,-80]){const before=Number(await page.locator('[data-showroom]').getAttribute('data-camera-z'));await wheel(page,delta);await page.waitForFunction(before=>Number(document.querySelector('[data-showroom]').dataset.cameraZ)!==before,before);}
+ // Turning and switching to touch must also work while paused midway along a wheel-driven showroom route.
+ await wheel(page,80);const exteriorHeading=await page.locator('[data-showroom]').getAttribute('data-camera-heading');
+ await page.locator('[data-showroom-model]').first().hover();await page.mouse.wheel(75,0);await page.waitForFunction(before=>document.querySelector('[data-showroom]').dataset.cameraHeading!==before,exteriorHeading);
+ const exteriorTouch=await context.newCDPSession(page),touchBefore=await page.locator('[data-showroom]').getAttribute('data-camera-heading');
+ await exteriorTouch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:400,y:350}]});await exteriorTouch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:470,y:350}]});await exteriorTouch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ await page.waitForFunction(before=>document.querySelector('[data-showroom]').dataset.cameraHeading!==before,touchBefore);await exteriorTouch.detach();await page.waitForTimeout(400);await wheel(page,-80);
  const point=await page.locator('[data-showroom-model="applications"]').evaluate(b=>({x:Number(b.dataset.worldX),y:Number(b.dataset.worldY)}));await page.mouse.click(point.x,point.y);await view(page,'category');
  await page.locator('[data-showroom-room="impex-automotive"]').click();await ready(page);
  assert.equal(await page.locator('[data-showroom]').getAttribute('data-wall-mounted'),'true');assert.equal(await page.locator('[data-showroom]').getAttribute('data-wall-angle'),'90');
