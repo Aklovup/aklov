@@ -40,8 +40,8 @@ try{
   for(let i=0;i<20;i++){assert.ok(await page.locator('[data-exhibit-chapter]').evaluate(e=>e.scrollHeight<=e.clientHeight+2),'The story must fit on its physical page');if(await page.locator('[data-story-next]').isDisabled())break;await page.locator('[data-story-next]').click();}
  }
  await page.screenshot({path:out+'/story-wall.png'});
- const mediaMatrix=await page.locator('[data-wall-media]').evaluate(e=>getComputedStyle(e).transform);
- await wheel(page,0,150);assert.notEqual(await page.locator('[data-wall-media]').evaluate(e=>getComputedStyle(e).transform),mediaMatrix,'Walls must change perspective with the camera');
+ const cameraMatrix=await page.locator('[data-wall-media]').evaluate(e=>getComputedStyle(e.parentElement).transform);
+ await wheel(page,0,150);await page.waitForFunction(previous=>getComputedStyle(document.querySelector('[data-wall-media]').parentElement).transform!==previous,cameraMatrix);
  // No gesture lock: one uninterrupted backward sequence crosses the physical door and reaches the table.
  for(let i=0;i<5;i++){if(await page.locator('[data-showroom]').getAttribute('data-view')==='showroom')break;await wheel(page,-350);}
  await view(page,'showroom');assert.equal(new URL(page.url()).searchParams.has('room'),false);assert.equal(new URL(page.url()).searchParams.has('model'),false);
