@@ -26,8 +26,8 @@ export function createProjectExhibit(root:HTMLElement) {
     setProject(next?:string){
       if(!next){stopMedia();stage.replaceChildren();exhibit.hidden=true;slug='';return;}
       if(next===slug)return;
-      const template=document.querySelector<HTMLTemplateElement>(`[data-exhibit-template="${next}"]`);if(!template)return;
-      slug=next;const content=template.content.cloneNode(true) as DocumentFragment;
+      const template=document.querySelector<HTMLElement>(`[data-exhibit-template="${next}"]`);if(!template)return;
+      slug=next;const content=template.cloneNode(true) as HTMLElement;
       const meta=content.querySelector<HTMLElement>('[data-exhibit-metadata]')!;
       title.textContent=meta.dataset.title!;exhibit.querySelector('[data-exhibit-type]')!.textContent=meta.dataset.type!;exhibit.querySelector('[data-exhibit-intro]')!.textContent=meta.dataset.intro!;exhibit.querySelector('[data-exhibit-summary]')!.textContent=meta.dataset.summary!;
       sections=[];let current:HTMLElement|undefined;

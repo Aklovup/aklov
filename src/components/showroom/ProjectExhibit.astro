@@ -19,7 +19,7 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   </section>
 </section>
 {entries.map(({ project, index, Content }) => (
-  <template data-exhibit-template={project.data.slug}>
+  <div hidden data-exhibit-template={project.data.slug}>
     <header data-exhibit-metadata data-type={project.data.projectType} data-title={project.data.title} data-intro={project.data.headline} data-summary={project.data.description}></header>
     <div data-exhibit-copy><Content /></div>
     <div data-exhibit-assets>
@@ -37,7 +37,7 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
         <a href={link.url} target="_blank" rel="noopener noreferrer">{link.label} ↗</a>
       ))}
     </nav>
-  </template>
+  </div>
 ))}
 <style is:global>
   .project-exhibit { position:absolute;inset:225px var(--pad) 84px;z-index:4;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.85fr);grid-template-rows:auto minmax(0,1fr);gap:24px 5vw;max-width:1300px;margin-inline:auto;pointer-events:none;opacity:0;transform:translateY(12px);transition:opacity .55s,transform .55s; }
