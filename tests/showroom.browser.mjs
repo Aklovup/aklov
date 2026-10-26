@@ -76,7 +76,7 @@ try{
  }
  const moving=await browser.newContext({viewport:{width:1024,height:768},deviceScaleFactor:.7}),mp=await moving.newPage();await goto(mp);
  const canvas=mp.locator('[data-showroom-canvas]');const before=Number(await mp.locator('[data-showroom]').getAttribute('data-camera-x'));
- await mp.mouse.move(900,360);assert.ok(Number(await mp.locator('[data-showroom]').getAttribute('data-pointer-x'))>.5);await mp.waitForFunction(x=>Math.abs(Number(document.querySelector('[data-showroom]').dataset.cameraX)-x)>.02,before);
+ await mp.mouse.move(900,250);assert.ok(Number(await mp.locator('[data-showroom]').getAttribute('data-pointer-x'))>.5);await mp.waitForFunction(x=>Math.abs(Number(document.querySelector('[data-showroom]').dataset.cameraX)-x)>.02,before);
  const t=Number(await mp.locator('[data-showroom]').getAttribute('data-ambient-time'));await mp.waitForFunction(t=>Number(document.querySelector('[data-showroom]').dataset.ambientTime)>t+.3,t);
  await mp.locator('[data-showroom-model="applications"]').click();await mp.locator('[data-showroom-room="impex-automotive"]').click();await roomReady(mp);await mp.screenshot({path:out+'/animated-room.png'});
  await mp.locator('[data-showroom-motion]').click();const frozen=await mp.locator('[data-showroom]').getAttribute('data-ambient-time');await mp.waitForTimeout(250);assert.equal(await mp.locator('[data-showroom]').getAttribute('data-ambient-time'),frozen);await moving.close();

@@ -61,6 +61,7 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   .project-exhibit[data-expanded='true'] .exhibit-installation { grid-column:1/-1;margin-inline:6vw; }
   .project-exhibit[data-expanded='true'] .installation-media { max-height:none; }
   .project-exhibit[data-expanded='true'] .exhibit-story { display:none; }
+  .project-exhibit[data-expanded='true'] .installation-label { position:sticky;top:0;z-index:2;background:#102023; }
   .installation-controls { display:flex;gap:3px;overflow:auto;padding:4px 12px;border-top:1px solid #d8bd7830; }
   .installation-controls button { flex:0 0 auto;min-width:44px;min-height:44px;border:0;color:#b9c2ba!important; }
   .installation-controls button[aria-pressed='true'] { color:var(--gold)!important;border-bottom:1px solid var(--gold); }
@@ -76,7 +77,7 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   .exhibit-links:empty { display:none; }
   .exhibit-links a { min-height:44px;display:inline-flex;align-items:center;color:var(--gold);font-size:12px; }
   @media(max-width:1100px) { .project-exhibit { gap:20px;grid-template-columns:minmax(0,1.1fr) minmax(280px,1fr); } .exhibit-header,.exhibit-installation { padding-left:0;margin-left:0; } }
-  @media(max-width:800px) { .project-exhibit { inset:235px var(--pad) 92px;display:block;overflow:auto;pointer-events:auto;overscroll-behavior:contain; } .exhibit-header { margin-bottom:22px; } .exhibit-installation { margin-bottom:28px; } .installation-media { max-height:40dvh; } .exhibit-story { padding:20px;border:1px solid #d8bd7860; } .chapter-content { max-height:45dvh; } .exhibit-header h2 { font-size:32px; } }
+  @media(max-width:800px) { .project-exhibit[data-expanded='true'] .exhibit-installation { margin-inline:0; } .project-exhibit { inset:235px var(--pad) 92px;display:block;overflow:auto;pointer-events:auto;overscroll-behavior:contain; } .exhibit-header { margin-bottom:22px; } .exhibit-installation { margin-bottom:28px; } .installation-media { max-height:40dvh; } .exhibit-story { padding:20px;border:1px solid #d8bd7860; } .chapter-content { max-height:45dvh; } .exhibit-header h2 { font-size:32px; } }
   @media(max-height:700px) and (min-width:801px) { .project-exhibit { inset-block:170px 72px;gap:12px 3vw; } .exhibit-header>[data-exhibit-intro],.exhibit-summary { margin-top:5px;font-size:12px; } .exhibit-header h2 { font-size:30px; } .chapter-content { padding-top:15px; } }
   @media(prefers-reduced-motion:reduce) { .project-exhibit { transition:none;transform:none; } }
 </style>
