@@ -99,6 +99,8 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   .room-panel,.lifted-media { font-family:var(--sans);font-stretch:normal; }
   .lifted-media { box-sizing:border-box;width:1000px;height:700px;padding:10px;background:var(--charcoal);border:1px solid var(--gold-dark);box-shadow:0 18px 70px #0007;backface-visibility:hidden;pointer-events:auto; }
   .lift-scroll { height:100%;overflow:auto;overscroll-behavior:contain;touch-action:pinch-zoom;scrollbar-width:thin;scrollbar-color:var(--gold) var(--charcoal); }
+  .lifted-media[data-resting='true'] { position:absolute;z-index:4; }
+  .showroom[data-surface-mode='world'][data-lift-kind='story']:is([data-media-lift='open'],[data-media-lift='closing']):not([data-lift-resting='true']) [data-wall-story] { visibility:hidden; }
   .lifted-media[data-kind='story'] { background:var(--ivory);padding:0;color:var(--charcoal); }
   .lifted-media[data-kind='story'] .lift-scroll { scrollbar-color:var(--gold-dark) var(--ivory); }
   .lift-scroll .project-media { margin:0;width:100%; }

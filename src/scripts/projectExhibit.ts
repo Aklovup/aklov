@@ -34,7 +34,7 @@ export function createProjectExhibit(root:HTMLElement) {
       const image=content.querySelector<HTMLImageElement>('.project-media>img');
       if(image&&selected.dataset.source){image.removeAttribute('srcset');image.removeAttribute('sizes');image.src=selected.dataset.source;image.loading='eager';}
     }
-    stopMedia();lifted.dataset.kind=kind;lifted.setAttribute('aria-label',kind==='story'?`${title.textContent}: complete project story`:'Full project media');
+    stopMedia();root.dataset.liftKind=kind;lifted.dataset.kind=kind;lifted.setAttribute('aria-label',kind==='story'?`${title.textContent}: complete project story`:'Full project media');
     liftScroll.setAttribute('aria-label',kind==='story'?'Complete case study; scroll to read':'Full project image; scroll to explore');
     liftScroll.replaceChildren(content);liftScroll.scrollTop=0;lifted.hidden=false;root.dataset.mediaLift='open';returnTarget.setAttribute('aria-expanded','true');
     root.dispatchEvent(new CustomEvent('aklov:media-lift',{detail:{open:true,kind}}));

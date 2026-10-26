@@ -20,6 +20,7 @@ export function createRoomSurfaces(root:HTMLElement,scene:THREE.Scene,camera:THR
   htmlScene.add(liftObject);liftObject.visible=false;
   const liftMask=new THREE.Mesh(new THREE.PlaneGeometry(1000,700),aperture);liftMask.visible=false;scene.add(liftMask);
   let node:THREE.Object3D|undefined,flat=innerWidth<800,failed=false;
+  let parked=false,savedLiftStyle='';
   let lift:{progress:number;target:number;from:THREE.Vector3;to:THREE.Vector3;rotation:THREE.Quaternion;facing:THREE.Quaternion;scale:THREE.Vector3;targetScale:THREE.Vector3}|undefined;
   function detach(){for(const s of surfaces){s.mask.visible=false;exhibit.append(s.element);s.element.style.removeProperty('display');}liftMask.visible=false;exhibit.append(lifted);lifted.style.removeProperty('display');renderer.domElement.hidden=true;root.dataset.surfaceMode='flat';root.dataset.wallMounted='false';}
   function bind(room?:THREE.Object3D){
@@ -34,6 +35,22 @@ export function createRoomSurfaces(root:HTMLElement,scene:THREE.Scene,camera:THR
     }
     root.dataset.wallAngle='90';root.dataset.wallMounted='true';root.dataset.surfaceMode='world';renderer.domElement.hidden=false;if(flat||failed)detach();
   }
+  // Use a screen-aligned HTML surface once the spatial flight has reached the camera.
+  // This keeps long-form text crisp and prevents other CSS3D walls painting over it.
+  function park(){
+    if(parked||!lift)return;
+    liftObject.updateWorldMatrix(true,false);
+    const top=liftObject.localToWorld(new THREE.Vector3(-500,350,0)).project(camera),bottom=liftObject.localToWorld(new THREE.Vector3(500,-350,0)).project(camera);
+    const x=(top.x+1)*root.clientWidth/2,y=(1-top.y)*root.clientHeight/2,width=(bottom.x-top.x)*root.clientWidth/2;
+    const focused=lifted.contains(document.activeElement)?document.activeElement as HTMLElement:undefined;
+    savedLiftStyle=lifted.style.cssText;htmlScene.remove(liftObject);root.append(lifted);lifted.dataset.resting='true';
+    lifted.style.left='0';lifted.style.top='0';lifted.style.transformOrigin='0 0';lifted.style.transform=`translate(${x}px,${y}px) scale(${width/1000})`;
+    parked=true;liftMask.visible=false;root.dataset.liftResting='true';focused?.focus({preventScroll:true});
+  }
+  function unpark(){
+    if(!parked)return;
+    delete lifted.dataset.resting;lifted.style.cssText=savedLiftStyle;htmlScene.add(liftObject);exhibit.append(lifted);parked=false;liftMask.visible=true;root.dataset.liftResting='false';
+  }
   function liftPose(){
     if(!lift)return;const t=lift.progress*lift.progress*(3-2*lift.progress);
     liftObject.position.lerpVectors(lift.from,lift.to,t);liftObject.quaternion.slerpQuaternions(lift.rotation,lift.facing,t);liftObject.scale.lerpVectors(lift.scale,lift.targetScale,t);
@@ -43,6 +60,7 @@ export function createRoomSurfaces(root:HTMLElement,scene:THREE.Scene,camera:THR
   }
   root.addEventListener('aklov:media-lift',event=>{
     const {open,immediate,kind}=(event as CustomEvent).detail;
+    if(!open)unpark();else root.dataset.liftResting='false';
     if(flat||failed||!node){root.dispatchEvent(new CustomEvent('aklov:media-lift-settled',{detail:{open}}));return;}
     if(open){
       const wall=surfaces[kind==='story'?1:0],source=root.querySelector<HTMLElement>(kind==='story'?'[data-wall-story]':'[data-exhibit-stage]')!;
@@ -56,12 +74,12 @@ export function createRoomSurfaces(root:HTMLElement,scene:THREE.Scene,camera:THR
       lift={progress:0,target:1,from,to,rotation:wall.object.quaternion.clone(),facing:camera.quaternion.clone(),scale:new THREE.Vector3(source.offsetWidth*scale/1000,source.offsetHeight*scale/700,scale),targetScale:new THREE.Vector3(width/1000,width/1000,width/1000)};
       liftObject.visible=true;liftMask.visible=true;
     }else if(lift)lift.target=0;
-    if(lift&&(immediate||matchMedia('(prefers-reduced-motion: reduce)').matches)){lift.progress=lift.target;liftPose();if(!open){liftObject.visible=false;liftMask.visible=false;}root.dispatchEvent(new CustomEvent('aklov:media-lift-settled',{detail:{open}}));}
+    if(lift&&(immediate||matchMedia('(prefers-reduced-motion: reduce)').matches)){lift.progress=lift.target;liftPose();if(open)park();if(!open){liftObject.visible=false;liftMask.visible=false;}root.dispatchEvent(new CustomEvent('aklov:media-lift-settled',{detail:{open}}));}
   });
   function update(dt:number){
     if(!lift||lift.progress===lift.target)return;
     const direction=Math.sign(lift.target-lift.progress);lift.progress=Math.max(0,Math.min(1,lift.progress+direction*dt/.55));liftPose();
-    if(lift.progress===lift.target){if(!lift.target){liftObject.visible=false;liftMask.visible=false;}root.dispatchEvent(new CustomEvent('aklov:media-lift-settled',{detail:{open:!!lift.target}}));}
+    if(lift.progress===lift.target){if(lift.target)park();if(!lift.target){liftObject.visible=false;liftMask.visible=false;}root.dispatchEvent(new CustomEvent('aklov:media-lift-settled',{detail:{open:!!lift.target}}));}
   }
   function render(){if(node&&!flat&&!failed)renderer.render(htmlScene,camera);}
   function resize(w:number,h:number){renderer.setSize(w,h);const next=w<800;if(next!==flat){flat=next;bind(node);}if(flat||failed)detach();}
