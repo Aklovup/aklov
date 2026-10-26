@@ -101,7 +101,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
       const frame=box(node,2.13,1.26,.08,gold,0,1.20,-1.10,.025);
       const material=new THREE.MeshBasicMaterial({map:preview(project,index),toneMapped:false});
       const screen=new THREE.Mesh(new THREE.PlaneGeometry(2.03,1.142),material);screen.position.set(0,1.20,-1.05);node.add(screen);
-      return {project,node,screen,material,accent,walls,interior,doorway,loaded:false,ready:false};
+      return {project,node,screen,frame,material,accent,walls,interior,doorway,loaded:false,ready:false};
     });
     const sign=new THREE.Mesh(new THREE.PlaneGeometry(Math.min(w,4),.95),modelSign(data,modelsFor(projects,data.group).findIndex(m=>m.key===data.key)));sign.position.set(0,.21,d/2+.075);sign.rotation.x=-.42;group.add(sign);
     return {data,group,roof,glass,rooms,open:0,w,d,materials:[] as {material:THREE.Material;base:number}[]};
@@ -184,7 +184,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
       for(const room of model.rooms){
         const inside=room.project.slug===state.room||room.project.slug===flight?.room;
         room.interior.visible=inside;for(const wall of room.walls)wall.visible=!inside;
-        room.screen.visible=!(room.project.slug===state.room&&root.dataset.roomReady==='true');
+        room.screen.visible=room.project.slug!==state.room||!!flight;room.frame.visible=room.screen.visible;
         room.accent.material.opacity=(!state.room||state.room===room.project.slug||hoverRoom===room.project.slug)?1:.2;
         room.doorway.material.opacity=.10+(!paused?Math.sin(elapsed*.7)*.025:0);
       }

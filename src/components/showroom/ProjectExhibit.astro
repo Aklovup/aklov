@@ -49,9 +49,9 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   .exhibit-header>[data-exhibit-intro],.exhibit-summary { margin:12px 0 0;color:#d1d6cc;font:400 14px/1.7 var(--sans);max-width:65ch; }
   .exhibit-summary { font-size:12px!important;color:#bfc9c0!important;max-width:76ch!important; }
   .project-exhibit .gif-toggle { background:#102023!important;border:1px solid var(--gold); }
-  .exhibit-installation { min-width:0;align-self:center;margin-left:6vw;pointer-events:auto;border-top:1px solid #d8bd7880;border-bottom:1px solid #d8bd7840;background:linear-gradient(145deg,#17282ae6,#081316e6);box-shadow:0 25px 70px #0005,0 0 35px #d8bd780b; }
+  .exhibit-installation { display:flex;flex-direction:column;max-height:100%;min-height:0;min-width:0;align-self:center;margin-left:6vw;pointer-events:auto;border-top:1px solid #d8bd7880;border-bottom:1px solid #d8bd7840;background:linear-gradient(145deg,#17282ae6,#081316e6);box-shadow:0 25px 70px #0005,0 0 35px #d8bd780b; }
   .installation-label { display:flex;justify-content:space-between;gap:12px;padding:15px 18px;color:var(--gold);font:10px/1.4 var(--sans);letter-spacing:1px;text-transform:uppercase; }
-  .installation-media { max-height:39dvh;overflow:auto;overscroll-behavior:contain;scrollbar-color:var(--gold) #152125;scrollbar-width:thin; }
+  .installation-media { flex:1;min-height:0;max-height:39dvh;overflow:auto;overscroll-behavior:contain;scrollbar-color:var(--gold) #152125;scrollbar-width:thin; }
   .installation-media .project-media { margin:0; }
   .installation-media .project-media>img { width:100%;height:auto;max-height:none; }
   .installation-media .gif-preview { aspect-ratio:var(--media-ratio);max-height:35dvh; }

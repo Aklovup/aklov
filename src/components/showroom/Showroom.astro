@@ -51,7 +51,7 @@ const models=modelsFor(entries,'client');
   <script id="showroom-data" type="application/json" set:html={JSON.stringify(entries).replace(/</g,'\u003c')}/>
 </section>
 <section class="showroom-index" id="showroom-index" tabindex="-1" aria-labelledby="showroom-index-title" data-showroom-index>
-  <div class="index-bar"><h2 id="showroom-index-title">Project index</h2><button type="button" data-showroom-index-close hidden>Return to showroom ↙</button></div>
+  <div class="index-bar"><h2 id="showroom-index-title">Project index</h2><button type="button" data-showroom-index-close hidden>Return to exhibition ↙</button></div>
   <ProjectGallery projects={projects} renderDialog={false}/>
 </section>
 <script>

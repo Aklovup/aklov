@@ -46,7 +46,7 @@ try{
  for(const [category,count]of [['applications',2],['websites',3],['customer-systems',2],['automation',5],['integrations',7]]){await page.locator(`[data-category-filters="client"] [data-filter="${category}"]`).click();assert.equal(await page.locator('[data-project]:not([hidden])').count(),count);}
  const projects=await page.locator('#showroom-data').evaluate(e=>JSON.parse(e.textContent));
  for(const project of projects){
-  await page.locator('[data-showroom-index-open]').click();await page.locator('[data-group="all"]').click();await page.locator(`[data-project-open="${project.slug}"]`).click();await roomReady(page);assert.equal(await page.locator('[data-exhibit-title]').innerText(),project.title);assert.ok(await page.locator('[data-exhibit-chapters] button').count()>=4);assert.equal(await page.locator('dialog').count(),0);
+  if(!await page.locator('[data-showroom-index]').isVisible())await page.locator('[data-showroom-index-open]').click();await page.locator('[data-group="all"]').click();await page.locator(`[data-project-open="${project.slug}"]`).click();await roomReady(page);assert.equal(await page.locator('[data-exhibit-title]').innerText(),project.title);assert.ok(await page.locator('[data-exhibit-chapters] button').count()>=4);assert.equal(await page.locator('dialog').count(),0);
  }
  await goto(page,'/work/?type=client&category=automation');await page.locator('[data-showroom-index]:not([hidden])').waitFor();assert.equal(await page.locator('[data-project]:not([hidden])').count(),5);
  await page.keyboard.press('Escape');assert.equal(await page.locator('[data-showroom-index]').isVisible(),false);
