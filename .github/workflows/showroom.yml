@@ -25,7 +25,7 @@ jobs:
       - run: npm install --no-save --package-lock=false playwright
       - run: npm run build
       - run: node --test --test-isolation=none tests/work.test.mjs tests/contact.test.mjs tests/showroom.test.mjs
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps --only-shell chromium
       - run: node tests/showroom.browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()

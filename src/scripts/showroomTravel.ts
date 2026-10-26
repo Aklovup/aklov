@@ -9,5 +9,5 @@ export function routeDistance(current:number,pixels:number,length:number,speed=.
   return Math.max(0,Math.min(length,current+pixels*speed));
 }
 export function roomExitPixels(x:number,z:number):number {
-  return (Math.abs(x)+Math.max(0,2.82-z))*.84/.0065;
+  return Math.hypot(x,Math.max(0,2.82-z))*.84/.0065;
 }

@@ -8,7 +8,7 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
 ---
 <section class="project-exhibit" data-exhibit hidden aria-label="Project exhibition">
   <section class="room-panel media-wall" data-wall-media aria-label="Wall-mounted project media">
-    <header class="wall-heading"><div><p data-exhibit-type></p><h2 data-exhibit-title tabindex="-1"></h2></div><button type="button" data-room-station="media">Approach display ↗</button></header>
+    <header class="wall-heading"><div><p data-exhibit-type></p><h2 data-exhibit-title tabindex="-1"></h2></div><div class="media-wall-actions"><button type="button" data-room-station="media">Approach ↗</button><button type="button" data-media-inspect hidden aria-pressed="false">Inspect image</button></div></header>
     <div class="wall-media-layout" data-media-layout>
       <div class="media-primary"><div class="installation-label"><span>Project display</span><span data-media-position></span></div><div class="installation-media" data-exhibit-stage></div></div>
       <nav class="media-rail" aria-label="Other project media" data-exhibit-media-controls></nav>
@@ -50,8 +50,9 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   .room-panel { box-sizing:border-box;width:1080px;height:760px;padding:30px;background:#102124;color:var(--ivory);border:3px solid #bfa363;box-shadow:inset 0 0 0 9px #0a171a;backface-visibility:hidden;pointer-events:auto; }
   .wall-heading { height:106px;display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid #d8bd7855;margin-bottom:20px; }
   .wall-heading p { margin:0 0 7px;color:var(--gold);font:20px/1.3 var(--sans);letter-spacing:2px;text-transform:uppercase; }
-  .wall-heading h2 { margin:0;color:var(--ivory);font:400 48px/1 var(--display);letter-spacing:-1px; }
+  .wall-heading h2 { margin:0;color:var(--ivory);font:400 var(--project-title-size,48px)/1 var(--display);letter-spacing:-1px; }
   .showroom .room-panel button { min-height:48px;border:1px solid #d8bd7860;padding:9px 16px;color:var(--gold);font:500 23px/1.3 var(--sans);cursor:pointer;background:#102124; }
+  .media-wall-actions { display:flex;gap:12px;flex-shrink:0; }
   .wall-media-layout { height:574px;display:grid;grid-template-columns:3fr 1fr;gap:18px; }
   .wall-media-layout[data-single='true'] { grid-template-columns:1fr; }
   .media-primary { min-width:0;display:flex;flex-direction:column;border:1px solid #d8bd7840; }
@@ -59,7 +60,10 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   .installation-media { flex:1;min-height:0;overflow:hidden;display:grid;align-items:center;background:#08171b; }
   .installation-media>[data-exhibit-asset],.installation-media .project-media { height:100%;min-height:0;display:flex;flex-direction:column; }
   .showroom .installation-media .gif-preview { flex:1;min-height:0;max-height:none;aspect-ratio:auto; }
-  .showroom .installation-media .project-media>img,.showroom .installation-media video { flex:1;min-height:0;width:100%;height:0;max-height:none;aspect-ratio:auto;object-fit:contain;object-position:center top; }
+  .showroom .installation-media .project-media>img,.showroom .installation-media video { flex:1;min-height:0;width:100%;height:0;max-height:none;aspect-ratio:auto;object-fit:cover;object-position:center top; }
+  .installation-media[data-inspecting='true'] { overflow:auto;overscroll-behavior:contain;display:block; }
+  .installation-media[data-inspecting='true']>[data-exhibit-asset],.installation-media[data-inspecting='true'] .project-media { display:block;height:auto; }
+  .showroom .installation-media[data-inspecting='true'] .project-media>img { display:block;width:100%;height:auto;max-height:none; }
   .showroom .installation-media figcaption { flex:0 0 auto;margin:0;padding:12px 16px;color:#d6ded3;background:#102124;font:20px/1.35 var(--sans); }
   .showroom .room-panel .gif-toggle { font-size:24px;min-height:52px;background:#102124; }
   .media-rail { min-height:0;display:grid;grid-template-rows:repeat(var(--rail-count,1),minmax(0,1fr));gap:14px;transform:perspective(1400px) rotateY(-8deg) translateZ(-8px);transform-origin:left; }
@@ -72,7 +76,7 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   .chapter-nav { display:flex;flex-wrap:wrap;gap:7px 12px;padding-bottom:16px;border-bottom:1px solid #d8bd7855; }
   .showroom .chapter-nav button { font-size:21px;border:0;border-bottom:2px solid transparent;padding:7px 3px; }
   .showroom .chapter-nav button[aria-pressed='true'] { border-color:var(--gold); }
-  .chapter-content { flex:1;min-height:0;padding-top:20px;overflow:hidden; }
+  .chapter-content { user-select:text; flex:1;min-height:0;padding-top:20px;overflow:hidden; }
   .chapter-content h3 { margin:0 0 20px;color:var(--ivory);font:400 56px/1.05 var(--display);letter-spacing:-1px; }
   .chapter-content p,.chapter-content li { margin:0 0 17px;color:#e0e5da;font:400 var(--reading-size,30px)/1.5 var(--sans); }
   .story-pages { display:flex;justify-content:space-between;align-items:center;border-top:1px solid #d8bd7850;padding-top:12px;gap:20px;color:var(--gold);font:21px var(--sans); }

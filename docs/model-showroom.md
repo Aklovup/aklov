@@ -1,33 +1,35 @@
-# Architectural Work exhibition
+# Wall-mounted Work exhibition
 
-Review branch: `experiment/model-showroom`, draft PR #12. Main and the previous kinetic experiment remain unchanged.
+Review branch `experiment/model-showroom`, draft PR #12. Production and the earlier kinetic experiment remain unchanged.
 
-## Spatial navigation
+## Actual room surfaces
 
-The table exposes populated primary-category models, with client work and concepts separate. Select a model to open its roof, then a room to enter its exhibition. Every project has one physical home. The original index retains complete primary/additional-category filtering.
+Media and story are CSS3D objects fixed to perpendicular walls. Three's existing CSS3DRenderer addon positions semantic HTML in the camera's world coordinates; no new dependency is added. Depth-tested WebGL alpha apertures expose those HTML surfaces through the real wall frames, so geometry can occlude them. The original media installation remains on the wall throughout entry. Other models/rooms are hidden when the camera is inside the selected room, preventing neighbouring project screens from filling its background.
 
-Pointer movement gives bounded camera parallax without a held button. Horizontal trackpad gestures orbit the table. Vertical gestures over architecture advance or retreat along a guided route, with proportional preview before committing a location. Reversing a partial gesture reverses travel. A gesture must end before momentum can commit another level. Browser pinch zoom remains native.
+Desktop has world-mounted surfaces and camera stations for approaching the media or story wall. Horizontal trackpad gestures turn the room view; forward movement stays within the floor bounds. Keyboard focus can approach the relevant display. Narrow viewports use a readable stacked alternative while preserving project navigation and media controls. WebGL loss or unavailability also retains an accessible HTML reading view.
 
-Project-room camera routes pass through a side doorway. The physical doorway and its projected Leave room control return to the category; Leave building returns to the table. Breadcrumbs, Escape, index links and browser history offer parallel routes. Reading/media surfaces consume their own scroll rather than triggering travel.
+## Media layout and memory
 
-## Integrated projects
+One main item occupies 75% of the media screen; the remaining items occupy its vertical 25% rail. A single item uses the full width. Available sources determine the rail; missing sources retain explicit placeholders. Thumbnail previews use static posters, including for GIFs.
 
-`ProjectExhibit.astro` renders all existing approved Markdown and media into hidden semantic content containers. `projectExhibit.ts` divides that rendered content at existing headings, preserving every paragraph. The selected room presents an ivory/gold-on-charcoal glass-like media installation and readable HTML story wall. Chapters, media, captions, external URLs and explicit pending slots come from collection entries. GIFs reuse the existing intentional play/pause controller; images scroll within the installation at their natural ratio. Expand display enlarges that installation within the same room; Escape restores the story before leaving the room. No project or image dialogs are mounted on this Work route. The original shared dialog components remain unchanged for other uses.
+The complete frame/rail composition exists in the miniature preview. From outside, one large image dominates and the recessed small previews are difficult to distinguish; approaching reveals the same installation at a readable scale rather than spawning unrelated UI.
 
-The index is a full-page alternate view, not a modal. The background stage is inert while it is shown. Category/project URLs remain compatible; `model` and `room` encode spatial locations. Unknown locations fall back gracefully.
+`mediaSelection.ts` keeps a per-project in-memory main ID and ordered rail IDs. Clicking a thumbnail swaps it with the primary item at that exact slot. Leaving/re-entering restores the selection and rail arrangement, and the miniature preview texture updates to match. A full document reload resets this memory. No content files or persistent browser storage are rewritten.
 
-## Arrival, life and performance
+GIFs reuse the intentional play/pause controller. Image inspection stays on the wall: approach the display and scroll the full image inside it, then Return to walk or Escape. No project/image dialogs are mounted.
 
-The static SVG is reserved for unavailable/lost WebGL. JavaScript-capable visitors first see a charcoal branded preparation state. It reveals the actual first rendered frame after font readiness (bounded wait), then starts the entrance camera. No artificial percentage or forced Enter click. A delayed rescue link opens the usable index if scene startup fails.
+## Story wall
 
-Subtle camera drift, architectural light breathing and sparse exhibition dust keep the idle scene alive. Pointer parallax is bounded. Rendering is capped at 30fps, suspends in hidden tabs/index, and settles while the user reads. Pause and reduced motion stop ambient movement and use immediate travel. Covers are cached and loaded when inspected; detailed media only enter live DOM for the selected project.
+Approved Markdown is rendered by Astro and paged at its existing headings and paragraph boundaries. The project headline and introduction remain in Overview. Larger pages replace the old tiny text scroller; every paragraph, chapter, technology list and approved external link is retained. Chapter/page controls are part of the physical screen bezel.
 
-No new dependencies, paid services, remote imagery or invented client content. Models are procedural exhibition artwork, not client buildings.
+## Travel and exits
 
-## Validation
+The entrance camera retains its smooth architectural route. The doorway is now behind the visitor's initial viewing position. Backward movement follows a finite floor route to that threshold; crossing it returns outside. Remaining gesture distance can continue toward the showroom. Outside travel follows arc length of the camera route, commits at its measured endpoint and reverses continuously. There is no timed gesture lock or arbitrary completion threshold. A compact in-world door plaque and category plinth provide clickable alternatives; breadcrumbs, Escape, history and the complete filtered index remain available.
 
-The dedicated review builds Astro and runs content/contact unit checks plus grouping, URL and trackpad-state tests. Browser coverage checks direct model/room picking, unclicked pointer response, horizontal/vertical wheel behavior, proportional reverse travel, doorway exits, all ten case studies, chapters/media, GIF controls, no modals, filter preservation, history, deep links, reduced motion, touch, fallback and 320–1440px overflow. Screenshot capture uses isolated GPU sessions; the animated check uses a smaller drawing buffer for the software renderer.
+## Arrival and validation
 
-Existing Home, Solutions, About, Contact and sitewide browser checks remain enabled. Legacy direct-gallery browser checks are replaced only on this experiment branch by the showroom/index/exhibition tests.
+The branded preparation state reveals the first real frame after bounded font readiness. Static artwork is reserved for fallback. Ambient motion respects Pause/reduced motion and sleeps while hidden, in the index or reading.
 
-Do not merge without the owner's review and approval.
+The dedicated build/unit/browser review checks physical wall matrices and perpendicular placement, 75/25 layout, exact thumbnail swaps, per-project memory/reload reset, matching miniature previews, GIFs, paged text, perspective, room isolation, uninterrupted finite retreat, history, all ten projects and filters, image inspection, animated entrance, five widths and renderer/JavaScript fallbacks. Home, Solutions, About, Contact and sitewide regressions remain enabled. Headless review installs only Chromium's required headless shell to avoid downloading the unused full browser.
+
+No approved project content, source media, shared navigation, hosting configuration or other page source is modified. Do not merge without owner approval.

@@ -7,6 +7,9 @@ export function createProjectExhibit(root:HTMLElement) {
   const chapters=exhibit.querySelector<HTMLElement>('[data-exhibit-chapters]')!;
   const stage=exhibit.querySelector<HTMLElement>('[data-exhibit-stage]')!;
   const rail=exhibit.querySelector<HTMLElement>('[data-exhibit-media-controls]')!;
+  const inspect=exhibit.querySelector<HTMLButtonElement>('[data-media-inspect]')!;
+  function setInspect(value:boolean){stage.dataset.inspecting=String(value);inspect.setAttribute('aria-pressed',String(value));inspect.textContent=value?'Return to walk':'Inspect image';}
+  inspect.addEventListener('click',()=>{const value=stage.dataset.inspecting!=='true';setInspect(value);if(value)root.dispatchEvent(new CustomEvent('aklov:room-station',{detail:'media'}));});
   const previous=exhibit.querySelector<HTMLButtonElement>('[data-story-prev]')!,next=exhibit.querySelector<HTMLButtonElement>('[data-story-next]')!;
   let slug='',activeChapter=0,page=0,sections:{title:string;pages:Node[][]}[]=[],assets:HTMLElement[]=[];
   const stopMedia=()=>stage.querySelectorAll('video').forEach(v=>v.pause());
@@ -17,7 +20,7 @@ export function createProjectExhibit(root:HTMLElement) {
   }
   function renderMedia(){
     const layout=mediaSelection.get(slug,assets.map(a=>a.dataset.id!));stopMedia();stage.replaceChildren();
-    const selected=assets.find(a=>a.dataset.id===layout.main);if(selected)stage.append(selected.cloneNode(true));
+    const selected=assets.find(a=>a.dataset.id===layout.main);if(selected)stage.append(selected.cloneNode(true));setInspect(false);inspect.hidden=!selected?.querySelector('[data-media-type="image"]');
     exhibit.querySelector('[data-media-position]')!.textContent=selected?.dataset.available==='true'?`${assets.indexOf(selected)+1} / ${assets.length} media`:'Media pending';
     exhibit.querySelector<HTMLElement>('[data-media-layout]')!.dataset.single=String(!layout.rail.length);rail.hidden=!layout.rail.length;
     rail.style.setProperty('--rail-count',String(layout.rail.length));
@@ -49,7 +52,7 @@ export function createProjectExhibit(root:HTMLElement) {
       if(nextSlug===slug)return;
       const source=document.querySelector<HTMLElement>(`[data-exhibit-template="${nextSlug}"]`);if(!source)return;
       slug=nextSlug;const content=source.cloneNode(true) as HTMLElement,meta=content.querySelector<HTMLElement>('[data-exhibit-metadata]')!;
-      title.textContent=meta.dataset.title!;exhibit.querySelector('[data-exhibit-type]')!.textContent=meta.dataset.type!;
+      title.textContent=meta.dataset.title!;title.style.setProperty('--project-title-size',meta.dataset.title!.length>30?'34px':'48px');exhibit.querySelector('[data-exhibit-type]')!.textContent=meta.dataset.type!;
       sections=[];let current:{title:string;pages:Node[][]}|undefined;
       for(const node of [...content.querySelector('[data-exhibit-copy]')!.childNodes]){
         if(node instanceof HTMLElement&&node.tagName==='H3'){current={title:node.textContent||'',pages:[[]]};sections.push(current);continue;}
@@ -67,7 +70,7 @@ export function createProjectExhibit(root:HTMLElement) {
       exhibit.hidden=false;activeChapter=0;page=0;renderPage();renderMedia();emitSelection();
     },
     focus(){title.focus({preventScroll:true});},
-    collapse(){return false;},
+    collapse(){if(stage.dataset.inspecting!=='true')return false;setInspect(false);inspect.focus({preventScroll:true});return true;},
     nextChapter(direction:number){activeChapter=Math.max(0,Math.min(sections.length-1,activeChapter+direction));page=0;renderPage(true);},
   };
 }

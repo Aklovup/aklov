@@ -137,7 +137,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   const surfaces=createRoomSurfaces(root,scene,camera);
   let state:ShowroomState={group:'client'},hoverModel:string|undefined,hoverRoom:string|undefined;
   let paused=motion.matches,lost=false,started=false,frame=0,last=0,elapsed=0,intro=paused?0:.8,yaw=0,targetYaw=0,dragging=false,reading=false;
-  let activeModel:typeof exhibitModels[number]|undefined;
+  let activeModel:typeof exhibitModels[number]|undefined;let recentRoom:string|undefined;
   const roomEye=new THREE.Vector3(-.12,1.24,1.95);let roomHeading=-.06;
   const pointerTarget=new THREE.Vector2(),pointerCurrent=new THREE.Vector2();
   const currentEye=new THREE.Vector3(-13,16,38),currentLook=new THREE.Vector3(0,4.3,0),targetEye=new THREE.Vector3(),targetLook=new THREE.Vector3();
@@ -163,7 +163,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   }
   function forwardLocation():ShowroomState|undefined {
     if(state.room)return;
-    if(activeModel){const room=activeModel.rooms.find(r=>r.project.slug===hoverRoom)||activeModel.rooms[0];return {...state,room:room.project.slug};}
+    if(activeModel){const room=activeModel.rooms.find(r=>r.project.slug===hoverRoom)||activeModel.rooms.find(r=>r.project.slug===recentRoom)||activeModel.rooms[0];return {...state,room:room.project.slug};}
     const model=exhibitModels.find(m=>m.data.group===state.group&&m.data.category===hoverModel)||exhibitModels.find(m=>m.data.group===state.group);
     return model?{group:state.group,model:model.data.category}:undefined;
   }
@@ -213,7 +213,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
       if(b){b.dataset.worldX=((anchor.x*.5+.5)*canvas.clientWidth).toFixed(1);b.dataset.worldY=((-anchor.y*.5+.5)*canvas.clientHeight).toFixed(1);}
     }
     if(activeModel)for(const room of activeModel.rooms){const anchor=room.screen.getWorldPosition(new THREE.Vector3()).project(camera),b=root.querySelector<HTMLElement>(`[data-showroom-room="${room.project.slug}"]`);if(b){b.dataset.worldX=((anchor.x*.5+.5)*canvas.clientWidth).toFixed(1);b.dataset.worldY=((-anchor.y*.5+.5)*canvas.clientHeight).toFixed(1);}}
-    const room=roomFor(state);root.dataset.exitDistance=room?((Math.abs(roomEye.x)+Math.max(0,2.82-roomEye.z))*.84).toFixed(3):walking?(walking.length-walking.distance).toFixed(3):'0';
+    const room=roomFor(state);root.dataset.exitDistance=room?(Math.hypot(roomEye.x,Math.max(0,2.82-roomEye.z))*.84).toFixed(3):walking?(walking.length-walking.distance).toFixed(3):'0';
   }
   function resize(){const r=root.getBoundingClientRect();camera.aspect=r.width/r.height;camera.updateProjectionMatrix();renderer.setSize(r.width,r.height,false);composer.setSize(r.width,r.height);surfaces.resize(r.width,r.height);pose();if(paused||!started){currentEye.copy(targetEye);currentLook.copy(targetLook);}camera.position.copy(currentEye);camera.lookAt(currentLook);updateModels(.016);draw();if(started)sync();}
   function tick(now:number){
@@ -228,7 +228,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   function setState(next:ShowroomState){
     if(lost){state=next;root.dataset.roomReady='true';return;}
     const previous=state,changed=previous.group!==next.group||previous.model!==next.model||previous.room!==next.room,previousRoom=roomFor(previous);
-    state=next;if(changed){targetYaw=0;walking=undefined;root.style.setProperty('--travel','0');if(next.model)intro=0;root.dataset.roomReady='false';roomEye.set(-.12,1.24,1.95);roomHeading=-.06;root.dataset.roomStation='overview';}
+    if(previous.room&&!next.room)recentRoom=previous.room;state=next;if(changed){targetYaw=0;walking=undefined;root.style.setProperty('--travel','0');if(next.model)intro=0;root.dataset.roomReady='false';roomEye.set(-.12,1.24,1.95);roomHeading=-.06;root.dataset.roomStation='overview';}
     updateLayout();canvas.style.pointerEvents=next.room?'none':'auto';root.querySelector<HTMLElement>('[data-showroom-exit]')!.hidden=root.dataset.surfaceMode==='flat'?!next.model:true;
     if(changed&&started&&!paused&&previous.group===next.group&&(previousRoom||roomFor(next))){const dest=basePose(next),room=roomFor(next)||previousRoom!;flight={curve:route(currentEye.clone(),dest.eye,room,!!next.room),fromLook:currentLook.clone(),toLook:dest.look,progress:0,room:room.project.slug};}
     if(paused||!started){yaw=targetYaw;settle();}else sync();
@@ -243,14 +243,14 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   }
   function walkRoom(pixels:number){
     const room=roomFor(state);if(!room)return;
-    const distanceToDoor=Math.abs(roomEye.x)+Math.max(0,2.82-roomEye.z);
+    const requiredPixels=roomExitPixels(roomEye.x,roomEye.z);
     if(flight&&root.dataset.insideRoom!=='true'){if(pixels<0)options.retreat();return;}
     flight=undefined;const distance=Math.abs(pixels)*.0065/.84;
     if(pixels<0){
-      let remaining=distance;const lateral=Math.min(Math.abs(roomEye.x),remaining);roomEye.x-=Math.sign(roomEye.x)*lateral;remaining-=lateral;roomEye.z=Math.min(2.82,roomEye.z+remaining);
+      const door=new THREE.Vector3(0,roomEye.y,2.82),length=roomEye.distanceTo(door);roomEye.lerp(door,Math.min(1,distance/Math.max(length,.001)));roomHeading=THREE.MathUtils.damp(roomHeading,0,8,Math.abs(pixels)*.003);
     }else{roomEye.x=THREE.MathUtils.clamp(roomEye.x-Math.sin(roomHeading)*distance,-1.0,1.0);roomEye.z=THREE.MathUtils.clamp(roomEye.z-Math.cos(roomHeading)*distance,.5,2.82);}
     settle();root.dataset.roomStation='walking';
-    if(roomEye.z>=2.8&&Math.abs(roomEye.x)<.48){options.retreat();const remainingPixels=Math.max(0,Math.abs(pixels)-distanceToDoor*.84/.0065);if(remainingPixels>0)walkOutside(-remainingPixels);}
+    if(roomEye.z>=2.8&&Math.abs(roomEye.x)<.48){options.retreat();const remainingPixels=Math.max(0,Math.abs(pixels)-requiredPixels);if(remainingPixels>0)walkOutside(-remainingPixels);}
     else if(!paused)sync();
   }
   function walkOutside(pixels:number){
@@ -260,8 +260,8 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
       const curve=new THREE.CatmullRomCurve3(points,false,'centripetal');walking={curve,length:Math.max(curve.getLength(),.01),distance:0,sign:Math.sign(pixels),fromLook:currentLook.clone(),toLook:dest.look,destination};
     }
     walking.distance=routeDistance(walking.distance,pixels*walking.sign,walking.length);root.style.setProperty('--travel',String(walking.distance/walking.length));
-    const complete=walking.distance>=walking.length,destination=walking.destination;settle();
-    if(complete){walking=undefined;if(destination.model)options.selectModel(destination.model);else options.retreat();}else if(!paused)sync();
+    const complete=walking.distance>=walking.length,atStart=walking.distance===0&&pixels*walking.sign<0,destination=walking.destination;settle();
+    if(complete){walking=undefined;if(destination.model)options.selectModel(destination.model);else options.retreat();}else{if(atStart)walking=undefined;if(!paused)sync();}
   }
   updateLayout();pose();currentEye.copy(targetEye);currentLook.copy(targetLook);resize();root.dataset.renderer='webgl';pause.hidden=false;
   pause.addEventListener('click',()=>{paused=!paused;if(paused){intro=0;yaw=targetYaw;settle();}sync();});
@@ -281,7 +281,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   function end(event:PointerEvent,cancelled=false){if(!gesture||gesture.id!==event.pointerId)return;const moved=gesture.dragged;gesture=undefined;dragging=false;delete root.dataset.dragging;if(moved||cancelled||interactive(event)||state.room)return;const hit=pick(event.clientX,event.clientY);if(!hit?.category)return;if(hit.exit&&activeModel?.data.category===hit.category)options.retreat();else if(!activeModel||activeModel.data.category!==hit.category)options.selectModel(hit.category);else if(hit.room)options.selectRoom(hit.room);}
   root.addEventListener('pointerup',event=>end(event));root.addEventListener('pointercancel',event=>end(event,true));
   root.addEventListener('wheel',event=>{
-    if(event.ctrlKey||options.isIndexOpen()||interactive(event)||(event.target as Element).closest('.showroom-options,.showroom-toolbar,.showroom-path'))return;
+    if(event.ctrlKey||options.isIndexOpen()||interactive(event)||(event.target as Element).closest("[data-inspecting='true']")||(event.target as Element).closest('.showroom-options,.showroom-toolbar,.showroom-path'))return;
     event.preventDefault();const x=wheelDistance(event.deltaX,event.deltaMode,innerHeight),y=wheelDistance(event.deltaY,event.deltaMode,innerHeight);
     if(Math.abs(x)>Math.abs(y)){if(state.room){flight=undefined;roomHeading-=x*.003;settle();}else{targetYaw=THREE.MathUtils.clamp(targetYaw-x*.0012,-.8,.8);if(paused){yaw=targetYaw;settle();}}if(!paused&&!frame)sync();return;}
     if(state.room)walkRoom(y);else walkOutside(y);
