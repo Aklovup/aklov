@@ -27,6 +27,21 @@ try {
     return {width:canvas.width,height:canvas.height,error:gl.getError(),vertices:gl.getParameter(gl.MAX_VERTEX_ATTRIBS)};
   });
   assert.ok(pixels.width>0 && pixels.height>0); assert.equal(pixels.error,0);
+  assert.ok(Number(await page.locator('[data-sculpture]').getAttribute('data-visible-projects'))>=2);
+  // Drag follows the pointer before release, including with ambient motion paused.
+  await page.mouse.move(1040,430);await page.mouse.down();
+  await page.mouse.move(510,430,{steps:12});
+  assert.ok(Number(await page.locator('[data-sculpture]').getAttribute('data-catalogue-position'))>.5);
+  await page.mouse.up();
+  await page.waitForFunction(()=>document.querySelector('[data-kinetic-hero]').dataset.activeProject==='divine-health-black-onyx');
+  await page.locator('[data-world-prev]').click();
+  await page.mouse.move(720,430);await page.mouse.wheel(350,0);
+  await page.waitForFunction(()=>document.querySelector('[data-kinetic-hero]').dataset.activeProject==='divine-health-black-onyx');
+  await page.locator('[data-world-prev]').click();
+  await page.mouse.wheel(0,350);await page.waitForFunction(()=>scrollY>50);
+  await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+  await page.waitForFunction(()=>scrollY===0);
+  report.checks.push('Multiple visible ring previews, direct mouse dragging, horizontal trackpad, preserved vertical wheel scrolling');
   await page.locator('[data-form-toggle]').click();
   assert.equal(await page.locator('[data-form-number]').textContent(),'02');
   assert.match(await page.locator('[data-world-title]').textContent(),/Divine/);
@@ -76,6 +91,36 @@ try {
   report.checks.push('Filtering without reload, URL history, concepts, project deep links, Escape and focus return');
   await context.close();
 
+  const touch=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+  const tp=await touch.newPage();await tp.goto(base+'/work/');
+  await tp.waitForSelector('[data-sculpture][data-renderer="webgl"]');
+  const cdp=await touch.newCDPSession(tp);
+  async function swipe(x1,y1,x2,y2){
+    await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:x1,y:y1}]});
+    for(let i=1;i<=12;i++){
+      await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x1+(x2-x1)*i/12,y:y1+(y2-y1)*i/12}]});
+      await tp.waitForTimeout(18);
+    }
+    await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  }
+  await swipe(320,450,65,450);
+  await tp.waitForFunction(()=>document.querySelector('[data-kinetic-hero]').dataset.activeProject==='divine-health-black-onyx');
+  assert.equal(await tp.evaluate(()=>scrollY),0);
+  await tp.waitForFunction(()=>document.querySelector('[data-sculpture]').dataset.catalogueSettled==='true');
+  await tp.screenshot({path:output+'/touch-next-project.png'});
+  await swipe(65,450,320,450);
+  await tp.waitForFunction(()=>document.querySelector('[data-kinetic-hero]').dataset.activeProject==='impex-automotive');
+  await tp.waitForFunction(()=>document.querySelector('[data-sculpture]').dataset.catalogueSettled==='true');
+  await swipe(65,450,320,450);
+  await tp.waitForFunction(()=>document.querySelector('[data-kinetic-hero]').dataset.activeProject==='vortex-gym-concept');
+  await tp.waitForFunction(()=>document.querySelector('[data-sculpture]').dataset.catalogueSettled==='true');
+  await tp.locator('[data-world-open]').tap();await tp.waitForSelector('dialog[open]');
+  assert.ok(tp.url().includes('project=vortex-gym-concept'));
+  await tp.keyboard.press('Escape');await tp.waitForFunction(()=>!document.querySelector('[data-project-dialog]').open);
+  await tp.waitForFunction(()=>document.activeElement?.hasAttribute('data-world-open'));
+  await swipe(190,570,190,240);await tp.waitForFunction(()=>scrollY>60);
+  report.checks.push('Native touch swipes both ways, inertia settling, circular wraparound, selected case study, native vertical touch scrolling');
+  await touch.close();
   const reduced=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});
   const rp=await reduced.newPage(); await rp.goto(base+'/work/');
   await rp.waitForSelector('[data-kinetic-hero][data-motion="paused"]');

@@ -11,3 +11,11 @@ Reduced motion starts with a static camera and still reflection. Pause is always
 Only Work's page and experiment files change, plus the Three.js dependency. Existing filters, ordering, dialogs, media controls, page copy and other pages' source are retained. The dedicated CI workflow builds Astro and checks scene rendering, project navigation, filters, history, dialogs, focus return, reduced motion and fallback modes at desktop/tablet/mobile widths.
 
 Review the moving scene in the branch preview at `/work/`; still screenshots cannot show camera travel and reflections. This is a procedural design experiment, not a claim to reproduce the custom assets or complete production quality of the reference studios.
+
+## Circular catalogue interaction
+
+Project previews now occupy a continuous three-dimensional ring inside the existing scene. The front preview is sharp; nearby angled previews soften through a surface shader and fade into depth. The radius derives from the number of collection entries, and only nearby panels render. Current and adjacent cover textures load on demand and are cached; detailed galleries still load only through the existing dialogs.
+
+Horizontal touch swipes and mouse drags move the ring continuously before release. Velocity affects the snap destination, and damped motion settles on a project. Horizontal trackpad gestures work as well. Native vertical scrolling and pinch zoom remain available. Project arrows and keyboard navigation are retained. Tapping an unobstructed neighbouring preview selects it; tapping the selected preview opens its case study. Reduced motion and Pause stop ambient motion and use immediate settling while preserving direct manipulation.
+
+Browser coverage includes real touch events through Chromium's input protocol, drag feedback before release, wheel-axis handling, native vertical touch scrolling, wraparound and opening the selected project after a swipe.

@@ -16,6 +16,7 @@ const worldProjects = projects.map(({data}) => ({slug:data.slug, title:data.titl
     <section class="kinetic-hero work-intro" aria-labelledby="work-title" data-kinetic-hero>
       <KineticSculpture projects={worldProjects} />
       <div class="hero-registration"><span>Portfolio / Aklov</span><span>{String(projects.length).padStart(2,'0')} projects — 05 categories</span></div>
+      <p class="world-gesture-hint" hidden>Drag or swipe to explore</p>
       <div class="world-heading"><h1 id="work-title">Work<span>.</span></h1><p>Client projects<br/><em>&amp; independent concepts.</em></p></div>
       <div class="world-project-panel">
         <div class="world-project-meta"><span data-world-category>{worldProjects[0].category}</span><span><span data-form-number>01</span> / {String(projects.length).padStart(2,'0')}</span></div>
@@ -45,6 +46,8 @@ const worldProjects = projects.map(({data}) => ({slug:data.slug, title:data.titl
   .work-experiment { --focus-color: var(--gold); }
   .kinetic-hero { position: relative; isolation: isolate; overflow: hidden; height: 100svh; min-height: 800px; background: #0a1012; color: var(--ivory); }
   .hero-registration { position: absolute; z-index: 3; top: 126px; left: var(--pad); right: var(--pad); display: flex; justify-content: space-between; gap: 20px; font: 500 10px/1.5 var(--sans); text-transform: uppercase; letter-spacing: 1.5px; color: #c9c6bb; }
+  .world-gesture-hint[hidden] { display:none; }
+  .world-gesture-hint { position:absolute; z-index:2; top:158px; left:var(--pad); color:#d6cba9; font:500 11px var(--sans); letter-spacing:.5px; pointer-events:none; }
   .world-heading { position: absolute; z-index: 2; left: var(--pad); bottom: 126px; pointer-events: none; }
   h1 { margin: 0 0 18px; font: 400 clamp(100px,12.6vw,210px)/.8 var(--display); letter-spacing: -.055em; }
   h1 span { color: var(--gold); }
@@ -76,7 +79,8 @@ const worldProjects = projects.map(({data}) => ({slug:data.slug, title:data.titl
   @media(max-width:800px) {
     .kinetic-hero { min-height: 900px; }
     .hero-registration { top: 110px; font-size: 9px; letter-spacing: .5px; }
-    .world-heading { top: 168px; bottom: auto; }
+    .world-gesture-hint { top:140px; font-size:10px; }
+    .world-heading { top: 180px; bottom: auto; }
     h1 { font-size: clamp(96px,26vw,150px); margin-bottom: 14px; }
     .world-heading p { font-size: 22px; }
     .world-project-panel { width: auto; left: var(--pad); right: var(--pad); bottom: 112px; }

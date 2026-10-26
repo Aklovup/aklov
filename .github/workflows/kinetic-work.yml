@@ -5,6 +5,8 @@ on:
     paths:
       - 'src/components/experimental/**'
       - 'src/scripts/kineticSculpture.ts'
+      - 'src/scripts/catalogueGesture.ts'
+      - 'src/scripts/catalogueMaterial.ts'
       - 'src/pages/work/index.astro'
       - 'tests/kinetic-work.browser.mjs'
       - '.github/workflows/kinetic-work.yml'
