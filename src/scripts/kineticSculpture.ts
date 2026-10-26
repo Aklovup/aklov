@@ -178,5 +178,7 @@ export function mountSculpture(root: HTMLElement) {
     event.preventDefault(); lost=true; cancelAnimationFrame(frame); root.dataset.renderer='fallback';
     pauseButton.hidden=true; formButton.hidden=true;
   });
-  canvas.addEventListener('webglcontextrestored', () => { lost=false; root.dataset.renderer='fallback'; });
+  // Restoring a context invalidates its old GPU resources. Keep the static artwork
+  // until navigation rather than attempting to draw with invalid buffers.
+  canvas.addEventListener('webglcontextrestored', () => { root.dataset.renderer='fallback'; });
 }
