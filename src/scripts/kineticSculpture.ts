@@ -1,184 +1,145 @@
-// A closed, chamfered ribbon swept around a parametric knot. No textures or libraries.
-type V3 = [number, number, number];
-const unit = (v: V3): V3 => { const l = Math.hypot(...v) || 1; return v.map(n => n / l) as V3; };
-const cross = (a: V3, b: V3): V3 => [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];
-const vertexShader = `
-attribute vec3 aPosition;
-attribute vec3 aNormal;
-uniform mat4 uRotation;
-uniform float uAspect;
-varying vec3 vNormal;
-varying vec3 vPosition;
-void main() {
-  vec3 p = (uRotation * vec4(aPosition, 1.)).xyz;
-  vNormal = (uRotation * vec4(aNormal, 0.)).xyz;
-  vPosition = p;
-  float z = 8.6 - p.z;
-  gl_Position = vec4(p.x * 2.15 / uAspect, p.y * 2.15, z * 1.002 - .2, z);
-}`;
-const fragmentShader = `
-precision highp float;
-varying vec3 vNormal;
-varying vec3 vPosition;
-void main() {
-  vec3 n = normalize(vNormal);
-  vec3 view = normalize(vec3(0., 0., 8.6) - vPosition);
-  vec3 reflected = reflect(-view, n);
-  float key = max(0., dot(n, normalize(vec3(-.7, 1., 1.4))));
-  float fill = max(0., dot(n, normalize(vec3(1., -.3, .6))));
-  float fresnel = pow(1. - max(dot(n, view), 0.), 3.);
-  float softbox = pow(max(0., dot(reflected, normalize(vec3(-.65, 1., 1.5)))), 20.);
-  float strip = pow(max(0., 1. - abs(reflected.x * .75 + reflected.y * .3 - .25)), 35.);
-  float rim = pow(max(0., dot(reflected, normalize(vec3(1., .1, .1)))), 70.);
-  vec3 gold = vec3(.56, .37, .15);
-  vec3 color = gold * (.32 + .8 * key + .2 * fill);
-  color += vec3(1., .88, .62) * (softbox * .9 + strip * .65);
-  color += vec3(.98, .96, .87) * (rim * .9 + fresnel * .3);
-  color *= .84 + .16 * smoothstep(-2.5, 1., vPosition.y);
-  color = pow(color, vec3(.78));
-  gl_FragColor = vec4(color, 1.);
-}`;
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { Reflector } from 'three/addons/objects/Reflector.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+interface Project { slug:string; title:string; category:string; type:string; src?:string; }
 
-export function mountSculpture(root: HTMLElement) {
-  const canvas = root.querySelector<HTMLCanvasElement>('canvas')!;
-  const hero = root.closest<HTMLElement>('[data-kinetic-hero]')!;
-  const pauseButton = hero.querySelector<HTMLButtonElement>('[data-motion-toggle]')!;
-  const formButton = hero.querySelector<HTMLButtonElement>('[data-form-toggle]')!;
-  const motion = matchMedia('(prefers-reduced-motion: reduce)');
-  let gl: WebGLRenderingContext | null;
-  try { gl = canvas.getContext('webgl', { alpha: true, antialias: true, powerPreference: 'low-power' }); }
-  catch { return; }
-  if (!gl) return;
-  const context = gl;
-  const shader = (type: number, source: string) => {
-    const s = context.createShader(type)!;
-    context.shaderSource(s, source); context.compileShader(s);
-    if (!context.getShaderParameter(s, context.COMPILE_STATUS)) { context.deleteShader(s); return null; }
-    return s;
-  };
-  const vs = shader(context.VERTEX_SHADER, vertexShader);
-  const fs = shader(context.FRAGMENT_SHADER, fragmentShader);
-  if (!vs || !fs) return;
-  const program = context.createProgram()!;
-  context.attachShader(program, vs); context.attachShader(program, fs); context.linkProgram(program);
-  context.deleteShader(vs); context.deleteShader(fs);
-  if (!context.getProgramParameter(program, context.LINK_STATUS)) return;
-  context.useProgram(program);
-  context.enable(context.DEPTH_TEST);
-  const rotationUniform = context.getUniformLocation(program, 'uRotation');
-  const aspectUniform = context.getUniformLocation(program, 'uAspect');
-  const buffers = [context.createBuffer()!, context.createBuffer()!, context.createBuffer()!];
-  let indexCount = 0;
-  let form = 0;
-
-  function build() {
-    const positions: number[] = [], normals: number[] = [], indices: number[] = [];
-    const rings = 240, sides = 32;
-    function curve(t: number): V3 {
-      const p = form === 1 ? 3 : 2, q = form === 1 ? 2 : 3;
-      const radius = 1.65 + (form === 2 ? .5 : .65) * Math.cos(q * t);
-      return [radius * Math.cos(p*t), radius * Math.sin(p*t), (form === 2 ? 1.05 : .72) * Math.sin(q*t)];
-    }
-    for (let i = 0; i <= rings; i++) {
-      const t = i/rings * Math.PI*2, c = curve(t), before = curve(t-.001), after = curve(t+.001);
-      const tangent = unit(after.map((v,j) => v-before[j]) as V3);
-      const n = unit(cross(tangent, [0,0,1]));
-      const b = unit(cross(tangent, n));
-      for (let j = 0; j <= sides; j++) {
-        const a = j/sides * Math.PI*2;
-        // A superellipse gives a wide ribbon with rounded edges instead of a round pipe.
-        const x = .31*Math.sign(Math.cos(a))*Math.pow(Math.abs(Math.cos(a)), .42);
-        const y = .16*Math.sign(Math.sin(a))*Math.pow(Math.abs(Math.sin(a)), .42);
-        const localNormal = unit([Math.sign(x)*Math.pow(Math.abs(x/.31), 3.76)/.31, Math.sign(y)*Math.pow(Math.abs(y/.16), 3.76)/.16, 0]);
-        for (let k = 0; k < 3; k++) {
-          positions.push(c[k] + n[k]*x + b[k]*y);
-          normals.push(n[k]*localNormal[0] + b[k]*localNormal[1]);
-        }
-        if (i < rings && j < sides) {
-          const a0 = i*(sides+1)+j, a1 = a0+sides+1;
-          indices.push(a0,a1,a0+1,a0+1,a1,a1+1);
-        }
-      }
-    }
-    [positions, normals].forEach((data,i) => {
-      context.bindBuffer(context.ARRAY_BUFFER, buffers[i]);
-      context.bufferData(context.ARRAY_BUFFER, new Float32Array(data), context.STATIC_DRAW);
-      const location = context.getAttribLocation(program, i === 0 ? 'aPosition' : 'aNormal');
-      context.enableVertexAttribArray(location); context.vertexAttribPointer(location,3,context.FLOAT,false,0,0);
+export function mountSculpture(root:HTMLElement) {
+  const hero=root.closest<HTMLElement>('[data-kinetic-hero]')!;
+  const projects:Project[]=JSON.parse(root.querySelector('#world-projects')!.textContent!);
+  const canvas=root.querySelector<HTMLCanvasElement>('canvas')!;
+  const pause=hero.querySelector<HTMLButtonElement>('[data-motion-toggle]')!;
+  const next=hero.querySelector<HTMLButtonElement>('[data-form-toggle]')!;
+  const previous=hero.querySelector<HTMLButtonElement>('[data-world-prev]')!;
+  const open=hero.querySelector<HTMLButtonElement>('[data-world-open]')!;
+  const status=hero.querySelector<HTMLElement>('[data-world-status]')!;
+  const motion=matchMedia('(prefers-reduced-motion: reduce)');
+  const dialog=document.querySelector<HTMLDialogElement>('[data-project-dialog]');
+  let active=0,worldOpener=false,textureEpoch=0,projectPan=0,targetProjectPan=0;
+  hero.querySelector<HTMLElement>('.world-controls')!.hidden=false;
+  let sync=()=>{};
+  let selectInScene:((project:Project,index:number)=>void)|undefined;
+  function select(index:number,announce=true) {
+    active=(index+projects.length)%projects.length;targetProjectPan=((active%3)-1)*1.8;
+    const p=projects[active];
+    hero.querySelector('[data-world-title]')!.textContent=p.title;
+    hero.querySelector('[data-world-category]')!.textContent=p.category;
+    hero.querySelector('[data-form-number]')!.textContent=String(active+1).padStart(2,'0');
+    hero.dataset.activeProject=p.slug;open.setAttribute('aria-label',`View project: ${p.title}`);
+    if(announce) status.textContent=`${active+1} of ${projects.length} · ${p.type}${p.src?'':' · Preview pending'}`;
+    const image=root.querySelector('[data-world-fallback-image]');
+    if(image) {if(p.src) image.setAttribute('href',p.src);else image.removeAttribute('href');}
+    selectInScene?.(p,active);
+  }
+  next.addEventListener('click',()=>select(active+1));
+  previous.addEventListener('click',()=>select(active-1));
+  hero.querySelector('.world-controls')!.addEventListener('keydown',(event:Event)=>{
+    const key=event as KeyboardEvent;
+    if(key.key==='ArrowRight'||key.key==='ArrowLeft'){key.preventDefault();select(active+(key.key==='ArrowRight'?1:-1));}
+  });
+  open.addEventListener('click',()=>{
+    const trigger=document.querySelector<HTMLButtonElement>(`[data-project-open="${projects[active].slug}"]`);
+    if(trigger&&!trigger.hidden){worldOpener=true;trigger.click();}else document.getElementById('projects')?.scrollIntoView();
+  });
+  dialog?.addEventListener('close',()=>{
+    if(worldOpener){worldOpener=false;requestAnimationFrame(()=>requestAnimationFrame(()=>open.focus({preventScroll:true})));}
+    sync();
+  });
+  select(0,false);
+  let renderer:THREE.WebGLRenderer;
+  try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'low-power'});}
+  catch{root.dataset.renderer='fallback';return;}
+  const mobile=innerWidth<800;
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.15:1.4));
+  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
+  renderer.shadowMap.enabled=!mobile;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  const scene=new THREE.Scene();scene.background=new THREE.Color('#111b1f');scene.fog=new THREE.FogExp2('#1c292c',.023);
+  const camera=new THREE.PerspectiveCamera(46,1,.1,200);
+  const pmrem=new THREE.PMREMGenerator(renderer),studio=new RoomEnvironment();
+  const env=pmrem.fromScene(studio,.06);scene.environment=env.texture;scene.environmentIntensity=.42;studio.dispose();pmrem.dispose();
+  scene.add(new THREE.HemisphereLight('#d3e0d8','#161a1a',1.7));
+  const sun=new THREE.DirectionalLight('#f5dfaf',4.5);sun.position.set(-12,24,7);sun.castShadow=!mobile;
+  sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-30;sun.shadow.camera.right=30;sun.shadow.camera.top=30;sun.shadow.camera.bottom=-30;sun.shadow.normalBias=.04;scene.add(sun);
+  const cold=new THREE.DirectionalLight('#879caa',2);cold.position.set(16,8,-20);scene.add(cold);
+  const stone=new THREE.MeshStandardMaterial({color:'#303735',roughness:.55,metalness:.48});
+  const darkStone=new THREE.MeshStandardMaterial({color:'#11191b',roughness:.68,metalness:.3});
+  const brass=new THREE.MeshStandardMaterial({color:'#b99b58',metalness:.92,roughness:.23});
+  const light=new THREE.MeshBasicMaterial({color:new THREE.Color('#e7c37e').multiplyScalar(2.4),toneMapped:false});
+  function box(w:number,h:number,d:number,material:THREE.Material,x:number,y:number,z:number,r=.07){
+    const mesh=new THREE.Mesh(new RoundedBoxGeometry(w,h,d,2,r),material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);return mesh;
+  }
+  // One coherent courtyard. Architecture, light strips and reflections share a space.
+  for(let i=0;i<9;i++){
+    const z=-11-i*8,opening=10+i*.35,height=11+i*.45,mat=i%2?darkStone:stone;
+    box(1.25,height,1.8,mat,-opening/2,height/2,z);box(1.25,height,1.8,mat,opening/2,height/2,z);box(opening+1.25,1.25,1.8,mat,0,height,z);
+    box(.045,height-.5,.07,light,-opening/2+.65,height/2,z+.92,.01);box(opening-.05,.045,.07,light,0,height-.64,z+.92,.01);
+    const offset=11+(i%3)*2.5;
+    box(2.2,13+i*.65,5,darkStone,-offset,6.5+i*.325,z-3);box(2.2,8+i*.8,3,stone,offset,4+i*.4,z-3);
+  }
+  for(let i=0;i<10;i++){const z=10-i*5;box(1.6,.3,3.2,stone,-5.8,.08,z);box(1.6,.3,3.2,darkStone,5.8,.08,z);}
+  const screenGroup=new THREE.Group();screenGroup.position.set(0,4.5,-11.2);scene.add(screenGroup);
+  screenGroup.add(new THREE.Mesh(new RoundedBoxGeometry(8.1,5.1,.35,3,.08),brass));
+  const backing=new THREE.Mesh(new THREE.PlaneGeometry(7.8,4.8),new THREE.MeshBasicMaterial({color:'#090d0e'}));backing.position.z=.19;screenGroup.add(backing);
+  const screenMaterial=new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false});
+  const screen=new THREE.Mesh(new THREE.PlaneGeometry(7.5,4.22),screenMaterial);screen.position.z=.2;screenGroup.add(screen);
+  const screenLight=new THREE.PointLight('#e2c58c',18,14,2);screenLight.position.set(0,5,-7);scene.add(screenLight);
+  const floor=new Reflector(new THREE.PlaneGeometry(250,250),{color:0x707a75,textureWidth:mobile?320:640,textureHeight:mobile?320:640,clipBias:.003,multisample:0});
+  floor.rotation.x=-Math.PI/2;floor.position.y=-.12;scene.add(floor);
+  const ripple={value:0};floor.material.uniforms.uTime=ripple;
+  floor.material.fragmentShader='uniform float uTime;\n'+floor.material.fragmentShader.replace('vec4 base = texture2DProj( tDiffuse, vUv );','vec4 waterUv=vUv; waterUv.x += sin(vUv.y*85.0/vUv.w+uTime*.28)*.00075*vUv.w; waterUv.y += sin(vUv.x*120.0/vUv.w+uTime*.19)*.0006*vUv.w; vec4 base = texture2DProj(tDiffuse, waterUv);');
+  const dustGeometry=new THREE.BufferGeometry(),positions=new Float32Array((mobile?650:1600)*3);let seed=917;
+  const random=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+  for(let i=0;i<positions.length;i+=3){positions[i]=(random()-.5)*55;positions[i+1]=random()*22+.3;positions[i+2]=random()*-85+12;}
+  dustGeometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
+  const dust=new THREE.Points(dustGeometry,new THREE.PointsMaterial({color:'#dbd1ae',size:.027,transparent:true,opacity:.42,depthWrite:false}));scene.add(dust);
+  const composer=new EffectComposer(renderer);composer.addPass(new RenderPass(scene,camera));
+  composer.addPass(new UnrealBloomPass(new THREE.Vector2(1,1),.32,.65,1.25));composer.addPass(new OutputPass());
+  const textures=new Map<string,THREE.Texture>(),loader=new THREE.TextureLoader();
+  function pendingTexture(p:Project,index:number){
+    const c=document.createElement('canvas');c.width=1024;c.height=576;const ctx=c.getContext('2d')!;
+    ctx.fillStyle='#11191b';ctx.fillRect(0,0,1024,576);ctx.strokeStyle='#a58a51';ctx.lineWidth=2;ctx.strokeRect(40,40,944,496);
+    ctx.font='180px Georgia';ctx.fillStyle='#d8bd78';ctx.fillText(String(index+1).padStart(2,'0'),72,260);
+    ctx.font='28px sans-serif';ctx.fillStyle='#f5f2ea';ctx.fillText(p.title,74,380,870);ctx.font='20px sans-serif';ctx.fillStyle='#bcb7a9';ctx.fillText('Preview pending',74,442);
+    const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;
+  }
+  function applyTexture(t:THREE.Texture){
+    screenMaterial.map=t;screenMaterial.needsUpdate=true;const aspect=t.image.width/t.image.height;
+    t.repeat.set(Math.min(1,(16/9)/aspect),Math.min(1,aspect/(16/9)));t.offset.set((1-t.repeat.x)/2,1-t.repeat.y);t.needsUpdate=true;draw();
+  }
+  selectInScene=(p,index)=>{
+    const epoch=++textureEpoch,key=p.src||p.slug;
+    if(textures.has(key)){applyTexture(textures.get(key)!);return;}
+    if(!p.src){const t=pendingTexture(p,index);textures.set(key,t);applyTexture(t);return;}
+    loader.load(p.src,t=>{t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());textures.set(key,t);if(epoch===textureEpoch)applyTexture(t);},undefined,()=>{
+      const t=pendingTexture(p,index);textures.set(key,t);if(epoch===textureEpoch){applyTexture(t);status.textContent='Project preview unavailable. Open the case study to explore the project.';}
     });
-    context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, buffers[2]);
-    context.bufferData(context.ELEMENT_ARRAY_BUFFER,new Uint16Array(indices),context.STATIC_DRAW);
-    indexCount = indices.length;
+  };
+  let paused=motion.matches,visible=true,lost=false,frameId=0,last=0,time=0,intro=0;
+  let mouseX=0,mouseY=0,smoothedX=0,smoothedY=0,scroll=0;
+  const look=new THREE.Vector3(0,4,-22);
+  function draw(){
+    if(lost)return;
+    const portrait=innerWidth<800,side=portrait?1.3:7.2,range=portrait?13.5:17;
+    camera.position.set(side+projectPan+smoothedX*2.3,5.4+smoothedY*.65,range+intro*7-scroll*5);camera.lookAt(look);
+    ripple.value=time;screenGroup.rotation.y=Math.sin(time*.15)*.025;dust.rotation.y=Math.sin(time*.02)*.02;composer.render();root.dataset.rendered='true';
   }
-
-  let angle = .2, elapsed = 0, previous = 0, frame = 0, visible = true, lost = false;
-  let paused = motion.matches;
-  let targetX = 0, targetY = 0, x = 0, y = 0;
-  function resize() {
-    const box = root.getBoundingClientRect();
-    const ratio = Math.min(devicePixelRatio || 1, innerWidth < 800 ? 1.25 : 1.5);
-    canvas.width = Math.max(1, Math.round(box.width*ratio)); canvas.height = Math.max(1,Math.round(box.height*ratio));
-    context.viewport(0,0,canvas.width,canvas.height);
-    context.uniform1f(aspectUniform,canvas.width/canvas.height);
-    draw();
+  function resize(){const r=root.getBoundingClientRect();camera.aspect=r.width/r.height;camera.updateProjectionMatrix();renderer.setSize(r.width,r.height,false);composer.setSize(r.width,r.height);draw();}
+  function tick(now:number){
+    frameId=0;if(paused||!visible||document.hidden||lost||dialog?.open){last=0;return;}
+    const dt=last?Math.min((now-last)/1000,.05):0;last=now;time+=dt;projectPan+=(targetProjectPan-projectPan)*.035;intro=Math.max(0,intro-dt*.32);smoothedX+=(mouseX-smoothedX)*.045;smoothedY+=(mouseY-smoothedY)*.045;draw();frameId=requestAnimationFrame(tick);
   }
-  function draw() {
-    if (lost) return;
-    const ax = -.48+y, ay = -.38+x, az = angle;
-    const cx=Math.cos(ax), sx=Math.sin(ax), cy=Math.cos(ay), sy=Math.sin(ay), cz=Math.cos(az), sz=Math.sin(az);
-    // Column-major rotation Rz * Ry * Rx.
-    const matrix = new Float32Array([
-      cz*cy, sz*cy, -sy, 0,
-      cz*sy*sx-sz*cx, sz*sy*sx+cz*cx, cy*sx, 0,
-      cz*sy*cx+sz*sx, sz*sy*cx-cz*sx, cy*cx, 0,
-      0, Math.sin(elapsed*.5)*.07, 0, 1,
-    ]);
-    context.clearColor(0,0,0,0); context.clear(context.COLOR_BUFFER_BIT|context.DEPTH_BUFFER_BIT);
-    context.uniformMatrix4fv(rotationUniform,false,matrix);
-    context.drawElements(context.TRIANGLES,indexCount,context.UNSIGNED_SHORT,0);
-    root.dataset.rendered = 'true';
-  }
-  function tick(time: number) {
-    frame = 0;
-    if (paused || !visible || document.hidden || lost) { previous=0; return; }
-    const dt = previous ? Math.min((time-previous)/1000,.05) : 0; previous=time;
-    elapsed += dt; angle += dt*.09;
-    x += (targetX-x)*.045; y += (targetY-y)*.045;
-    draw(); frame=requestAnimationFrame(tick);
-  }
-  function sync() {
-    cancelAnimationFrame(frame); frame=0; previous=0;
-    pauseButton.textContent = paused ? 'Play motion' : 'Pause motion';
-    pauseButton.setAttribute('aria-pressed',String(paused));
-    hero.dataset.motion = paused ? 'paused' : 'playing';
-    if (!paused && visible && !document.hidden && !lost) frame=requestAnimationFrame(tick);
-  }
-  build(); resize();
-  root.dataset.renderer = 'webgl';
-  pauseButton.hidden = false; formButton.hidden = false;
-  sync();
-  pauseButton.addEventListener('click', () => { paused=!paused; sync(); });
-  formButton.addEventListener('click', () => {
-    form=(form+1)%3; build(); draw();
-    const count=hero.querySelector<HTMLElement>('[data-form-number]');
-    if (count) count.textContent=String(form+1).padStart(2,'0');
-  });
-  hero.addEventListener('pointermove', event => {
-    if (event.pointerType!=='mouse' || paused || motion.matches) return;
-    const rect=hero.getBoundingClientRect();
-    targetX=(event.clientX/rect.width-.5)*.45;
-    targetY=((event.clientY-rect.top)/rect.height-.5)*.3;
-  }, { passive:true });
-  hero.addEventListener('pointerleave', () => { targetX=0; targetY=0; });
-  const observer=new IntersectionObserver(([entry]) => { visible=entry.isIntersecting; sync(); }); observer.observe(hero);
-  const sizeObserver=new ResizeObserver(resize); sizeObserver.observe(root);
-  document.addEventListener('visibilitychange',sync);
-  motion.addEventListener('change', () => { paused=motion.matches; x=y=targetX=targetY=0; draw(); sync(); });
-  canvas.addEventListener('webglcontextlost', event => {
-    event.preventDefault(); lost=true; cancelAnimationFrame(frame); root.dataset.renderer='fallback';
-    pauseButton.hidden=true; formButton.hidden=true;
-  });
-  // Restoring a context invalidates its old GPU resources. Keep the static artwork
-  // until navigation rather than attempting to draw with invalid buffers.
-  canvas.addEventListener('webglcontextrestored', () => { root.dataset.renderer='fallback'; });
+  sync=()=>{cancelAnimationFrame(frameId);last=0;hero.dataset.motion=paused?'paused':'playing';pause.textContent=paused?'Play motion':'Pause motion';pause.setAttribute('aria-pressed',String(paused));if(!paused&&visible&&!document.hidden&&!lost&&!dialog?.open)frameId=requestAnimationFrame(tick);};
+  intro=paused?0:1;resize();selectInScene(projects[0],0);root.dataset.renderer='webgl';pause.hidden=false;sync();
+  pause.addEventListener('click',()=>{paused=!paused;sync();});
+  hero.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&!paused){const r=hero.getBoundingClientRect();mouseX=(e.clientX-r.left)/r.width-.5;mouseY=(e.clientY-r.top)/r.height-.5;}},{passive:true});
+  hero.addEventListener('pointerleave',()=>{mouseX=mouseY=0;});
+  window.addEventListener('scroll',()=>{scroll=Math.max(0,Math.min(1,-hero.getBoundingClientRect().top/hero.offsetHeight));if(paused){scroll=0;return;}if(visible&&!frameId)draw();},{passive:true});
+  new ResizeObserver(resize).observe(root);new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;sync();}).observe(hero);
+  document.addEventListener('visibilitychange',sync);document.addEventListener('aklov:project-open',sync);
+  motion.addEventListener('change',()=>{paused=motion.matches;if(paused){intro=scroll=smoothedX=smoothedY=0;draw();}sync();});
+  canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();lost=true;cancelAnimationFrame(frameId);root.dataset.renderer='fallback';pause.hidden=true;});
 }

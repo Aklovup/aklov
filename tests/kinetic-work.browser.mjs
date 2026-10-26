@@ -22,17 +22,22 @@ try {
   await page.waitForFunction(()=>document.querySelector('[data-kinetic-hero]').dataset.motion==='paused');
   // Check renderer dimensions and GL state; saved screenshots document the composition.
   const pixels = await page.locator('canvas[data-sculpture-canvas]').evaluate(canvas=>{
-    const gl=canvas.getContext('webgl');
+    const gl=canvas.getContext('webgl2');
     return {width:canvas.width,height:canvas.height,error:gl.getError(),vertices:gl.getParameter(gl.MAX_VERTEX_ATTRIBS)};
   });
   assert.ok(pixels.width>0 && pixels.height>0); assert.equal(pixels.error,0);
   await page.locator('[data-form-toggle]').click();
   assert.equal(await page.locator('[data-form-number]').textContent(),'02');
-  await page.locator('[data-form-toggle]').click();
-  assert.equal(await page.locator('[data-form-number]').textContent(),'03');
-  await page.locator('[data-form-toggle]').click();
+  assert.match(await page.locator('[data-world-title]').textContent(),/Divine/);
+  await page.locator('[data-world-open]').click();
+  await page.waitForSelector('dialog[open]');
+  assert.ok(page.url().includes('project=divine-health-black-onyx'));
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(()=>!document.querySelector('[data-project-dialog]').open);
+  await page.waitForFunction(()=>document.activeElement?.hasAttribute('data-world-open'));
+  await page.locator('[data-world-prev]').click();
   assert.equal(await page.locator('[data-form-number]').textContent(),'01');
-  report.checks.push('WebGL rendering, pause control and all three sculpture forms');
+  report.checks.push('Spatial scene rendering, pause, scene project selection, opening the selected case study, focus return');
   for(const width of [1440,1024,768,390,320]) {
     await page.setViewportSize({width,height:width<800?844:1000});
     await page.waitForTimeout(180);
@@ -76,10 +81,14 @@ try {
   await rp.screenshot({path:output+'/reduced-motion.png'});
   await reduced.close();
   const fallback=await browser.newContext({viewport:{width:390,height:844}});
-  await fallback.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext=function(type,...args){ if(type==='webgl') return null; return original.call(this,type,...args); };});
+  await fallback.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext=function(type,...args){ if(type==='webgl'||type==='webgl2') return null; return original.call(this,type,...args); };});
   const fp=await fallback.newPage(); await fp.goto(base+'/work/');
   assert.equal(await fp.locator('.sculpture-fallback').isVisible(),true);
   assert.equal(await fp.locator('[data-motion-toggle]').isVisible(),false);
+  await fp.locator('[data-world-open]').click();
+  await fp.waitForSelector('dialog[open]');
+  await fp.keyboard.press('Escape');
+  await fp.waitForFunction(()=>!document.querySelector('[data-project-dialog]').open);
   await fp.locator('[data-group="client"]').click();
   assert.equal(await fp.locator('[data-project]:not([hidden])').count(),8);
   await fp.screenshot({path:output+'/fallback.png'});

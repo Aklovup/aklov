@@ -1,13 +1,13 @@
-# Experimental Work page
+# Spatial Work experiment
 
-Isolated visual exploration on `experiment/kinetic-work`. Main is unchanged.
+An isolated Work-page study on `experiment/kinetic-work`, draft PR #11. Main is unchanged.
 
-The Work route uses the existing collection, ordering, filters, cards and accessible project dialogs. Page-scoped styles introduce an ivory opening and dark editorial index. No project copy or media is replaced. The shared header receives overrides only while this page is present.
+The initial floating-object study has been replaced by a complete real-time architectural archive: receding stone frames, an illuminated suspended project screen, mirrored water with shader ripples, studio environment lighting, fog, dust and restrained bloom. Camera movement responds to pointer and natural page scroll. Project navigation changes the actual first-frame preview and opens the corresponding existing case study.
 
-The sculpture is a locally generated, chamfered parametric knot, rendered with native WebGL and custom studio-lighting shaders. Three forms can be selected. Pointer motion gently changes the view; continuous rotation has an explicit pause control. Pixel density is capped, rendering suspends outside the viewport and on hidden tabs, and reduced-motion users initially receive a still composition. If WebGL is unavailable, a static SVG composition remains visible. All ten projects are available without JavaScript.
+Three.js 0.180.0 is the single added dependency. Its scene graph, PBR materials, reflection camera and post-processing pipeline replace the hand-written isolated-object renderer. No remote 3D assets, paid services or fabricated project images are used. Project previews come from collection metadata and the existing media manifest; missing covers remain explicit placeholders. Textures load on selection and are cached.
 
-No dependencies, remote models, image textures or new hosting services are introduced. The sculpture is abstract brand artwork, not a representation of client functionality.
+Reduced motion starts with a static camera and still reflection. Pause is always available after renderer initialization. Rendering suspends when the scene is offscreen, the tab is hidden, or a project dialog opens. Pixel ratio and reflection resolution are capped. Without WebGL, static architectural artwork and working project-selection controls remain; without JavaScript, the project index still contains all ten projects.
 
-Validation: the `Experimental Work review` workflow builds Astro, runs the content/validation unit tests, and exercises WebGL, controls, viewport overflow, filters, dialogs, deep links, history, reduced motion and fallback behavior. It saves desktop, tablet and mobile screenshots as `kinetic-work-review`. The existing full-site validation workflow runs separately.
+Only Work's page and experiment files change, plus the Three.js dependency. Existing filters, ordering, dialogs, media controls, page copy and other pages' source are retained. The dedicated CI workflow builds Astro and checks scene rendering, project navigation, filters, history, dialogs, focus return, reduced motion and fallback modes at desktop/tablet/mobile widths.
 
-Preview `/work/` on the Cloudflare branch deployment. This is a design experiment for review, not approval to merge or roll out the design to other pages.
+Review the moving scene in the branch preview at `/work/`; still screenshots cannot show camera travel and reflections. This is a procedural design experiment, not a claim to reproduce the custom assets or complete production quality of the reference studios.
