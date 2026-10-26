@@ -57,15 +57,20 @@ export function mountSculpture(root:HTMLElement) {
   renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.15:1.4));
   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
   renderer.shadowMap.enabled=!mobile;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  const scene=new THREE.Scene();scene.background=new THREE.Color('#111b1f');scene.fog=new THREE.FogExp2('#1c292c',.023);
+  const scene=new THREE.Scene();scene.background=new THREE.Color('#27373b');scene.fog=new THREE.FogExp2('#3d4b4a',.024);
   const camera=new THREE.PerspectiveCamera(46,1,.1,200);
+  const sky=new THREE.Mesh(new THREE.SphereGeometry(110,32,16),new THREE.ShaderMaterial({
+    side:THREE.BackSide,depthWrite:false,
+    vertexShader:'varying vec3 vDirection; void main(){ vDirection=position; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }',
+    fragmentShader:'precision highp float; varying vec3 vDirection; void main(){ vec3 d=normalize(vDirection); float h=smoothstep(-.06,.6,d.y); vec3 c=mix(vec3(.27,.32,.29),vec3(.025,.055,.07),h); float sun=pow(max(dot(d,normalize(vec3(-.6,.16,-1.))),0.),18.); c+=vec3(.30,.22,.10)*sun; gl_FragColor=vec4(c,1.); }'
+  }));scene.add(sky);
   const pmrem=new THREE.PMREMGenerator(renderer),studio=new RoomEnvironment();
   const env=pmrem.fromScene(studio,.06);scene.environment=env.texture;scene.environmentIntensity=.42;studio.dispose();pmrem.dispose();
-  scene.add(new THREE.HemisphereLight('#d3e0d8','#161a1a',1.7));
+  scene.add(new THREE.HemisphereLight('#d3e0d8','#222a28',2.1));
   const sun=new THREE.DirectionalLight('#f5dfaf',4.5);sun.position.set(-12,24,7);sun.castShadow=!mobile;
   sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-30;sun.shadow.camera.right=30;sun.shadow.camera.top=30;sun.shadow.camera.bottom=-30;sun.shadow.normalBias=.04;scene.add(sun);
   const cold=new THREE.DirectionalLight('#879caa',2);cold.position.set(16,8,-20);scene.add(cold);
-  const stone=new THREE.MeshStandardMaterial({color:'#303735',roughness:.55,metalness:.48});
+  const stone=new THREE.MeshStandardMaterial({color:'#596059',roughness:.58,metalness:.48});
   const darkStone=new THREE.MeshStandardMaterial({color:'#11191b',roughness:.68,metalness:.3});
   const brass=new THREE.MeshStandardMaterial({color:'#b99b58',metalness:.92,roughness:.23});
   const light=new THREE.MeshBasicMaterial({color:new THREE.Color('#e7c37e').multiplyScalar(2.4),toneMapped:false});
@@ -84,18 +89,18 @@ export function mountSculpture(root:HTMLElement) {
   const screenGroup=new THREE.Group();screenGroup.position.set(0,4.5,-11.2);scene.add(screenGroup);
   screenGroup.add(new THREE.Mesh(new RoundedBoxGeometry(8.1,5.1,.35,3,.08),brass));
   const backing=new THREE.Mesh(new THREE.PlaneGeometry(7.8,4.8),new THREE.MeshBasicMaterial({color:'#090d0e'}));backing.position.z=.19;screenGroup.add(backing);
-  const screenMaterial=new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false});
+  const screenMaterial=new THREE.MeshBasicMaterial({color:'#11191b',toneMapped:false});
   const screen=new THREE.Mesh(new THREE.PlaneGeometry(7.5,4.22),screenMaterial);screen.position.z=.2;screenGroup.add(screen);
   const screenLight=new THREE.PointLight('#e2c58c',18,14,2);screenLight.position.set(0,5,-7);scene.add(screenLight);
   const floor=new Reflector(new THREE.PlaneGeometry(250,250),{color:0x707a75,textureWidth:mobile?320:640,textureHeight:mobile?320:640,clipBias:.003,multisample:0});
   floor.rotation.x=-Math.PI/2;floor.position.y=-.12;scene.add(floor);
   const ripple={value:0};floor.material.uniforms.uTime=ripple;
   floor.material.fragmentShader='uniform float uTime;\n'+floor.material.fragmentShader.replace('vec4 base = texture2DProj( tDiffuse, vUv );','vec4 waterUv=vUv; waterUv.x += sin(vUv.y*85.0/vUv.w+uTime*.28)*.00075*vUv.w; waterUv.y += sin(vUv.x*120.0/vUv.w+uTime*.19)*.0006*vUv.w; vec4 base = texture2DProj(tDiffuse, waterUv);');
-  const dustGeometry=new THREE.BufferGeometry(),positions=new Float32Array((mobile?650:1600)*3);let seed=917;
+  const dustGeometry=new THREE.BufferGeometry(),positions=new Float32Array((mobile?160:420)*3);let seed=917;
   const random=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
   for(let i=0;i<positions.length;i+=3){positions[i]=(random()-.5)*55;positions[i+1]=random()*22+.3;positions[i+2]=random()*-85+12;}
   dustGeometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
-  const dust=new THREE.Points(dustGeometry,new THREE.PointsMaterial({color:'#dbd1ae',size:.027,transparent:true,opacity:.42,depthWrite:false}));scene.add(dust);
+  const dust=new THREE.Points(dustGeometry,new THREE.PointsMaterial({color:'#dbd1ae',size:.015,transparent:true,opacity:.23,depthWrite:false}));scene.add(dust);
   const composer=new EffectComposer(renderer);composer.addPass(new RenderPass(scene,camera));
   composer.addPass(new UnrealBloomPass(new THREE.Vector2(1,1),.32,.65,1.25));composer.addPass(new OutputPass());
   const textures=new Map<string,THREE.Texture>(),loader=new THREE.TextureLoader();
@@ -107,13 +112,15 @@ export function mountSculpture(root:HTMLElement) {
     const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;
   }
   function applyTexture(t:THREE.Texture){
-    screenMaterial.map=t;screenMaterial.needsUpdate=true;const aspect=t.image.width/t.image.height;
+    screenMaterial.color.set(0xffffff);screenMaterial.map=t;screenMaterial.needsUpdate=true;
+    const current=projects[active];status.textContent=`${active+1} of ${projects.length} · ${current.type}${current.src?'':' · Preview pending'}`;const aspect=t.image.width/t.image.height;
     t.repeat.set(Math.min(1,(16/9)/aspect),Math.min(1,aspect/(16/9)));t.offset.set((1-t.repeat.x)/2,1-t.repeat.y);t.needsUpdate=true;draw();
   }
   selectInScene=(p,index)=>{
     const epoch=++textureEpoch,key=p.src||p.slug;
     if(textures.has(key)){applyTexture(textures.get(key)!);return;}
     if(!p.src){const t=pendingTexture(p,index);textures.set(key,t);applyTexture(t);return;}
+    screenMaterial.map=null;screenMaterial.color.set('#11191b');screenMaterial.needsUpdate=true;draw();status.textContent='Loading project preview…';
     loader.load(p.src,t=>{t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());textures.set(key,t);if(epoch===textureEpoch)applyTexture(t);},undefined,()=>{
       const t=pendingTexture(p,index);textures.set(key,t);if(epoch===textureEpoch){applyTexture(t);status.textContent='Project preview unavailable. Open the case study to explore the project.';}
     });
