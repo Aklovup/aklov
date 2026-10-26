@@ -2,9 +2,11 @@ import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {spawn} from 'node:child_process';
 import {chromium} from 'playwright';
+import sharp from 'sharp';
 const base='http://127.0.0.1:4321',out='artifacts/showroom';
 const server=spawn('npm',['run','preview','--','--host','127.0.0.1','--port','4321'],{stdio:'inherit'});
 let browser;const report={checks:[],viewports:[]};
+async function visual(file,label){const buffer=await sharp(file).resize({width:720,withoutEnlargement:true}).jpeg({quality:60}).toBuffer();console.log(`VISUAL_REVIEW_${label}:${buffer.toString('base64')}`);}
 async function goto(page,path='/work/'){await page.goto(base+path,{waitUntil:'domcontentloaded',timeout:60000});await page.waitForSelector('[data-showroom][data-ready="true"][data-arrival="ready"]');}
 async function view(page,value){await page.waitForFunction(v=>document.querySelector('[data-showroom]').dataset.view===v,value);}
 async function ready(page){await page.waitForSelector('[data-showroom][data-room-ready="true"]');}
@@ -17,7 +19,7 @@ try{
  page.on('pageerror',e=>errors.push(e.message));
  let release;const gate=new Promise(r=>release=r);await context.route('**/_astro/*.js',async route=>{await gate;await route.continue();});
  try{await page.goto(base+'/work/',{waitUntil:'commit'});await page.locator('[data-showroom-arrival]').waitFor({state:'visible'});assert.equal(await page.locator('.showroom-fallback').isVisible(),false);await page.screenshot({path:out+'/arrival.png'});}finally{release();}
- await page.waitForSelector('[data-showroom][data-arrival="ready"][data-ready="true"]');await context.unroute('**/_astro/*.js');
+ await page.waitForSelector('[data-showroom][data-arrival="ready"][data-ready="true"]');await context.unroute('**/_astro/*.js');await page.screenshot({path:out+'/neutral-showroom.png'});await visual(out+'/neutral-showroom.png','SHOWROOM');
  assert.equal(await page.locator('dialog').count(),0);assert.equal(await page.locator('[data-showroom-model]').count(),4);
  // Repeated vertical wheel events continue to travel instead of locking after the first gesture.
  for(const delta of [80,80,-80,-80]){const before=Number(await page.locator('[data-showroom]').getAttribute('data-camera-z'));await wheel(page,delta);await page.waitForFunction(before=>Number(document.querySelector('[data-showroom]').dataset.cameraZ)!==before,before);}
@@ -52,11 +54,11 @@ try{
  assert.equal(await page.locator('[data-lift-display]').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(245, 242, 234)');
  assert.ok((await reader.locator('h2').evaluate(e=>getComputedStyle(e).fontFamily)).includes('Instrument Serif'));
  assert.deepEqual(await reader.locator('.case-copy h3').allTextContents(),['Overview','The challenge','What I built','The outcome','Technologies']);
- await page.screenshot({path:out+'/editorial-story.png'});
+ await page.screenshot({path:out+'/editorial-story.png'});await visual(out+'/editorial-story.png','STORY');
  await reader.hover();await page.mouse.wheel(0,500);await page.waitForFunction(()=>document.querySelector('[data-media-lift-scroll]').scrollTop>0);
  await reader.focus();await page.keyboard.press('End');assert.ok(await reader.evaluate(e=>e.scrollTop>0));await page.keyboard.press('Escape');await page.waitForFunction(()=>document.querySelector('[data-showroom]').dataset.mediaLift==='closed');
  assert.equal(await page.locator('[data-story-launch]').evaluate(e=>document.activeElement===e),true);
- await page.screenshot({path:out+'/story-wall.png'});
+ await page.screenshot({path:out+'/story-wall.png'});await visual(out+'/story-wall.png','COVER');
  const navigationTarget=page.locator('[data-story-launch]');
  const headingBefore=Number(await page.locator('[data-showroom]').getAttribute('data-room-heading'));
  await navigationTarget.hover();await page.mouse.wheel(60,0);await page.waitForFunction(before=>Number(document.querySelector('[data-showroom]').dataset.roomHeading)!==before,headingBefore);
