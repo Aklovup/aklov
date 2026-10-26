@@ -335,7 +335,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     if(Math.abs(x)>Math.abs(y)){flight=undefined;if(state.room){if(event.shiftKey)walkRoom(0,x);else{roomHeading-=x*.0025;respond();}}else{targetYaw=THREE.MathUtils.clamp(targetYaw-x*.0016,-1.25,1.25);respond();}return;}
     if(state.room)walkRoom(y);else walkOutside(y);
   },{passive:false});
-  root.addEventListener('focusin',event=>{if(!keyboardNavigation||!state.room||lifted())return;const target=(event.target as Element).closest('[data-wall-story],[data-wall-media]');const name=target?.hasAttribute('data-wall-story')?'story':'media';if(target&&root.dataset.roomStation!==name)station(name);});
+  root.addEventListener('focusin',event=>{if(!keyboardNavigation||!state.room||lifted()||root.dataset.restoringFocus)return;const target=(event.target as Element).closest('[data-wall-story],[data-wall-media]');const name=target?.hasAttribute('data-wall-story')?'story':'media';if(target&&root.dataset.roomStation!==name)station(name);});
   root.addEventListener('keydown',event=>{
     if(event.key==='Tab')keyboardNavigation=true;if(!state.room||lifted()||flat()||(event.target as Element).closest('input,select,textarea'))return;
     const key=event.key.toLowerCase();if(key==='arrowleft'||key==='arrowright'){event.preventDefault();roomHeading+=(key==='arrowleft'?1:-1)*.18;flight=undefined;respond();}

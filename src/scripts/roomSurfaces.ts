@@ -21,7 +21,7 @@ export function createRoomSurfaces(root:HTMLElement,scene:THREE.Scene,camera:THR
   const liftMask=new THREE.Mesh(new THREE.PlaneGeometry(1000,700),aperture);liftMask.visible=false;scene.add(liftMask);
   let node:THREE.Object3D|undefined,flat=innerWidth<800,failed=false;
   let lift:{progress:number;target:number;from:THREE.Vector3;to:THREE.Vector3;rotation:THREE.Quaternion;facing:THREE.Quaternion;scale:THREE.Vector3;targetScale:THREE.Vector3}|undefined;
-  function detach(){for(const s of surfaces){s.mask.visible=false;exhibit.append(s.element);s.element.style.removeProperty('transform');s.element.style.removeProperty('position');s.element.style.removeProperty('display');}liftMask.visible=false;exhibit.append(lifted);lifted.style.removeProperty('transform');renderer.domElement.hidden=true;root.dataset.surfaceMode='flat';root.dataset.wallMounted='false';}
+  function detach(){for(const s of surfaces){s.mask.visible=false;exhibit.append(s.element);s.element.style.removeProperty('display');}liftMask.visible=false;exhibit.append(lifted);lifted.style.removeProperty('display');renderer.domElement.hidden=true;root.dataset.surfaceMode='flat';root.dataset.wallMounted='false';}
   function bind(room?:THREE.Object3D){
     node=room;for(const s of surfaces){s.mask.visible=!!room;s.object.visible=!!room;}
     if(!room){liftMask.visible=false;liftObject.visible=false;lift=undefined;return;}

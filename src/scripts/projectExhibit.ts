@@ -9,14 +9,16 @@ export function createProjectExhibit(root:HTMLElement) {
   const rail=exhibit.querySelector<HTMLElement>('[data-exhibit-media-controls]')!;
   const lifted=exhibit.querySelector<HTMLElement>('[data-lift-display]')!;
   const liftScroll=exhibit.querySelector<HTMLElement>('[data-media-lift-scroll]')!;
+  let restoreLiftFocus=true;
   let liftTimer:ReturnType<typeof setTimeout>|undefined;
   function finishLift(){
     clearTimeout(liftTimer);lifted.hidden=true;liftScroll.replaceChildren();root.dataset.mediaLift='closed';stage.setAttribute('aria-expanded','false');
-    if(!exhibit.hidden)stage.focus({preventScroll:true});
+    if(restoreLiftFocus&&!exhibit.hidden){root.dataset.restoringFocus='true';stage.focus({preventScroll:true});delete root.dataset.restoringFocus;}
   }
   function closeLift(immediate=false){
     if(!root.dataset.mediaLift||root.dataset.mediaLift==='closed')return false;
-    root.dataset.mediaLift='closing';root.dispatchEvent(new CustomEvent('aklov:media-lift',{detail:{open:false,immediate}}));
+    restoreLiftFocus=!immediate;root.dataset.mediaLift='closing';root.dispatchEvent(new CustomEvent('aklov:media-lift',{detail:{open:false,immediate}}));
+    if(root.dataset.mediaLift==='closed')return true;
     if(immediate||root.dataset.surfaceMode!=='world')finishLift();else liftTimer=setTimeout(finishLift,900);
     return true;
   }
@@ -30,6 +32,7 @@ export function createProjectExhibit(root:HTMLElement) {
     root.dispatchEvent(new CustomEvent('aklov:media-lift',{detail:{open:true}}));
     document.dispatchEvent(new CustomEvent('aklov:project-open',{detail:{root:liftScroll}}));liftScroll.focus({preventScroll:true});
   }
+  window.addEventListener('resize',()=>closeLift(true));
   root.addEventListener('aklov:media-lift-settled',event=>{if(!(event as CustomEvent).detail.open)finishLift();});
   exhibit.querySelector('[data-media-lift-close]')!.addEventListener('click',()=>closeLift());
   stage.addEventListener('click',event=>{if(!(event.target as Element).closest('button,a,video'))openLift();});
