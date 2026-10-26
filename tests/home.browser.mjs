@@ -84,11 +84,19 @@ try {
     await page.goto(base);
     await page.locator('.selected-project a.project-link[href$="' + slug + '"]').click();
     await page.waitForURL('**/work/?project=' + slug);
-    const dialog = page.locator('#project-dialog');
-    await dialog.waitFor({state:'visible'});
-    assert.equal(await dialog.locator('#project-dialog-title').innerText(), projects.find(p => p.slug === slug).title);
-    await page.keyboard.press('Escape');
-    await dialog.waitFor({state:'hidden'});
+    if (await page.locator('[data-exhibit]').count()) {
+      await page.locator('[data-exhibit]:not([hidden])').waitFor({state:'visible'});
+      assert.equal(await page.locator('[data-exhibit-title]').innerText(), projects.find(p => p.slug === slug).title);
+      assert.equal(await page.locator('dialog').count(), 0);
+      await page.keyboard.press('Escape');
+      await page.waitForFunction(() => !document.querySelector('[data-showroom]').dataset.room);
+    } else {
+      const dialog = page.locator('#project-dialog');
+      await dialog.waitFor({state:'visible'});
+      assert.equal(await dialog.locator('#project-dialog-title').innerText(), projects.find(p => p.slug === slug).title);
+      await page.keyboard.press('Escape');
+      await dialog.waitFor({state:'hidden'});
+    }
   }
   await page.goto(base);
   await page.locator('.concept-link').click();
