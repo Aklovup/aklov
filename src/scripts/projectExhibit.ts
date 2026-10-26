@@ -7,7 +7,7 @@ export function createProjectExhibit(root:HTMLElement) {
   const chapters=exhibit.querySelector<HTMLElement>('[data-exhibit-chapters]')!;
   const stage=exhibit.querySelector<HTMLElement>('[data-exhibit-stage]')!;
   const rail=exhibit.querySelector<HTMLElement>('[data-exhibit-media-controls]')!;
-  const lifted=exhibit.querySelector<HTMLElement>('[data-media-lift]')!;
+  const lifted=exhibit.querySelector<HTMLElement>('[data-lift-display]')!;
   const liftScroll=exhibit.querySelector<HTMLElement>('[data-media-lift-scroll]')!;
   let liftTimer:ReturnType<typeof setTimeout>|undefined;
   function finishLift(){

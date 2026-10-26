@@ -16,7 +16,7 @@ export function createRoomSurfaces(root:HTMLElement,scene:THREE.Scene,camera:THR
     htmlScene.add(object);const mask=new THREE.Mesh(new THREE.PlaneGeometry(spec.w,spec.h),aperture);mask.visible=false;scene.add(mask);
     return {spec,element,object,mask};
   });
-  const lifted=exhibit.querySelector<HTMLElement>('[data-media-lift]')!,liftObject=new CSS3DObject(lifted);
+  const lifted=exhibit.querySelector<HTMLElement>('[data-lift-display]')!,liftObject=new CSS3DObject(lifted);
   htmlScene.add(liftObject);liftObject.visible=false;
   const liftMask=new THREE.Mesh(new THREE.PlaneGeometry(1000,700),aperture);liftMask.visible=false;scene.add(liftMask);
   let node:THREE.Object3D|undefined,flat=innerWidth<800,failed=false;

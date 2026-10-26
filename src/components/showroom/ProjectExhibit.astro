@@ -21,7 +21,7 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
     <nav class="story-pages" aria-label="Chapter pages"><button type="button" data-story-prev>← Previous</button><span data-story-position></span><button type="button" data-story-next>Next →</button></nav>
     <nav class="exhibit-links" aria-label="External project links" data-exhibit-links></nav>
   </section>
-  <section class="lifted-media" data-media-lift hidden role="dialog" aria-modal="true" aria-label="Full project media" tabindex="-1">
+  <section class="lifted-media" data-lift-display hidden role="dialog" aria-modal="true" aria-label="Full project media" tabindex="-1">
     <button type="button" class="lift-close" data-media-lift-close>Return image to wall</button>
     <div class="lift-scroll" data-media-lift-scroll tabindex="0" role="region" aria-label="Full project image; scroll to explore"></div>
   </section>
