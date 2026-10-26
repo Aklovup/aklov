@@ -69,8 +69,10 @@ const models=modelsFor(entries,'client');
   .showroom[data-arrival='ready'][data-renderer='webgl'] canvas[data-showroom-canvas] { opacity:1; }
   .showroom-fallback { visibility:hidden; }
   .showroom[data-renderer='fallback'] .showroom-fallback,html:not([data-showroom-js]) .showroom-fallback { visibility:visible; }
+  .showroom[data-renderer='fallback'] canvas[data-showroom-canvas] { visibility:hidden;pointer-events:none; }
   .showroom[data-dragging] canvas { cursor:grabbing; }
   .showroom-shade { position:absolute;inset:0;pointer-events:none;background:linear-gradient(0deg,#081215fa 0%,#081215eb 18%,#081215aa 36%,transparent 60%,#08121545); }
+  .showroom[data-view='project'] .showroom-shade { background:linear-gradient(0deg,#081215f0,transparent 55%),linear-gradient(180deg,#081215ef,#081215b8 36%,transparent 65%); }
   .showroom-toolbar { position:absolute;z-index:3;top:112px;left:var(--pad);right:var(--pad);display:flex;justify-content:space-between;align-items:center;gap:20px; }
   .showroom-toolbar>.mono { color:#c3c6b8; }
   .showroom-types { display:flex;gap:8px; }

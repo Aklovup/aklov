@@ -224,6 +224,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   function sync(){cancelAnimationFrame(frame);frame=0;last=0;root.dataset.motion=paused?'paused':'playing';pause.textContent=paused?'Play motion':'Pause motion';pause.setAttribute('aria-pressed',String(paused));if(!paused&&started&&!document.hidden&&!lost&&!options.isIndexOpen())frame=requestAnimationFrame(tick);}
   function settle(){flight=undefined;updateModels(.016);pose();currentEye.copy(targetEye);currentLook.copy(targetLook);camera.position.copy(currentEye);camera.lookAt(currentLook);draw();}
   function setState(next:ShowroomState){
+    if(lost){state=next;root.dataset.roomReady='true';return;}
     const previous=state,changed=previous.group!==next.group||previous.model!==next.model||previous.room!==next.room,previousRoom=roomFor(previous);
     state=next;if(changed){targetYaw=0;travel=0;root.dataset.travel='0';root.style.setProperty('--travel','0');if(next.model)intro=0;root.dataset.roomReady='false';}
     updateLayout();

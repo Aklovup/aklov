@@ -82,7 +82,12 @@ export function mountShowroom(root:HTMLElement) {
   rescue.addEventListener('click',event=>{event.preventDefault();root.dataset.arrival='ready';setIndex(true);});
   const rescueTimer=setTimeout(()=>{rescue.hidden=false;},10000);
   apply();
-  scene=createShowroomScene(root,projects,{selectModel,selectRoom,retreat,isIndexOpen:()=>!index.hidden});scene.setState(state);
+  try {
+    scene=createShowroomScene(root,projects,{selectModel,selectRoom,retreat,isIndexOpen:()=>!index.hidden});scene.setState(state);
+  } catch {
+    scene=undefined;root.dataset.renderer='fallback';root.dataset.roomReady='true';
+    root.querySelector<HTMLButtonElement>('[data-showroom-motion]')!.hidden=true;
+  }
   root.dataset.ready='true';
   Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,2500))]).then(()=>{
     requestAnimationFrame(()=>{root.dataset.arrival='ready';clearTimeout(rescueTimer);scene?.start();});
