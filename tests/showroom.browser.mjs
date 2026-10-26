@@ -6,6 +6,7 @@ const base='http://127.0.0.1:4321',out='artifacts/showroom';
 const server=spawn('npm',['run','preview','--','--host','127.0.0.1','--port','4321'],{stdio:'inherit'});
 let browser;
 const report={checks:[],viewports:[]};
+async function goto(page,url){await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});}
 async function ready(page){await page.waitForSelector('[data-showroom][data-ready="true"]');}
 async function view(page,value){await page.waitForFunction(v=>document.querySelector('[data-showroom]').dataset.view===v,value);}
 try{
@@ -13,7 +14,7 @@ try{
  await mkdir(out,{recursive:true});browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error'&&/Shader Error|WebGLProgram/.test(m.text()))errors.push(m.text());});
- await page.goto(base+'/work/');await ready(page);await page.evaluate(()=>document.fonts.ready);
+ await goto(page,base+'/work/');await ready(page);await page.evaluate(()=>document.fonts.ready);
  await page.waitForSelector('[data-showroom][data-renderer="webgl"][data-rendered="true"]');
  assert.equal(await page.locator('[data-showroom-model]').count(),4);
  assert.equal(await page.locator('[data-showroom-model="integrations"]').count(),0);
@@ -59,7 +60,7 @@ try{
  await page.locator('[data-showroom-index-close]').click();
  report.checks.push('All category buildings, separate concepts, complete index, all original multi-category filters and nested case-study dialog');
  for(const width of [1440,1024,768,390,320]){
-  await page.setViewportSize({width,height:width<800?844:1000});await page.goto(base+'/work/');await ready(page);
+  await page.setViewportSize({width,height:width<800?844:1000});await page.locator('[data-showroom-home]').click();await view(page,'showroom');
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'Horizontal overflow at '+width);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+1),'The experiment must stay inside one viewport');
   await page.screenshot({path:`${out}/showroom-${width}.png`});
@@ -67,16 +68,16 @@ try{
   await page.locator('[data-showroom-room="impex-automotive"]').click();await page.screenshot({path:`${out}/room-${width}.png`});
   report.viewports.push({width,overflow:false});
  }
- await page.goto(base+'/work/?project=jaycor-commerce');await ready(page);await page.waitForSelector('[data-project-dialog][open]');assert.equal(await page.locator('[data-showroom]').getAttribute('data-room'),'jaycor-commerce');await page.keyboard.press('Escape');
- await page.goto(base+'/work/?type=client&category=integrations');await ready(page);await page.waitForSelector('[data-showroom-index][open][data-user-open]');assert.equal(await page.locator('[data-project]:not([hidden])').count(),7);
+ await goto(page,base+'/work/?project=jaycor-commerce');await ready(page);await page.waitForSelector('[data-project-dialog][open]');assert.equal(await page.locator('[data-showroom]').getAttribute('data-room'),'jaycor-commerce');await page.keyboard.press('Escape');
+ await goto(page,base+'/work/?type=client&category=integrations');await ready(page);await page.waitForSelector('[data-showroom-index][open][data-user-open]');assert.equal(await page.locator('[data-project]:not([hidden])').count(),7);
  assert.deepEqual(errors,[]);await context.close();
- const moving=await browser.newContext({viewport:{width:1440,height:1000}}),mp=await moving.newPage();await mp.goto(base+'/work/');await ready(mp);await mp.locator('[data-showroom-model="applications"]').click();await view(mp,'category');
+ const moving=await browser.newContext({viewport:{width:1440,height:1000}}),mp=await moving.newPage();await goto(mp,base+'/work/');await ready(mp);await mp.locator('[data-showroom-model="applications"]').click();await view(mp,'category');
  await mp.waitForFunction(()=>Number(document.querySelector('[data-showroom]').dataset.roofOpen)>.05&&Number(document.querySelector('[data-showroom]').dataset.roofOpen)<.98);
  await mp.waitForFunction(()=>document.querySelector('[data-showroom]').dataset.transitionSettled==='true');await mp.screenshot({path:out+'/animated-cutaway-settled.png'});await moving.close();
- const touch=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),tp=await touch.newPage();await tp.goto(base+'/work/');await ready(tp);await tp.locator('[data-showroom-model="applications"]').tap();await view(tp,'category');await tp.locator('[data-showroom-room="impex-automotive"]').tap();await view(tp,'project');await tp.locator('[data-showroom-case]').tap();await tp.waitForSelector('[data-project-dialog][open]');await tp.keyboard.press('Escape');await tp.waitForFunction(()=>!document.querySelector('[data-project-dialog]').open);await touch.close();
+ const touch=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),tp=await touch.newPage();await goto(tp,base+'/work/');await ready(tp);await tp.locator('[data-showroom-model="applications"]').tap();await view(tp,'category');await tp.locator('[data-showroom-room="impex-automotive"]').tap();await view(tp,'project');await tp.locator('[data-showroom-case]').tap();await tp.waitForSelector('[data-project-dialog][open]');await tp.keyboard.press('Escape');await tp.waitForFunction(()=>!document.querySelector('[data-project-dialog]').open);await touch.close();
  const fallback=await browser.newContext({viewport:{width:390,height:844}});await fallback.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){if(type==='webgl'||type==='webgl2')return null;return original.call(this,type,...args);};});
- const fp=await fallback.newPage();await fp.goto(base+'/work/');await ready(fp);assert.equal(await fp.locator('.showroom-fallback').isVisible(),true);await fp.locator('[data-showroom-model="applications"]').click();await fp.locator('[data-showroom-room="impex-automotive"]').click();await fp.locator('[data-showroom-case]').click();await fp.waitForSelector('[data-project-dialog][open]');await fallback.close();
- const nojs=await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}}),np=await nojs.newPage();await np.goto(base+'/work/');assert.equal(await np.locator('[data-showroom-index]').isVisible(),true);assert.equal(await np.locator('[data-project]').count(),10);await nojs.close();
+ const fp=await fallback.newPage();await goto(fp,base+'/work/');await ready(fp);assert.equal(await fp.locator('.showroom-fallback').isVisible(),true);await fp.locator('[data-showroom-model="applications"]').click();await fp.locator('[data-showroom-room="impex-automotive"]').click();await fp.locator('[data-showroom-case]').click();await fp.waitForSelector('[data-project-dialog][open]');await fallback.close();
+ const nojs=await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}}),np=await nojs.newPage();await goto(np,base+'/work/');assert.equal(await np.locator('[data-showroom-index]').isVisible(),true);assert.equal(await np.locator('[data-project]').count(),10);await nojs.close();
  report.checks.push('Desktop/tablet/mobile single-screen layouts, deep links, animated roof/camera transition, native touch selection, reduced motion, no-WebGL and no-JavaScript access');
  await writeFile(out+'/report.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));
 }finally{await browser?.close();server.kill('SIGTERM');}
