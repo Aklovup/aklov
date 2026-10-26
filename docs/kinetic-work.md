@@ -19,3 +19,5 @@ Project previews now occupy a continuous three-dimensional ring inside the exist
 Horizontal touch swipes and mouse drags move the ring continuously before release. Velocity affects the snap destination, and damped motion settles on a project. Horizontal trackpad gestures work as well. Native vertical scrolling and pinch zoom remain available. Project arrows and keyboard navigation are retained. Tapping an unobstructed neighbouring preview selects it; tapping the selected preview opens its case study. Reduced motion and Pause stop ambient motion and use immediate settling while preserving direct manipulation.
 
 Browser coverage includes real touch events through Chromium's input protocol, drag feedback before release, wheel-axis handling, native vertical touch scrolling, wraparound and opening the selected project after a swipe.
+
+GPU cover textures are cropped at runtime to the same top-center 16:9 preview and capped at 768px on mobile or 1024px on desktop, avoiding full-page image textures on every panel. Original repository assets and full-page case-study inspection remain unchanged.

@@ -141,7 +141,14 @@ export function mountSculpture(root:HTMLElement) {
     const panel=panels[index],p=projects[index];if(panel.loaded)return;panel.loaded=true;
     if(!p.src){panel.ready=true;return;}
     if(!textures.has(p.src))textures.set(p.src,new Promise((resolve,reject)=>loader.load(p.src!,texture=>{
-      texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());resolve(texture);
+      const image=texture.image,cover=document.createElement('canvas');
+      cover.width=mobile?768:1024;cover.height=cover.width*9/16;
+      const ctx=cover.getContext('2d')!,aspect=image.width/image.height;
+      const sw=aspect>16/9?image.height*16/9:image.width;
+      const sh=aspect>16/9?image.height:image.width*9/16;
+      ctx.drawImage(image,(image.width-sw)/2,0,sw,sh,0,0,cover.width,cover.height);
+      const cropped=new THREE.CanvasTexture(cover);cropped.colorSpace=THREE.SRGBColorSpace;
+      cropped.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());texture.dispose();resolve(cropped);
     },undefined,reject)));
     void textures.get(p.src)!.then(texture=>applyTexture(index,texture)).catch(()=>{
       // Keep an explicit pending preview, without displaying another project's image.
@@ -152,14 +159,15 @@ export function mountSculpture(root:HTMLElement) {
   let cataloguePosition=0,catalogueTarget=0,catalogueVelocity=0,dragging=false;
   function layoutCatalogue(){
     const focus=Math.round(cataloguePosition);ensurePanel(focus);ensurePanel(focus+1);ensurePanel(focus-1);
+    const portrait=innerWidth<800,ringRadius=radius*(portrait?.83:1);
     let visibleCount=0;
     for(let index=0;index<panels.length;index++){
       const panel=panels[index];
       const distance=THREE.MathUtils.euclideanModulo(index-cataloguePosition+projects.length/2,projects.length)-projects.length/2;
       const angle=distance*step,depth=Math.abs(distance);
       panel.group.visible=depth<1.72;if(!panel.group.visible)continue;visibleCount++;
-      panel.group.position.set(Math.sin(angle)*radius,4.5,-11.2+radius*(Math.cos(angle)-1));
-      panel.group.rotation.y=angle;
+      panel.group.position.set(Math.sin(angle)*ringRadius,4.5,(portrait?-7.5:-11.2)+ringRadius*(Math.cos(angle)-1));
+      panel.group.rotation.y=angle;panel.group.scale.setScalar(portrait?.86:1);
       const opacity=THREE.MathUtils.clamp(1-depth*.38,.14,1);
       panel.material.uniforms.uBlur.value=Math.min(18,depth*12);
       panel.material.uniforms.uOpacity.value=opacity;
@@ -183,7 +191,7 @@ export function mountSculpture(root:HTMLElement) {
   const look=new THREE.Vector3(0,4,-22);
   function draw(){
     if(lost)return;
-    const portrait=innerWidth<800,side=portrait?.75:3.8,range=portrait?13.5:17;
+    const portrait=innerWidth<800,side=portrait?.75:3.8,range=portrait?17.2:17;
     camera.position.set(side+smoothedX*1.4,5.4+smoothedY*.65,range+intro*7-scroll*5);camera.lookAt(look);
     ripple.value=time;layoutCatalogue();dust.rotation.y=Math.sin(time*.02)*.02;composer.render();root.dataset.rendered='true';
   }
@@ -207,7 +215,7 @@ export function mountSculpture(root:HTMLElement) {
     position:()=>cataloguePosition,
     start:()=>{dragging=true;catalogueVelocity=0;hero.dataset.dragging='true';},
     move:position=>{cataloguePosition=position;if(paused||!frameId)draw();},
-    release:projected=>{dragging=false;delete hero.dataset.dragging;select(Math.round(projected),true,true);},
+    release:(projected,velocity=0)=>{dragging=false;catalogueVelocity=THREE.MathUtils.clamp(velocity*.35,-1.8,1.8);delete hero.dataset.dragging;select(Math.round(projected),true,true);},
     tap:(x,y)=>{
       const box=canvas.getBoundingClientRect();pointer.set((x-box.left)/box.width*2-1,-(y-box.top)/box.height*2+1);
       raycaster.setFromCamera(pointer,camera);

@@ -2,7 +2,7 @@ interface GestureOptions {
   position:()=>number;
   start:()=>void;
   move:(position:number)=>void;
-  release:(projected:number)=>void;
+  release:(projected:number,velocity?:number)=>void;
   tap:(x:number,y:number)=>void;
 }
 // Horizontal intent belongs to the catalogue; vertical intent stays with the page.
@@ -37,12 +37,12 @@ export function bindCatalogueGestures(canvas:HTMLCanvasElement,options:GestureOp
     if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId);
     if(state.axis==='x'){
       const speed=performance.now()-state.lastTime<100?state.velocity:0;
-      let projected=options.position()+(cancelled?0:clamp(speed*.16,-.7,.7));
+      let projected=options.position()+(cancelled?0:clamp(speed*.12,-.35,.35));
       const distance=state.x-event.clientX;
       if(!cancelled&&Math.round(projected)===Math.round(state.origin)&&(Math.abs(distance)>span()*.15||Math.abs(speed)>1)){
         projected=Math.round(state.origin)+Math.sign(distance||speed);
       }
-      options.release(clamp(projected,Math.round(state.origin)-2,Math.round(state.origin)+2));
+      options.release(clamp(projected,Math.round(state.origin)-2,Math.round(state.origin)+2),cancelled?0:speed);
     }else if(!cancelled&&state.axis!== 'y'&&Math.hypot(event.clientX-state.x,event.clientY-state.y)<8){
       options.tap(event.clientX,event.clientY);
     }
