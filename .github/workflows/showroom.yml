@@ -28,7 +28,7 @@ jobs:
         run: |
           node --input-type=module - <<'NODE'
           import {readFileSync,appendFileSync} from 'node:fs';
-          const showroom=readFileSync('dist/work/index.html','utf8').includes('data-showroom=');
+          const showroom=/<section\b[^>]*\sdata-showroom(?:=|\s|>)/.test(readFileSync('dist/work/index.html','utf8'));
           appendFileSync(process.env.GITHUB_OUTPUT, `showroom=${showroom}\n`);
           NODE
       - run: node --test --test-isolation=none tests/work.test.mjs tests/contact.test.mjs tests/showroom.test.mjs

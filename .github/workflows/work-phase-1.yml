@@ -38,7 +38,7 @@ jobs:
         run: |
           node --input-type=module - <<'NODE'
           import {readFileSync,appendFileSync} from 'node:fs';
-          const showroom=readFileSync('dist/work/index.html','utf8').includes('data-showroom=');
+          const showroom=/<section\b[^>]*\sdata-showroom(?:=|\s|>)/.test(readFileSync('dist/work/index.html','utf8'));
           appendFileSync(process.env.GITHUB_OUTPUT, `showroom=${showroom}\n`);
           NODE
       - name: Check content and filtering logic
