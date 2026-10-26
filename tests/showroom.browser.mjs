@@ -72,6 +72,7 @@ try{
  context=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});page=await context.newPage();
  await goto(page,base+'/work/?project=jaycor-commerce');await ready(page);await page.waitForSelector('[data-project-dialog][open]');assert.equal(await page.locator('[data-showroom]').getAttribute('data-room'),'jaycor-commerce');await page.keyboard.press('Escape');
  await goto(page,base+'/work/?type=client&category=integrations');await ready(page);await page.waitForSelector('[data-showroom-index][open][data-user-open]');assert.equal(await page.locator('[data-project]:not([hidden])').count(),7);
+ await goto(page,base+'/work/?type=client&category=automation');await ready(page);await page.waitForSelector('[data-showroom-index][open][data-user-open]');assert.equal(await page.locator('[data-project]:not([hidden])').count(),5);
  assert.deepEqual(errors,[]);await context.close();
  const moving=await browser.newContext({viewport:{width:1440,height:1000}}),mp=await moving.newPage();await goto(mp,base+'/work/');await ready(mp);await mp.locator('[data-showroom-model="applications"]').click();await view(mp,'category');
  await mp.waitForFunction(()=>Number(document.querySelector('[data-showroom]').dataset.roofOpen)>.05&&Number(document.querySelector('[data-showroom]').dataset.roofOpen)<.98);

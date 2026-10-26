@@ -72,6 +72,6 @@ export function mountShowroom(root:HTMLElement) {
   scene=createShowroomScene(root,projects,{selectModel,selectRoom,openProject,projectDialog:dialog});scene.setState(state);
   root.dataset.ready='true';
   window.addEventListener('resize',()=>{const count=options.children.length;options.style.gridTemplateColumns=innerWidth>800?`repeat(${Math.min(4,count)},minmax(0,1fr))`:'';});
-  // Secondary-category links retain the original indexed filtering route.
-  const initial=new URL(location.href);if(initial.searchParams.has('category')&&!state.model&&!dialog.open){index.dataset.userOpen='';index.showModal();}
+  // Existing category links retain complete primary and secondary membership in the index.
+  const initial=new URL(location.href);if(initial.searchParams.has('category')&&!initial.searchParams.has('model')&&!initial.searchParams.has('room')&&!initial.searchParams.has('project')&&!dialog.open){index.dataset.userOpen='';index.showModal();}
 }
