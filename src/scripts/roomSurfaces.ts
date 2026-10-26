@@ -43,13 +43,13 @@ export function createRoomSurfaces(root:HTMLElement,scene:THREE.Scene,camera:THR
     const top=liftObject.localToWorld(new THREE.Vector3(-500,350,0)).project(camera),bottom=liftObject.localToWorld(new THREE.Vector3(500,-350,0)).project(camera);
     const x=(top.x+1)*root.clientWidth/2,y=(1-top.y)*root.clientHeight/2,width=(bottom.x-top.x)*root.clientWidth/2;
     const focused=lifted.contains(document.activeElement)?document.activeElement as HTMLElement:undefined;
-    savedLiftStyle=lifted.style.cssText;htmlScene.remove(liftObject);root.append(lifted);lifted.dataset.resting='true';
+    savedLiftStyle=lifted.style.cssText;htmlScene.remove(liftObject);root.append(lifted);lifted.style.removeProperty('display');lifted.dataset.resting='true';
     lifted.style.left='0';lifted.style.top='0';lifted.style.transformOrigin='0 0';lifted.style.transform=`translate(${x}px,${y}px) scale(${width/1000})`;
     parked=true;liftMask.visible=false;root.dataset.liftResting='true';focused?.focus({preventScroll:true});
   }
   function unpark(){
     if(!parked)return;
-    delete lifted.dataset.resting;lifted.style.cssText=savedLiftStyle;htmlScene.add(liftObject);exhibit.append(lifted);parked=false;liftMask.visible=true;root.dataset.liftResting='false';
+    delete lifted.dataset.resting;lifted.style.cssText=savedLiftStyle;lifted.style.removeProperty('display');htmlScene.add(liftObject);exhibit.append(lifted);parked=false;liftMask.visible=true;root.dataset.liftResting='false';
   }
   function liftPose(){
     if(!lift)return;const t=lift.progress*lift.progress*(3-2*lift.progress);
