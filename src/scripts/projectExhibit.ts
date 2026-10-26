@@ -43,12 +43,12 @@ export function createProjectExhibit(root:HTMLElement) {
     event.preventDefault();liftScroll.scrollTop+=gesturePixels(event.deltaY,event.deltaMode,liftScroll.clientHeight);
   },{passive:false,capture:true});
   let readingTouch:{id:number;y:number;origin:number;moved:boolean}|undefined;
-  liftScroll.addEventListener('pointerdown',event=>{if(event.pointerType==='mouse')return;readingTouch={id:event.pointerId,y:event.clientY,origin:event.clientY,moved:false};liftScroll.setPointerCapture(event.pointerId);});
+  liftScroll.addEventListener('pointerdown',event=>{if(event.pointerType==='mouse')return;readingTouch={id:event.pointerId,y:event.clientY,origin:event.clientY,moved:false};});
   liftScroll.addEventListener('pointermove',event=>{
     if(!readingTouch||readingTouch.id!==event.pointerId)return;
     const distance=readingTouch.y-event.clientY;readingTouch.y=event.clientY;
     if(Math.abs(event.clientY-readingTouch.origin)>6)readingTouch.moved=true;
-    if(readingTouch.moved){event.preventDefault();liftScroll.scrollTop+=distance;}
+    if(readingTouch.moved){if(!liftScroll.hasPointerCapture(event.pointerId))liftScroll.setPointerCapture(event.pointerId);event.preventDefault();liftScroll.scrollTop+=distance;}
   },{passive:false});
   liftScroll.addEventListener('pointerup',event=>{if(readingTouch?.id!==event.pointerId)return;if(readingTouch.moved){const suppress=(click:MouseEvent)=>{click.preventDefault();click.stopImmediatePropagation();};liftScroll.addEventListener('click',suppress,{once:true,capture:true});setTimeout(()=>liftScroll.removeEventListener('click',suppress,true),0);}readingTouch=undefined;});
   liftScroll.addEventListener('pointercancel',()=>{readingTouch=undefined;});
