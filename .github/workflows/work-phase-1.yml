@@ -33,6 +33,14 @@ jobs:
         run: npm install --no-save --package-lock=false playwright
       - name: Build the static site
         run: npm run build
+      - name: Detect the active Work experience
+        id: work
+        run: |
+          node --input-type=module - <<'NODE'
+          import {readFileSync,appendFileSync} from 'node:fs';
+          const showroom=readFileSync('dist/work/index.html','utf8').includes('data-showroom=');
+          appendFileSync(process.env.GITHUB_OUTPUT, `showroom=${showroom}\n`);
+          NODE
       - name: Check content and filtering logic
         run: node --test --test-isolation=none tests/work.test.mjs tests/contact.test.mjs
       - name: Install the test browser
@@ -40,16 +48,16 @@ jobs:
       - name: Review the editorial homepage
         run: node tests/home.browser.mjs
       - name: Verify uploaded static media
-        if: github.head_ref != 'experiment/model-showroom'
+        if: steps.work.outputs.showroom != 'true'
         run: node tests/media-assets.browser.mjs
       - name: Verify single images and bounded multi-image inspection
-        if: github.head_ref != 'experiment/model-showroom'
+        if: steps.work.outputs.showroom != 'true'
         run: node tests/project-images.browser.mjs
       - name: Verify uploaded Impex media and playback
-        if: github.head_ref != 'experiment/model-showroom'
+        if: steps.work.outputs.showroom != 'true'
         run: node tests/impex.browser.mjs
       - name: Review rendered page and browser interactions
-        if: github.head_ref != 'experiment/model-showroom'
+        if: steps.work.outputs.showroom != 'true'
         run: node tests/work.browser.mjs
       - name: Audit the rendered Solutions page
         run: node tests/solutions.browser.mjs

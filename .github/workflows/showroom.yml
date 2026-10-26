@@ -14,7 +14,6 @@ concurrency:
 
 jobs:
   review:
-    if: github.head_ref == 'experiment/model-showroom'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -24,9 +23,19 @@ jobs:
           node-version: '24'
       - run: npm install --no-save --package-lock=false playwright
       - run: npm run build
+      - name: Detect the active Work experience
+        id: work
+        run: |
+          node --input-type=module - <<'NODE'
+          import {readFileSync,appendFileSync} from 'node:fs';
+          const showroom=readFileSync('dist/work/index.html','utf8').includes('data-showroom=');
+          appendFileSync(process.env.GITHUB_OUTPUT, `showroom=${showroom}\n`);
+          NODE
       - run: node --test --test-isolation=none tests/work.test.mjs tests/contact.test.mjs tests/showroom.test.mjs
-      - run: npx playwright install --only-shell chromium
-      - run: node tests/showroom.browser.mjs
+      - if: steps.work.outputs.showroom == 'true'
+        run: npx playwright install --only-shell chromium
+      - if: steps.work.outputs.showroom == 'true'
+        run: node tests/showroom.browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
