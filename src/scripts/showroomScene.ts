@@ -122,7 +122,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     if(activeModel){
       const room=activeModel.rooms.find(r=>r.project.slug===state.room);
       if(room){room.node.getWorldPosition(targetLook);targetLook.y+=.45;targetEye.copy(targetLook).add(mobile?new THREE.Vector3(3.3,4.1,7.5):new THREE.Vector3(3.2,3.8,6.0));}
-      else{activeModel.group.getWorldPosition(targetLook);targetLook.y+=1;targetEye.copy(targetLook).add(mobile?new THREE.Vector3(6.5,9,15):new THREE.Vector3(5.5,6.4,10.5));}
+      else{activeModel.group.getWorldPosition(targetLook);targetLook.y+=1;targetEye.copy(targetLook).add(mobile?new THREE.Vector3(8.4,11.7,19.5):new THREE.Vector3(5.5,6.4,10.5));}
     }else{
       targetLook.set(0,4.1,0);const single=exhibitModels.filter(m=>m.group.visible).length===1;targetEye.set(mobile?(single?-5:-10):(single?-8:-13),mobile?(single?21:29):(single?13:16),mobile?(single?30:40):(single?20:24));targetEye.z+=intro*12;
     }
