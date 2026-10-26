@@ -60,9 +60,11 @@ try{
  for(const project of projects){
   if(!await page.locator('[data-showroom-index]').isVisible())await page.locator('[data-showroom-index-open]').click();await page.locator('[data-group="all"]').click();await page.locator(`[data-project-open="${project.slug}"]`).click();await roomReady(page);assert.equal(await page.locator('[data-exhibit-title]').innerText(),project.title);assert.ok(await page.locator('[data-exhibit-chapters] button').count()>=4);assert.equal(await page.locator('dialog').count(),0);
  }
- await goto(page,'/work/?type=client&category=automation');await page.locator('[data-showroom-index]:not([hidden])').waitFor();assert.equal(await page.locator('[data-project]:not([hidden])').count(),5);
- await page.keyboard.press('Escape');assert.equal(await page.locator('[data-showroom-index]').isVisible(),false);
- assert.deepEqual(errors,[]);await context.close();report.checks.push('All ten project exhibitions, concepts, original filters, external URLs and legacy category links');
+ assert.deepEqual(errors,[]);await context.close();
+ const legacy=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'}),lp=await legacy.newPage();
+ await goto(lp,'/work/?type=client&category=automation');await lp.locator('[data-showroom-index]:not([hidden])').waitFor();assert.equal(await lp.locator('[data-project]:not([hidden])').count(),5);
+ await lp.keyboard.press('Escape');assert.equal(await lp.locator('[data-showroom-index]').isVisible(),false);await legacy.close();
+ report.checks.push('All ten project exhibitions, concepts, original filters, external URLs and legacy category links');
  // Fresh GPU sessions avoid software-renderer readback stalls between viewport captures.
  for(const width of [1440,1024,768,390,320]){
   const c=await browser.newContext({viewport:{width,height:width<800?844:1000},reducedMotion:'reduce'}),p=await c.newPage();await goto(p,'/work/?model=applications&room=impex-automotive');await roomReady(p);
@@ -74,7 +76,7 @@ try{
  }
  const moving=await browser.newContext({viewport:{width:1024,height:768},deviceScaleFactor:.7}),mp=await moving.newPage();await goto(mp);
  const canvas=mp.locator('[data-showroom-canvas]');const before=Number(await mp.locator('[data-showroom]').getAttribute('data-camera-x'));
- await mp.mouse.move(900,360);await mp.waitForFunction(x=>Math.abs(Number(document.querySelector('[data-showroom]').dataset.cameraX)-x)>.02,before);
+ await mp.mouse.move(900,360);assert.ok(Number(await mp.locator('[data-showroom]').getAttribute('data-pointer-x'))>.5);await mp.waitForFunction(x=>Math.abs(Number(document.querySelector('[data-showroom]').dataset.cameraX)-x)>.02,before);
  const t=Number(await mp.locator('[data-showroom]').getAttribute('data-ambient-time'));await mp.waitForFunction(t=>Number(document.querySelector('[data-showroom]').dataset.ambientTime)>t+.3,t);
  await mp.locator('[data-showroom-model="applications"]').click();await mp.locator('[data-showroom-room="impex-automotive"]').click();await roomReady(mp);await mp.screenshot({path:out+'/animated-room.png'});
  await mp.locator('[data-showroom-motion]').click();const frozen=await mp.locator('[data-showroom]').getAttribute('data-ambient-time');await mp.waitForTimeout(250);assert.equal(await mp.locator('[data-showroom]').getAttribute('data-ambient-time'),frozen);await moving.close();

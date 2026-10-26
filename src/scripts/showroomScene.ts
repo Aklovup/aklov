@@ -184,7 +184,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
       for(const room of model.rooms){
         const inside=room.project.slug===state.room||room.project.slug===flight?.room;
         room.interior.visible=inside;for(const wall of room.walls)wall.visible=!inside;
-        room.screen.visible=room.project.slug!==state.room||!!flight;room.frame.visible=room.screen.visible;
+        room.screen.visible=room.project.slug!==state.room||!!flight||Math.abs(travel)>.01;room.frame.visible=room.screen.visible;
         room.accent.material.opacity=(!state.room||state.room===room.project.slug||hoverRoom===room.project.slug)?1:.2;
         room.doorway.material.opacity=.10+(!paused?Math.sin(elapsed*.7)*.025:0);
       }
