@@ -1,4 +1,5 @@
 import {mediaSelection} from './mediaSelection';
+import {gesturePixels} from './showroomNavigation';
 /** Real HTML stays on the wall; all approved text is paged at existing paragraph boundaries. */
 export function createProjectExhibit(root:HTMLElement) {
   const exhibit=root.querySelector<HTMLElement>('[data-exhibit]')!;
@@ -33,6 +34,29 @@ export function createProjectExhibit(root:HTMLElement) {
     document.dispatchEvent(new CustomEvent('aklov:project-open',{detail:{root:liftScroll}}));liftScroll.focus({preventScroll:true});
   }
   window.addEventListener('resize',()=>closeLift(true));
+  // A projected CSS3D surface is not consistently included in native scroll chaining.
+  // Route reading gestures explicitly, keeping them separate from room navigation.
+  root.addEventListener('wheel',event=>{
+    if(root.dataset.mediaLift!=='open'||event.ctrlKey)return;
+    const box=lifted.getBoundingClientRect();
+    if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)return;
+    event.preventDefault();liftScroll.scrollTop+=gesturePixels(event.deltaY,event.deltaMode,liftScroll.clientHeight);
+  },{passive:false});
+  let readingTouch:{id:number;y:number;origin:number;moved:boolean}|undefined;
+  liftScroll.addEventListener('pointerdown',event=>{if(event.pointerType==='mouse')return;readingTouch={id:event.pointerId,y:event.clientY,origin:event.clientY,moved:false};liftScroll.setPointerCapture(event.pointerId);});
+  liftScroll.addEventListener('pointermove',event=>{
+    if(!readingTouch||readingTouch.id!==event.pointerId)return;
+    const distance=readingTouch.y-event.clientY;readingTouch.y=event.clientY;
+    if(Math.abs(event.clientY-readingTouch.origin)>6)readingTouch.moved=true;
+    if(readingTouch.moved){event.preventDefault();liftScroll.scrollTop+=distance;}
+  },{passive:false});
+  liftScroll.addEventListener('pointerup',event=>{if(readingTouch?.id!==event.pointerId)return;if(readingTouch.moved){const suppress=(click:MouseEvent)=>{click.preventDefault();click.stopImmediatePropagation();};liftScroll.addEventListener('click',suppress,{once:true,capture:true});setTimeout(()=>liftScroll.removeEventListener('click',suppress,true),0);}readingTouch=undefined;});
+  liftScroll.addEventListener('pointercancel',()=>{readingTouch=undefined;});
+  liftScroll.addEventListener('keydown',event=>{
+    if((event.target as Element).closest('button,video,a'))return;
+    const steps:Record<string,number>={ArrowDown:48,ArrowUp:-48,PageDown:liftScroll.clientHeight*.85,PageUp:-liftScroll.clientHeight*.85,' ':liftScroll.clientHeight*.85,Home:-liftScroll.scrollHeight,End:liftScroll.scrollHeight};
+    if(event.key in steps){event.preventDefault();liftScroll.scrollTop+=steps[event.key];}
+  });
   root.addEventListener('aklov:media-lift-settled',event=>{if(!(event as CustomEvent).detail.open)finishLift();});
   exhibit.querySelector('[data-media-lift-close]')!.addEventListener('click',()=>closeLift());
   stage.addEventListener('click',event=>{if(!(event.target as Element).closest('button,a,video'))openLift();});

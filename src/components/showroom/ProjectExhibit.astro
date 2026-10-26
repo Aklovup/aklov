@@ -88,7 +88,7 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   .installation-media[data-available='true'] { cursor:zoom-in; }
   .room-panel,.lifted-media { font-family:var(--sans);font-stretch:normal; }
   .lifted-media { box-sizing:border-box;width:1000px;height:700px;padding:10px;background:var(--charcoal);border:2px solid var(--gold);box-shadow:0 18px 70px #0007;backface-visibility:hidden;pointer-events:auto; }
-  .lift-scroll { height:100%;overflow:auto;overscroll-behavior:contain;touch-action:pan-y pinch-zoom;scrollbar-width:thin;scrollbar-color:var(--gold) var(--charcoal); }
+  .lift-scroll { height:100%;overflow:auto;overscroll-behavior:contain;touch-action:pinch-zoom;scrollbar-width:thin;scrollbar-color:var(--gold) var(--charcoal); }
   .lift-scroll .project-media { margin:0;width:100%; }
   .showroom .lift-scroll .project-media>img { display:block;width:100%;height:auto;max-height:none;aspect-ratio:auto;object-fit:contain; }
   .showroom .lift-scroll figcaption { padding:14px 20px;margin:0;color:var(--on-dark);font:20px/1.5 var(--sans); }
