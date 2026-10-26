@@ -12,7 +12,7 @@ Camera targets ease continuously; ordinary input does not snap the camera to its
 
 Wheel navigation is handled over thumbnails and buttons as well as the room. A pointer press remains a click until it crosses a movement threshold, after which it becomes camera navigation and suppresses the resulting accidental click. Pointer capture is released on completion/cancellation and input-device changes. Browser pinch/zoom wheel gestures and editable fields are excluded. The readable narrow-screen alternative keeps native scrolling.
 
-Keyboard focus approaches the appropriate wall squarely, without adding visible Approach/Inspect/Read controls. Free movement can reach the same positions. Both HTML surfaces and miniature canvas signs use the existing Instrument Serif/DM Sans design tokens; no global typography is changed.
+Clicking the story display or keyboard-focusing its controls approaches it squarely, without adding visible Approach/Inspect/Read controls. Free movement can reach the same positions. Both HTML surfaces and miniature canvas signs use the existing Instrument Serif/DM Sans design tokens; no global typography is changed.
 
 ## Media screen
 
