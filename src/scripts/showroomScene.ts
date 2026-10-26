@@ -18,7 +18,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
   const pause=root.querySelector<HTMLButtonElement>('[data-showroom-motion]')!;
   let renderer:THREE.WebGLRenderer;
-  try {renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'low-power'});}catch {root.dataset.renderer='fallback';root.dataset.roomReady='true';return {setState:(_state:ShowroomState)=>{},hover:(_key?:string)=>{},start:()=>{}};}
+  try {renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:innerWidth<800?'low-power':'high-performance'});}catch {root.dataset.renderer='fallback';root.dataset.roomReady='true';return {setState:(_state:ShowroomState)=>{},hover:(_key?:string)=>{},start:()=>{}};}
   renderer.setPixelRatio(Math.min(devicePixelRatio||1,innerWidth<800?1.1:1.4));
   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -123,7 +123,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     const layout=mediaSelection.get(p.slug,items.map(item=>item.id),p.initialMedia);
     const version=room.node.userData.previewVersion=(room.node.userData.previewVersion||0)+1;
     const ids=[layout.main,...layout.rail],media=ids.map(id=>items.find(item=>item.id===id)).filter(Boolean);
-    if(!media.length){if(p.src){loader.load(p.src,texture=>{texture.colorSpace=THREE.SRGBColorSpace;room.material.map=texture;room.material.needsUpdate=true;room.ready=true;draw();});}return;}
+    if(!media.length){if(p.src){loader.load(p.src,texture=>{texture.colorSpace=THREE.SRGBColorSpace;const old=room.material.map;room.material.map=texture;old?.dispose();room.material.needsUpdate=true;room.ready=true;draw();});}return;}
     const images=await Promise.all(media.map(item=>bitmap(item!.src!).catch(()=>undefined)));
     if(room.node.userData.previewVersion!==version)return;
     const c=document.createElement('canvas');c.width=1080;c.height=760;const ctx=c.getContext('2d')!;ctx.fillStyle='#102124';ctx.fillRect(0,0,1080,760);
@@ -131,7 +131,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     function imageFit(image:HTMLImageElement|undefined,x:number,y:number,w:number,h:number,cover=true){if(!image)return;const scale=(cover?Math.max:Math.min)(w/image.width,h/image.height);ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();ctx.drawImage(image,x+(w-image.width*scale)/2,y,image.width*scale,image.height*scale);ctx.restore();}
     const mainWidth=media.length>1?760:1016;imageFit(images[0],32,160,mainWidth,540,media[0]?.type==='image');
     if(media.length>1){const h=540/(media.length-1);for(let i=1;i<media.length;i++){ctx.strokeStyle='#bfa363';ctx.strokeRect(818,160+(i-1)*h,230,h-12);imageFit(images[i],824,166+(i-1)*h,218,h-24);}}
-    const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;room.material.map=texture;room.material.needsUpdate=true;room.ready=true;room.node.userData.previewId=layout.main;root.dataset.previewMedia=JSON.stringify(Object.fromEntries(exhibitModels.flatMap(m=>m.rooms).filter(r=>r.node.userData.previewId).map(r=>[r.project.slug,r.node.userData.previewId])));
+    const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;const old=room.material.map;room.material.map=texture;old?.dispose();room.material.needsUpdate=true;room.ready=true;room.node.userData.previewId=layout.main;root.dataset.previewMedia=JSON.stringify(Object.fromEntries(exhibitModels.flatMap(m=>m.rooms).filter(r=>r.node.userData.previewId).map(r=>[r.project.slug,r.node.userData.previewId])));
     root.dataset.readyPreviews=String(exhibitModels.flatMap(m=>m.rooms).filter(r=>r.ready).length);draw();
   }
   function ensureMedia(model:typeof exhibitModels[number]){for(const room of model.rooms){if(room.loaded)continue;room.loaded=true;void updatePreview(room).catch(()=>{root.dataset.previewErrors=String(Number(root.dataset.previewErrors||0)+1);});}}
@@ -182,7 +182,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   function updateModels(dt:number){
     const activeRoom=roomFor(state),local=activeRoom?activeRoom.node.worldToLocal(currentEye.clone()):undefined;
     const inside=!!local&&local.x>-1.18&&local.x<1.18&&local.z>-.95&&local.z<2.8&&local.y<2.2;
-    root.dataset.insideRoom=String(inside);root.dataset.visibleRoom=inside?activeRoom!.project.slug:'';
+    floor.visible=!inside;root.dataset.insideRoom=String(inside);root.dataset.visibleRoom=inside?activeRoom!.project.slug:'';
     for(const model of exhibitModels){
       model.group.visible=model.data.group===state.group&&(!inside||model===activeModel);if(!model.group.visible)continue;
       const selected=model===activeModel,target=selected?1:(!paused&&hoverModel===model.data.category ? .06 : 0);
@@ -252,7 +252,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     if(previous.room&&!next.room)recentRoom=previous.room;state=next;if(changed){targetYaw=0;walking=undefined;root.style.setProperty('--travel','0');if(next.model)intro=0;root.dataset.roomReady='false';roomEye.set(0,1.18,1.95);roomHeading=0;viewHeading=0;root.dataset.roomStation='overview';}
     updateLayout();canvas.style.pointerEvents=next.room?'none':'auto';root.querySelector<HTMLElement>('[data-showroom-exit]')!.hidden=root.dataset.surfaceMode==='flat'?!next.model:true;
     if(changed&&!travelCommit&&started&&!motion.matches&&previous.group===next.group&&(previousRoom||roomFor(next))){const dest=basePose(next),room=roomFor(next)||previousRoom!;flight={curve:route(currentEye.clone(),dest.eye,room,!!next.room),fromLook:currentLook.clone(),toLook:dest.look,progress:0,room:room.project.slug};}
-    if(motion.matches||!started||travelCommit){yaw=targetYaw;settle();}else sync();
+    if(motion.matches||!started){yaw=targetYaw;settle();}else sync();
   }
   function station(name:string){
     const room=roomFor(state);if(!room)return;
@@ -303,7 +303,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   const flat=()=>root.dataset.surfaceMode==='flat'||root.dataset.renderer==='fallback';
   function clearGesture(){if(gesture&&root.hasPointerCapture(gesture.id))root.releasePointerCapture(gesture.id);gesture=undefined;dragging=false;delete root.dataset.dragging;}
   root.addEventListener('pointerdown',event=>{
-    keyboardNavigation=false;if(lifted()||flat()||(event.pointerType==='mouse'&&event.button!==0)||(event.target as Element).closest('input,select,textarea'))return;
+    suppressClickUntil=0;keyboardNavigation=false;if(lifted()||flat()||(event.pointerType==='mouse'&&event.button!==0)||(event.target as Element).closest('input,select,textarea'))return;
     clearGesture();gesture={id:event.pointerId,x:event.clientX,y:event.clientY,lastX:event.clientX,lastY:event.clientY,dragged:false};
   });
   root.addEventListener('pointermove',event=>{
