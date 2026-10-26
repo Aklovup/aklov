@@ -1,6 +1,6 @@
 # Spatial Work exhibition
 
-Review branch `experiment/model-showroom`, draft PR #12. Do not merge without owner approval. Production and other page sources remain unchanged.
+Implementation developed on `experiment/model-showroom` in PR #12. Merge/deployment follow explicit owner approval; unrelated page sources remain unchanged.
 
 ## Room navigation
 
@@ -45,3 +45,7 @@ Physical trackpad/touchscreen hardware feel must still be reviewed by the owner;
 The resting story wall shows the existing project type, title, case-study headline and introduction. The lifted ivory article restores the original hierarchy: large Instrument Serif headline, quiet project metadata, readable DM Sans body copy, generous margins, original section headings and fine rules. Categories and approved external links remain available. There are no Next/Previous pages or chapter tabs. Mobile uses the same continuous article with responsive type and padding.
 
 The media wall retains its working 75/25 gallery with quieter metadata, smaller captions and a finer frame. The architecture, backdrop, fog, hemisphere/fill lighting, glass tint, table, canvas previews, loading/fallback artwork and wall surfaces now use neutral charcoal/ivory tones with restrained gold. Supplied project images retain their own original colours. No global site tokens, other pages or content records are changed.
+
+## Detachment and return
+
+An active display has a single visible copy. From opening through the end of return travel, the story cover is absent from its dark recessed mount, or the main media item is absent from its media screen. The physical frame and media thumbnail strip remain in place. The source is restored only when the shared lift finishes closing, preserving the selected media, rail arrangement and camera position. This also applies to the reduced-motion and flat alternatives.
