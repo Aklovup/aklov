@@ -12,7 +12,7 @@ async function view(page,value){await page.waitForFunction(v=>document.querySele
 try{
  for(let i=0;i<100;i++){try{if((await fetch(base+'/work/')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
  await mkdir(out,{recursive:true});browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
- const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
+ let context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'}),page=await context.newPage();const errors=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error'&&/Shader Error|WebGLProgram/.test(m.text()))errors.push(m.text());});
  await goto(page,base+'/work/');await ready(page);await page.evaluate(()=>document.fonts.ready);
  await page.waitForSelector('[data-showroom][data-renderer="webgl"][data-rendered="true"]');
@@ -59,15 +59,17 @@ try{
  assert.equal(await page.locator('[data-showroom-index]').isVisible(),true);
  await page.locator('[data-showroom-index-close]').click();
  report.checks.push('All category buildings, separate concepts, complete index, all original multi-category filters and nested case-study dialog');
+ await context.close();
  for(const width of [1440,1024,768,390,320]){
-  await page.setViewportSize({width,height:width<800?844:1000});await page.locator('[data-showroom-home]').click();await view(page,'showroom');
+  console.log('Reviewing showroom viewport',width);context=await browser.newContext({viewport:{width,height:width<800?844:1000},reducedMotion:'reduce'});page=await context.newPage();await goto(page,base+'/work/');await ready(page);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'Horizontal overflow at '+width);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+1),'The experiment must stay inside one viewport');
   await page.screenshot({path:`${out}/showroom-${width}.png`});
   await page.locator('[data-showroom-model="applications"]').click();await page.screenshot({path:`${out}/category-${width}.png`});
   await page.locator('[data-showroom-room="impex-automotive"]').click();await page.screenshot({path:`${out}/room-${width}.png`});
-  report.viewports.push({width,overflow:false});
+  report.viewports.push({width,overflow:false});await context.close();
  }
+ context=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});page=await context.newPage();
  await goto(page,base+'/work/?project=jaycor-commerce');await ready(page);await page.waitForSelector('[data-project-dialog][open]');assert.equal(await page.locator('[data-showroom]').getAttribute('data-room'),'jaycor-commerce');await page.keyboard.press('Escape');
  await goto(page,base+'/work/?type=client&category=integrations');await ready(page);await page.waitForSelector('[data-showroom-index][open][data-user-open]');assert.equal(await page.locator('[data-project]:not([hidden])').count(),7);
  assert.deepEqual(errors,[]);await context.close();
