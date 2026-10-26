@@ -3,57 +3,123 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { orderProjects } from '../../lib/projectOrder';
 import ProjectGallery from '../../components/work/ProjectGallery.astro';
-
+import KineticSculpture from '../../components/experimental/KineticSculpture.astro';
+import { links } from '../../data/links';
 const projects = orderProjects(await getCollection('projects'));
 ---
 
 <BaseLayout title="Work — Aklov®" description="Aklov portfolio: client projects and independent concepts across websites, customer and sales systems, workflow automation, custom applications, integrations and reporting.">
-  <section class="work-intro" aria-labelledby="work-title">
-    <div class="wrap">
-      <div class="intro-meta mono">
-        <span>Websites, business systems &amp; digital solutions</span>
-        <span>Portfolio / Aklov</span>
+  <div class="work-experiment">
+    <section class="kinetic-hero work-intro" aria-labelledby="work-title" data-kinetic-hero>
+      <div class="hero-registration"><span>Portfolio / Aklov</span><span>{String(projects.length).padStart(2,'0')} projects — 05 categories</span></div>
+      <h1 id="work-title">Work<span>.</span></h1>
+      <KineticSculpture />
+      <div class="hero-caption">
+        <p>Client projects<br/><em>&amp; independent concepts.</em></p>
+        <span>Websites, business systems<br/>&amp; digital solutions</span>
       </div>
-      <div class="intro-composition">
-        <h1 id="work-title">Work<span>.</span></h1>
-        <div class="intro-note">
-          <p>Client projects <em>&amp; independent concepts.</em></p>
-          <a class="index-link" href="#projects">Explore projects <span aria-hidden="true">↓</span></a>
-        </div>
+      <div class="sculpture-controls">
+        <span class="form-label">Form <span data-form-number aria-live="polite">01</span> / 03</span>
+        <button type="button" data-form-toggle hidden>Change form <span aria-hidden="true">↗</span></button>
+        <button type="button" data-motion-toggle aria-pressed="false" hidden>Pause motion</button>
       </div>
-      <div class="intro-bottom">
-        <span class="mono">{String(projects.length).padStart(2, '0')} projects</span>
-        <span class="mono">05 categories</span>
-      </div>
+      <a class="explore" href="#projects" aria-label="Explore projects"><span>Explore<br/>projects</span><span aria-hidden="true">↓</span></a>
+      <div class="hero-baseline" aria-hidden="true"><span>01 — Index</span><span>Aklov / Selected work</span></div>
+    </section>
+    <div class="index-surface">
+      <div class="index-title"><span class="mono">Selected work</span><p>Built around<br/><em>the business.</em></p><span class="index-total">{String(projects.length).padStart(2,'0')}</span></div>
+      <ProjectGallery projects={projects}/>
     </div>
-  </section>
-  <ProjectGallery projects={projects} />
+    <section class="experiment-close" aria-label="Contact">
+      <span class="mono">Start a conversation</span>
+      <a href={links.contact}>Let's talk about<br/><em>your project.</em><span aria-hidden="true">↗</span></a>
+      <a class="back-index" href="#work-title">Back to top ↑</a>
+    </section>
+  </div>
 </BaseLayout>
 
 <style>
-  .work-intro { background: var(--charcoal); color: var(--ivory); padding-top: clamp(32px, 4vw, 56px); }
-  .intro-meta { display: flex; justify-content: space-between; gap: 24px; color: var(--gold); }
-  .intro-meta span:last-child { color: var(--on-dark); text-align: right; }
-  .intro-composition { display: grid; grid-template-columns: 1.35fr .65fr; align-items: end; gap: 36px; padding-block: clamp(32px, 4vw, 64px) clamp(40px, 5vw, 76px); }
-  h1 { margin: 0; font-family: var(--display); font-size: clamp(112px, 20vw, 350px); font-weight: 400; line-height: .75; letter-spacing: -.05em; }
-  h1 span { color: var(--gold); }
-  .intro-note { max-width: 380px; padding-bottom: 3px; }
-  .intro-note p { margin: 0; font-family: var(--display); font-size: clamp(30px, 3.5vw, 58px); line-height: 1.04; letter-spacing: -.02em; }
-  .intro-note em { display: block; color: var(--gold); font-weight: 400; }
-  .index-link { display: inline-flex; align-items: center; gap: 32px; min-height: 44px; margin-top: 22px; border-bottom: 1px solid var(--line-dark); font-size: 12px; }
-  .index-link span { font-size: 20px; transition: transform .2s ease; }
-  .intro-bottom { display: flex; justify-content: space-between; gap: 20px; padding-block: 18px; border-top: 1px solid var(--line-dark); color: var(--on-dark); }
-  @media (hover: hover) { .index-link:hover { color: var(--gold); } .index-link:hover span { transform: translateY(3px); } }
-  @media (max-width: 1000px) { .intro-composition { grid-template-columns: 1fr .8fr; } }
-  @media (max-width: 640px) {
-    .intro-meta { font-size: 9px; letter-spacing: 1px; }
-    .intro-meta span:first-child { max-width: 24ch; }
-    .intro-meta span:last-child { white-space: nowrap; }
-    .intro-composition { grid-template-columns: 1fr; gap: 30px; padding-block: 38px 32px; }
-    h1 { font-size: clamp(110px, 31vw, 190px); }
-    .intro-note { max-width: 300px; margin-left: auto; }
-    .intro-note p { font-size: clamp(30px, 8vw, 42px); }
-    .index-link { margin-top: 16px; }
-    .intro-bottom { font-size: 9px; }
+  .work-experiment { --focus-color: var(--gold); }
+  .kinetic-hero { position: relative; isolation: isolate; overflow: hidden; min-height: 780px; height: calc(100svh - 97px); max-height: 1100px; background: #ede9df; color: #25231e; }
+  .hero-registration { position: absolute; z-index: 3; top: 24px; left: var(--pad); right: var(--pad); display: flex; justify-content: space-between; gap: 20px; font: 500 10px/1.5 var(--sans); text-transform: uppercase; letter-spacing: 1.5px; }
+  h1 { position: absolute; top: 1%; left: 4%; margin: 0; font: 400 clamp(230px, 41vw, 740px)/.94 var(--display); letter-spacing: -.065em; }
+  h1 span { color: #9f7d3f; }
+  .hero-caption { position: absolute; left: var(--pad); bottom: 110px; z-index: 2; max-width: 330px; }
+  .hero-caption p { margin-bottom: 24px; font: 400 clamp(28px, 2.8vw, 42px)/1.05 var(--display); letter-spacing: -.025em; }
+  .hero-caption em { color: #80632e; }
+  .hero-caption > span { font-size: 12px; line-height: 1.7; }
+  .sculpture-controls { position: absolute; z-index: 3; left: 50%; bottom: 108px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 18px; max-width: 320px; }
+  .form-label { width: 100%; padding-bottom: 6px; color: #716e64; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; }
+  .sculpture-controls button { min-height: 44px; padding: 0; background: none; border: 0; border-bottom: 1px solid #b6af9e; font: 500 12px var(--sans); color: #39362d; cursor: pointer; }
+  .sculpture-controls button[hidden] { display: none; }
+  .sculpture-controls button span { margin-left: 12px; }
+  .sculpture-controls button:focus-visible, .explore:focus-visible { outline-color: #6e5123; }
+  .explore { position: absolute; right: var(--pad); bottom: 106px; z-index: 3; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; width: 106px; height: 106px; border: 1px solid #8c877a; border-radius: 50%; font-size: 12px; line-height: 1.4; text-align: center; transition: background .3s, color .3s, transform .3s; }
+  .explore > span:last-child { font-size: 24px; line-height: 1; }
+  .hero-baseline { position: absolute; bottom: 22px; left: var(--pad); right: var(--pad); display: flex; justify-content: space-between; padding-top: 16px; border-top: 1px solid #c8c2b5; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
+  .index-surface { background: #171814; color: var(--ivory); }
+  .index-title { position: relative; display: grid; grid-template-columns: 1fr 2fr; align-items: start; gap: 32px; padding: 100px var(--pad) 60px; border-bottom: 1px solid #ffffff25; }
+  .index-title > .mono { color: var(--gold); padding-top: 12px; }
+  .index-title p { margin: 0; font: 400 clamp(52px,7vw,110px)/.95 var(--display); letter-spacing: -.04em; }
+  .index-title p em { color: var(--gold); }
+  .index-total { position: absolute; right: var(--pad); top: 80px; font: 400 80px var(--display); color: #ffffff38; }
+  .experiment-close { position: relative; padding: 80px var(--pad) 56px; background: var(--gold); color: var(--charcoal); }
+  .experiment-close > a:not(.back-index) { display: block; position: relative; width: 100%; margin-block: 48px 64px; font: 400 clamp(64px,10vw,160px)/.94 var(--display); letter-spacing: -.04em; }
+  .experiment-close > a > span { position: absolute; right: 0; top: 0; font-family: var(--sans); font-weight: 400; }
+  .back-index { display: inline-flex; align-items: center; min-height: 44px; font-size: 13px; border-bottom: 1px solid; }
+  @media(hover:hover) { .explore:hover { background: #24251f; color: var(--ivory); transform: rotate(-8deg); } }
+  @media(max-width:1000px) { .hero-caption { max-width: 240px; } .index-total { font-size: 60px; } }
+  @media(max-width:800px) {
+    .kinetic-hero { height: calc(100svh - 85px); min-height: 760px; max-height: 1000px; }
+    h1 { top: 9%; left: 3%; font-size: 46vw; }
+    .hero-caption { bottom: 140px; max-width: 245px; }
+    .hero-caption p { font-size: 30px; margin-bottom: 12px; }
+    .hero-caption > span { font-size: 11px; }
+    .explore { width: 86px; height: 86px; bottom: 146px; }
+    .sculpture-controls { left: var(--pad); right: var(--pad); bottom: 66px; max-width: none; gap: 8px 22px; }
+    .form-label { width: auto; padding: 0; }
+    .hero-registration { font-size: 9px; letter-spacing: .7px; }
+    .hero-baseline { bottom: 14px; font-size: 9px; }
+    .index-title { grid-template-columns: 1fr; padding-top: 64px; gap: 28px; }
+    .index-total { top: 60px; font-size: 54px; }
+    .experiment-close > a:not(.back-index) { font-size: clamp(52px,11vw,88px); }
+    .experiment-close > a > span { font-size: 40px; }
+  }
+</style>
+
+<style is:global>
+  /* Every override is scoped to this one experiment. Shared source files are untouched. */
+  body:has(.work-experiment) .header-surface { background: #ede9df; color: #25231e; --focus-color: #80632e; }
+  body:has(.work-experiment) .top { border-color: #c8c2b5; color: #49463e; }
+  body:has(.work-experiment) .brand, body:has(.work-experiment) .nav a:last-child, body:has(.work-experiment) .menu-toggle { color: #25231e; }
+  body:has(.work-experiment) .brand i, body:has(.work-experiment) .nav a[aria-current='page'] { color: #80632e; }
+  body:has(.work-experiment) .top-note { color: #716e64; }
+  .work-experiment .gallery { padding-top: 30px; --body: #c2c0b6; --gold-dark: #d8bd78; --line: #ffffff25; --focus-color: #d8bd78; }
+  .work-experiment .group-filters { border-color: #ffffff45; }
+  .work-experiment .group-filters button, .work-experiment .filters button { color: #bbb9b0; font-size: 14px; }
+  .work-experiment .group-filters button[aria-pressed='true'], .work-experiment .filters button[aria-pressed='true'] { color: var(--gold); border-bottom-color: var(--gold); }
+  .work-experiment .group-filters button:focus-visible, .work-experiment .filters button:focus-visible { outline-color: var(--gold); }
+  .work-experiment .project-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 80px 50px; }
+  .work-experiment .project-card[data-layout] { grid-column: span 1; }
+  .work-experiment .project-card[data-layout='0'], .work-experiment .project-card[data-layout='3'] { display: grid; grid-template-columns: 1.35fr .65fr; align-items: center; gap: clamp(28px,5vw,80px); grid-column: 1 / -1; padding-block: 36px; border-block: 1px solid #ffffff25; }
+  .work-experiment .project-card[data-layout='3'] > .project-media { order: 2; }
+  .work-experiment .project-card[data-layout='3'] { grid-template-columns: .65fr 1.35fr; }
+  .work-experiment .project-card h2 { color: var(--ivory); font-size: clamp(36px,4.2vw,72px); }
+  .work-experiment .project-card .card-copy { padding-top: 24px; }
+  .work-experiment .project-card .project-description { font-size: 15px; }
+  .work-experiment .project-open { color: var(--ivory); font-size: 14px; }
+  .work-experiment .project-open:focus-visible, .work-experiment .card-footer a:focus-visible { outline-color: var(--gold); }
+  .work-experiment .project-media { overflow: hidden; border: 1px solid #ffffff20; }
+  .work-experiment .project-media > img { transition: transform .7s cubic-bezier(.2,.7,.2,1); }
+  .work-experiment .placeholder-bottom span:first-child, .work-experiment .placeholder-top span:last-child { visibility: hidden; }
+  @media(hover:hover) { .work-experiment .project-card:hover .project-media > img { transform: scale(1.025); } .work-experiment .project-card:hover .project-open { color: var(--gold); } }
+  @media(max-width:1000px) { .work-experiment .project-grid { gap: 54px 28px; } .work-experiment .project-card[data-layout='0'], .work-experiment .project-card[data-layout='3'] { grid-template-columns: 1fr 1fr; gap: 28px; } }
+  @media(max-width:640px) {
+    .work-experiment .project-grid { grid-template-columns: 1fr; gap: 54px; }
+    .work-experiment .project-card[data-layout] { display: block; grid-column: 1 / -1; padding-block: 0; border: 0; }
+    .work-experiment .project-card h2 { font-size: 40px; }
+    .work-experiment .group-filters { gap: 10px; }
+    .work-experiment .group-filters button { font-size: 13px; }
+    .work-experiment .filters button { font-size: 12px; }
   }
 </style>

@@ -1,0 +1,97 @@
+import assert from 'node:assert/strict';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { spawn } from 'node:child_process';
+import { chromium } from 'playwright';
+
+const base = process.env.KINETIC_PREVIEW_URL || 'http://127.0.0.1:4321';
+const output = 'artifacts/kinetic-work';
+const server = process.env.KINETIC_PREVIEW_URL ? null : spawn('npm',['run','preview','--','--host','127.0.0.1','--port','4321'],{stdio:'inherit'});
+let browser;
+const report = { viewports: [], checks: [] };
+try {
+  for(let i=0;i<100;i++) { try { if((await fetch(base+'/work/')).ok) break; } catch {} await new Promise(r=>setTimeout(r,100)); }
+  await mkdir(output,{recursive:true});
+  browser = await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+  const context = await browser.newContext({viewport:{width:1440,height:1000}});
+  const page = await context.newPage();
+  const errors=[]; page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(base+'/work/');
+  await page.evaluate(()=>document.fonts.ready);
+  await page.waitForSelector('[data-sculpture][data-renderer="webgl"][data-rendered="true"]');
+  await page.locator('[data-motion-toggle]').click();
+  await page.waitForFunction(()=>document.querySelector('[data-kinetic-hero]').dataset.motion==='paused');
+  // Check renderer dimensions and GL state; saved screenshots document the composition.
+  const pixels = await page.locator('canvas[data-sculpture-canvas]').evaluate(canvas=>{
+    const gl=canvas.getContext('webgl');
+    return {width:canvas.width,height:canvas.height,error:gl.getError(),vertices:gl.getParameter(gl.MAX_VERTEX_ATTRIBS)};
+  });
+  assert.ok(pixels.width>0 && pixels.height>0); assert.equal(pixels.error,0);
+  await page.locator('[data-form-toggle]').click();
+  assert.equal(await page.locator('[data-form-number]').textContent(),'02');
+  await page.locator('[data-form-toggle]').click();
+  assert.equal(await page.locator('[data-form-number]').textContent(),'03');
+  await page.locator('[data-form-toggle]').click();
+  assert.equal(await page.locator('[data-form-number]').textContent(),'01');
+  report.checks.push('WebGL rendering, pause control and all three sculpture forms');
+  for(const width of [1440,1024,768,390,320]) {
+    await page.setViewportSize({width,height:width<800?844:1000});
+    await page.waitForTimeout(180);
+    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
+    assert.equal(overflow,false,'Horizontal overflow at '+width);
+    await page.screenshot({path:`${output}/work-${width}.png`,fullPage:true});
+    await page.locator('[data-kinetic-hero]').screenshot({path:`${output}/hero-${width}.png`});
+    report.viewports.push({width,overflow});
+  }
+  await page.setViewportSize({width:1440,height:1000});
+  const stamp=await page.evaluate(()=>{ window.__kineticStamp=41; return window.__kineticStamp; });
+  await page.locator('[data-group="client"]').click();
+  assert.equal(await page.locator('[data-project]:not([hidden])').count(),8);
+  await page.locator('[data-category-filters="client"] [data-filter="applications"]').click();
+  assert.equal(await page.locator('[data-project]:not([hidden])').count(),2);
+  assert.ok(page.url().includes('category=applications'));
+  assert.equal(await page.evaluate(()=>window.__kineticStamp),stamp);
+  await page.locator('[data-project-open="impex-automotive"]').click();
+  await page.waitForSelector('dialog[open]');
+  assert.ok(page.url().includes('project=impex-automotive'));
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(()=>!document.querySelector('[data-project-dialog]').open);
+  await page.waitForFunction(()=>!location.search.includes('project='));
+  assert.ok(page.url().includes('category=applications'));
+  await page.waitForFunction(()=>document.activeElement?.getAttribute('data-project-open')==='impex-automotive');
+  await page.goBack();
+  await page.waitForFunction(()=>document.querySelectorAll('[data-project]:not([hidden])').length===8);
+  await page.goForward();
+  await page.waitForFunction(()=>document.querySelectorAll('[data-project]:not([hidden])').length===2);
+  await page.goto(base+'/work/?type=concepts');
+  assert.equal(await page.locator('[data-project]:not([hidden])').count(),2);
+  await page.goto(base+'/work/?project=jaycor-commerce');
+  await page.waitForSelector('dialog[open]');
+  assert.ok((await page.locator('dialog[open]').textContent()).includes('JAYCOR'));
+  report.checks.push('Filtering without reload, URL history, concepts, project deep links, Escape and focus return');
+  await context.close();
+
+  const reduced=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});
+  const rp=await reduced.newPage(); await rp.goto(base+'/work/');
+  await rp.waitForSelector('[data-kinetic-hero][data-motion="paused"]');
+  await rp.screenshot({path:output+'/reduced-motion.png'});
+  await reduced.close();
+  const fallback=await browser.newContext({viewport:{width:390,height:844}});
+  await fallback.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext=function(type,...args){ if(type==='webgl') return null; return original.call(this,type,...args); };});
+  const fp=await fallback.newPage(); await fp.goto(base+'/work/');
+  assert.equal(await fp.locator('.sculpture-fallback').isVisible(),true);
+  assert.equal(await fp.locator('[data-motion-toggle]').isVisible(),false);
+  await fp.locator('[data-group="client"]').click();
+  assert.equal(await fp.locator('[data-project]:not([hidden])').count(),8);
+  await fp.screenshot({path:output+'/fallback.png'});
+  await fallback.close();
+  const nojs=await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});
+  const np=await nojs.newPage(); await np.goto(base+'/work/');
+  assert.equal(await np.locator('.sculpture-fallback').isVisible(),true);
+  assert.equal(await np.locator('[data-project]').count(),10);
+  await nojs.close();
+  report.checks.push('Reduced motion, no-WebGL fallback, no-JavaScript content');
+  assert.deepEqual(errors,[]);
+  report.errors=errors;
+  await writeFile(output+'/report.json',JSON.stringify(report,null,2));
+  console.log(JSON.stringify(report,null,2));
+} finally { await browser?.close(); server?.kill('SIGTERM'); }
