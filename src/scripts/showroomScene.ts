@@ -17,14 +17,14 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   let renderer:THREE.WebGLRenderer;
   try {renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'low-power'});}catch {root.dataset.renderer='fallback';return {setState:(_state:ShowroomState)=>{},hover:(_key?:string)=>{}};}
   renderer.setPixelRatio(Math.min(devicePixelRatio||1,innerWidth<800?1.1:1.4));
-  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.2;
+  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   const scene=new THREE.Scene();scene.background=new THREE.Color('#18292b');scene.fog=new THREE.FogExp2('#253c3d',.012);
   const camera=new THREE.PerspectiveCamera(42,1,.1,180);
   const envSource=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(renderer),environment=pmrem.fromScene(envSource,.06);
   scene.environment=environment.texture;scene.environmentIntensity=.48;envSource.dispose();pmrem.dispose();
-  scene.add(new THREE.HemisphereLight('#dce7da','#172628',2.6));
-  const key=new THREE.DirectionalLight('#ffe4b2',4.2);key.position.set(-14,28,12);key.castShadow=true;key.shadow.mapSize.set(1024,1024);key.shadow.camera.left=-23;key.shadow.camera.right=23;key.shadow.camera.top=23;key.shadow.camera.bottom=-23;key.shadow.normalBias=.035;scene.add(key);
+  scene.add(new THREE.HemisphereLight('#dce7da','#172628',1.7));
+  const key=new THREE.DirectionalLight('#ffe4b2',2.3);key.position.set(-14,28,12);key.castShadow=true;key.shadow.mapSize.set(1024,1024);key.shadow.camera.left=-23;key.shadow.camera.right=23;key.shadow.camera.top=23;key.shadow.camera.bottom=-23;key.shadow.normalBias=.035;scene.add(key);
   const fill=new THREE.DirectionalLight('#a4c1c3',1.9);fill.position.set(16,12,-20);scene.add(fill);
   const plaster=new THREE.MeshStandardMaterial({color:'#e5e1d3',roughness:.57,metalness:.04});
   const charcoal=new THREE.MeshStandardMaterial({color:'#17282a',roughness:.4,metalness:.55});
@@ -41,7 +41,8 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   box(scene,46,18,.8,charcoal,0,9,-28);
   box(scene,28,.06,.15,glow,0,10,-27.5,.01);
   const table=new THREE.Group();scene.add(table);
-  box(table,18,.46,15.4,plaster,0,3.2,0,.16);
+  const tabletop=new THREE.MeshStandardMaterial({color:'#9d9f8c',roughness:.72,metalness:.08});
+  box(table,18,.46,15.4,tabletop,0,3.2,0,.16);
   box(table,18.12,.07,15.52,gold,0,2.96,0,.03);
   box(table,10.2,2.8,7.5,charcoal,0,1.4,0,.2);
   for(let i=-4;i<=4;i++)box(table,.055,2.55,.08,gold,i*1.04,1.4,3.8,.01);

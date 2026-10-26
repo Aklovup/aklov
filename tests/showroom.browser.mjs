@@ -38,6 +38,7 @@ try{
  await page.locator('[data-showroom-back]').click();await view(page,'category');
  await page.locator('[data-showroom-back]').click();await view(page,'showroom');
  await page.goBack();await view(page,'category');await page.goForward();await view(page,'showroom');
+ const beforeOrbit=await page.screenshot();await page.mouse.move(650,380);await page.mouse.down();await page.mouse.move(830,380,{steps:8});await page.mouse.up();const afterOrbit=await page.screenshot();assert.notDeepEqual(beforeOrbit,afterOrbit,'Dragging should change the model-table viewpoint');assert.equal(await page.locator('[data-showroom]').getAttribute('data-view'),'showroom');
  report.checks.push('Physical model picking, cutaway roof, canonical project rooms, uploaded previews, case study, GIF controls, focus return and history');
  for(const [category,count] of [['websites',3],['customer-systems',1],['automation',2]]){
   await page.locator(`[data-showroom-model="${category}"]`).click();await view(page,'category');assert.equal(await page.locator('[data-showroom-room]').count(),count);await page.locator('[data-showroom-home]').click();
