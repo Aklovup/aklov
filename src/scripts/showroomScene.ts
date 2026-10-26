@@ -210,7 +210,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     const settled=currentEye.distanceTo(targetEye)+currentLook.distanceTo(targetLook)<.06&&!flight&&intro<.01;
     root.dataset.transitionSettled=String(settled);root.dataset.roomReady=String(!!state.room&&settled);
     root.dataset.roomX=roomEye.x.toFixed(4);root.dataset.roomZ=roomEye.z.toFixed(4);root.dataset.roomHeading=roomHeading.toFixed(4);
-    root.dataset.cameraHeading=Math.atan2(currentLook.x-currentEye.x,currentLook.z-currentEye.z).toFixed(5);root.dataset.cameraX=currentEye.x.toFixed(4);root.dataset.cameraZ=currentEye.z.toFixed(4);root.dataset.ambientTime=elapsed.toFixed(2);
+    root.dataset.cameraError=(currentEye.distanceTo(targetEye)+currentLook.distanceTo(targetLook)).toFixed(4);root.dataset.cameraHeading=Math.atan2(currentLook.x-currentEye.x,currentLook.z-currentEye.z).toFixed(5);root.dataset.cameraX=currentEye.x.toFixed(4);root.dataset.cameraZ=currentEye.z.toFixed(4);root.dataset.ambientTime=elapsed.toFixed(2);
     for(const model of exhibitModels.filter(m=>m.group.visible)){
       const anchor=model.group.position.clone();anchor.y+=1.1;anchor.project(camera);const b=root.querySelector<HTMLElement>(`[data-showroom-model="${model.data.category}"]`);
       if(b){b.dataset.worldX=((anchor.x*.5+.5)*canvas.clientWidth).toFixed(1);b.dataset.worldY=((-anchor.y*.5+.5)*canvas.clientHeight).toFixed(1);}
@@ -223,11 +223,11 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   function tick(now:number){
     frame=0;if(!started||document.hidden||lost||options.isIndexOpen())return;
     if(last&&now-last<15){frame=requestAnimationFrame(tick);return;}
-    const dt=last?Math.min((now-last)/1000,.04):1/60;last=now;
-    if(!paused){elapsed+=dt;intro=Math.max(0,intro-dt*.55);}
+    const delta=last?Math.max(0,(now-last)/1000):1/60,dt=Math.min(delta,.1);last=now;
+    if(!paused){elapsed+=delta;intro=Math.max(0,intro-delta*.55);}
     const lifting=root.dataset.mediaLift==='open'||root.dataset.mediaLift==='closing';
     if(!lifting){
-      if(flight){flight.progress=Math.min(1,flight.progress+dt/1.7);if(flight.progress>=1)flight=undefined;}
+      if(flight){flight.progress=Math.min(1,flight.progress+delta/1.7);if(flight.progress>=1)flight=undefined;}
       yaw=THREE.MathUtils.damp(yaw,targetYaw,10,dt);pointerCurrent.lerp(pointerTarget,1-Math.exp(-5*dt));pose();
       currentEye.lerp(targetEye,1-Math.exp(-11*dt));
       const room=roomFor(state);
@@ -235,7 +235,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
       else currentLook.lerp(targetLook,1-Math.exp(-10*dt));
       camera.position.copy(currentEye);camera.lookAt(currentLook);
     }
-    surfaces.update(dt);updateModels(dt);dust.rotation.y=elapsed*.008;key.intensity=2.3+Math.sin(elapsed*.32)*.025;draw();
+    surfaces.update(delta);updateModels(dt);dust.rotation.y=elapsed*.008;key.intensity=2.3+Math.sin(elapsed*.32)*.025;draw();
     if(walking&&walking.distance>=walking.length&&currentEye.distanceTo(targetEye)<.025)finishWalking();
     if(needsFrame())frame=requestAnimationFrame(tick);
   }
