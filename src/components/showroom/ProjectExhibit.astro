@@ -18,17 +18,27 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
     <nav class="exhibit-links" aria-label="External project links" data-exhibit-links></nav>
   </section>
 </section>
-{entries.map(({project,index,Content})=><template data-exhibit-template={project.data.slug}>
-  <header data-exhibit-metadata data-type={project.data.projectType} data-title={project.data.title} data-intro={project.data.headline} data-summary={project.data.description}></header>
-  <div data-exhibit-copy><Content/></div>
-  <div data-exhibit-assets>
-    {project.data.media.map(item=><section data-exhibit-asset data-label={item.caption||item.alt} data-available={!!item.url}><ProjectMedia cover={item} title={project.data.title} number={String(index+1).padStart(2,'0')} presentation="detail" bounded={false}/></section>)}
-  </div>
-  <nav data-exhibit-external>
-    {project.data.externalUrl&&<a href={project.data.externalUrl} target="_blank" rel="noopener noreferrer">Visit Website ↗</a>}
-    {project.data.externalLinks.map(link=><a href={link.url} target="_blank" rel="noopener noreferrer">{link.label} ↗</a>)}
-  </nav>
-</template>)}
+{entries.map(({ project, index, Content }) => (
+  <template data-exhibit-template={project.data.slug}>
+    <header data-exhibit-metadata data-type={project.data.projectType} data-title={project.data.title} data-intro={project.data.headline} data-summary={project.data.description}></header>
+    <div data-exhibit-copy><Content /></div>
+    <div data-exhibit-assets>
+      {project.data.media.map((item) => (
+        <section data-exhibit-asset data-label={item.caption || item.alt} data-available={Boolean(item.url)}>
+          <ProjectMedia cover={item} title={project.data.title} number={String(index + 1).padStart(2, '0')} presentation="detail" bounded={false} />
+        </section>
+      ))}
+    </div>
+    <nav data-exhibit-external>
+      {project.data.externalUrl && (
+        <a href={project.data.externalUrl} target="_blank" rel="noopener noreferrer">Visit Website ↗</a>
+      )}
+      {project.data.externalLinks.map((link) => (
+        <a href={link.url} target="_blank" rel="noopener noreferrer">{link.label} ↗</a>
+      ))}
+    </nav>
+  </template>
+))}
 <style is:global>
   .project-exhibit { position:absolute;inset:225px var(--pad) 84px;z-index:4;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.85fr);grid-template-rows:auto minmax(0,1fr);gap:24px 5vw;max-width:1300px;margin-inline:auto;pointer-events:none;opacity:0;transform:translateY(12px);transition:opacity .55s,transform .55s; }
   .showroom[data-room-ready='true'] .project-exhibit,.showroom[data-renderer='fallback'] .project-exhibit { opacity:1;transform:none; }
@@ -36,7 +46,7 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   .exhibit-header { grid-column:1/-1;max-width:850px;padding-left:6vw;pointer-events:auto; }
   .exhibit-header>p:first-child { margin:0 0 8px;color:var(--gold);font:10px/1.5 var(--sans);letter-spacing:1.5px;text-transform:uppercase; }
   .exhibit-header h2 { margin:0;color:var(--ivory);font:400 clamp(28px,3.2vw,52px)/1.05 var(--display);letter-spacing:-.025em; }
-  .exhibit-header>p:last-child { margin:12px 0 0;color:#d1d6cc;font:400 14px/1.7 var(--sans);max-width:65ch; }
+  .exhibit-header>[data-exhibit-intro],.exhibit-summary { margin:12px 0 0;color:#d1d6cc;font:400 14px/1.7 var(--sans);max-width:65ch; }
   .exhibit-summary { font-size:12px!important;color:#bfc9c0!important;max-width:76ch!important; }
   .project-exhibit .gif-toggle { background:#102023!important;border:1px solid var(--gold); }
   .exhibit-installation { min-width:0;align-self:center;margin-left:6vw;pointer-events:auto;border-top:1px solid #d8bd7880;border-bottom:1px solid #d8bd7840;background:linear-gradient(145deg,#17282ae6,#081316e6);box-shadow:0 25px 70px #0005,0 0 35px #d8bd780b; }
@@ -63,6 +73,6 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   .exhibit-links a { min-height:44px;display:inline-flex;align-items:center;color:var(--gold);font-size:12px; }
   @media(max-width:1100px) { .project-exhibit { gap:20px;grid-template-columns:minmax(0,1.1fr) minmax(280px,1fr); } .exhibit-header,.exhibit-installation { padding-left:0;margin-left:0; } }
   @media(max-width:800px) { .project-exhibit { inset:235px var(--pad) 92px;display:block;overflow:auto;pointer-events:auto;overscroll-behavior:contain; } .exhibit-header { margin-bottom:22px; } .exhibit-installation { margin-bottom:28px; } .installation-media { max-height:40dvh; } .exhibit-story { padding:20px;border:1px solid #d8bd7860; } .chapter-content { max-height:45dvh; } .exhibit-header h2 { font-size:32px; } }
-  @media(max-height:700px) and (min-width:801px) { .project-exhibit { inset-block:170px 72px;gap:12px 3vw; } .exhibit-header>p:last-child { margin-top:5px;font-size:12px; } .exhibit-header h2 { font-size:30px; } .chapter-content { padding-top:15px; } }
+  @media(max-height:700px) and (min-width:801px) { .project-exhibit { inset-block:170px 72px;gap:12px 3vw; } .exhibit-header>[data-exhibit-intro],.exhibit-summary { margin-top:5px;font-size:12px; } .exhibit-header h2 { font-size:30px; } .chapter-content { padding-top:15px; } }
   @media(prefers-reduced-motion:reduce) { .project-exhibit { transition:none;transform:none; } }
 </style>
