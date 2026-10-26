@@ -45,10 +45,14 @@ export function mountSculpture(root:HTMLElement) {
     const trigger=document.querySelector<HTMLButtonElement>(`[data-project-open="${projects[active].slug}"]`);
     if(trigger&&!trigger.hidden){worldOpener=true;trigger.click();}else document.getElementById('projects')?.scrollIntoView();
   });
-  dialog?.addEventListener('close',()=>{
-    if(worldOpener){worldOpener=false;requestAnimationFrame(()=>requestAnimationFrame(()=>open.focus({preventScroll:true})));}
-    sync();
-  });
+  const returnWorldFocus=()=>{
+    if(!worldOpener||dialog?.open||new URL(location.href).searchParams.has('project')) return;
+    worldOpener=false;
+    // Wait for the dialog's URL/history restoration and its own queued focus work.
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{if(!dialog?.open)open.focus({preventScroll:true});}));
+  };
+  dialog?.addEventListener('close',()=>{returnWorldFocus();sync();});
+  window.addEventListener('popstate',returnWorldFocus);
   select(0,false);
   let renderer:THREE.WebGLRenderer;
   try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'low-power'});}
@@ -96,6 +100,7 @@ export function mountSculpture(root:HTMLElement) {
   floor.rotation.x=-Math.PI/2;floor.position.y=-.12;scene.add(floor);
   const ripple={value:0};floor.material.uniforms.uTime=ripple;
   floor.material.fragmentShader='uniform float uTime;\n'+floor.material.fragmentShader.replace('vec4 base = texture2DProj( tDiffuse, vUv );','vec4 waterUv=vUv; waterUv.x += sin(vUv.y*85.0/vUv.w+uTime*.28)*.00075*vUv.w; waterUv.y += sin(vUv.x*120.0/vUv.w+uTime*.19)*.0006*vUv.w; vec4 base = texture2DProj(tDiffuse, waterUv);');
+  floor.material.fragmentShader=floor.material.fragmentShader.replace(/\}\s*$/, 'gl_FragColor.rgb=mix(gl_FragColor.rgb,vec3(.27,.32,.29),smoothstep(.9975,.9996,gl_FragCoord.z));\n}');
   const dustGeometry=new THREE.BufferGeometry(),positions=new Float32Array((mobile?160:420)*3);let seed=917;
   const random=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
   for(let i=0;i<positions.length;i+=3){positions[i]=(random()-.5)*55;positions[i+1]=random()*22+.3;positions[i+2]=random()*-85+12;}

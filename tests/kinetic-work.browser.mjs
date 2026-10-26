@@ -15,6 +15,7 @@ try {
   const context = await browser.newContext({viewport:{width:1440,height:1000}});
   const page = await context.newPage();
   const errors=[]; page.on('pageerror',e=>errors.push(e.message));
+  page.on('console',m=>{if(m.type()==='error'&&/Shader Error|WebGLProgram/.test(m.text()))errors.push(m.text());});
   await page.goto(base+'/work/');
   await page.evaluate(()=>document.fonts.ready);
   await page.waitForSelector('[data-sculpture][data-renderer="webgl"][data-rendered="true"]');
