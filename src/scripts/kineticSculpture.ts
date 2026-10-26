@@ -26,7 +26,7 @@ export function mountSculpture(root:HTMLElement) {
   let sync=()=>{};
   let selectInScene:((project:Project,index:number,fromGesture?:boolean)=>void)|undefined;
   function select(index:number,announce=true,fromGesture=false) {
-    active=(index+projects.length)%projects.length;
+    active=((index%projects.length)+projects.length)%projects.length;
     const p=projects[active];
     hero.querySelector('[data-world-title]')!.textContent=p.title;
     hero.querySelector('[data-world-category]')!.textContent=p.category;
@@ -137,7 +137,7 @@ export function mountSculpture(root:HTMLElement) {
     draw();
   }
   function ensurePanel(index:number){
-    index=(index+projects.length)%projects.length;
+    index=((index%projects.length)+projects.length)%projects.length;
     const panel=panels[index],p=projects[index];if(panel.loaded)return;panel.loaded=true;
     if(!p.src){panel.ready=true;return;}
     if(!textures.has(p.src))textures.set(p.src,new Promise((resolve,reject)=>loader.load(p.src!,texture=>{

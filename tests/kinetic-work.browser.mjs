@@ -28,6 +28,11 @@ try {
   });
   assert.ok(pixels.width>0 && pixels.height>0); assert.equal(pixels.error,0);
   assert.ok(Number(await page.locator('[data-sculpture]').getAttribute('data-visible-projects'))>=2);
+  await page.locator('[data-world-prev]').evaluate(button=>{for(let i=0;i<12;i++)button.click();});
+  assert.equal(await page.locator('[data-kinetic-hero]').getAttribute('data-active-project'),'vera-skincare-concept');
+  await page.locator('[data-form-toggle]').evaluate(button=>{for(let i=0;i<12;i++)button.click();});
+  assert.equal(await page.locator('[data-kinetic-hero]').getAttribute('data-active-project'),'impex-automotive');
+  report.checks.push('Repeated full-ring wraparound in both directions');
   // Drag follows the pointer before release, including with ambient motion paused.
   await page.mouse.move(1040,430);await page.mouse.down();
   await page.mouse.move(510,430,{steps:12});
