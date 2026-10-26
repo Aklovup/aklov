@@ -46,7 +46,7 @@ const models=modelsFor(entries,'client');
   <button type="button" class="spatial-exit" data-showroom-exit hidden><span class="exit-threshold" aria-hidden="true"></span><span data-exit-label>Leave room</span><span aria-hidden="true">↙</span></button>
   <ProjectExhibit projects={projects}/>
   <div class="travel-indicator" aria-hidden="true"><span data-travel-progress></span></div>
-  <div class="showroom-bottom"><button type="button" data-showroom-index-open>Project index ↗</button><button type="button" data-showroom-motion hidden aria-pressed="false">Pause motion</button><span data-showroom-hint>Move to look · Scroll to travel · Select a model</span></div>
+  <div class="showroom-bottom"><button type="button" data-showroom-index-open>Browse Project List ↗</button><button type="button" data-showroom-motion hidden aria-pressed="false">Pause motion</button><span data-showroom-hint>Move to look · Scroll to travel · Select a model</span></div>
   <p class="sr-status" role="status" aria-live="polite" data-showroom-status></p>
   <script id="showroom-data" type="application/json" set:html={JSON.stringify(entries).replace(/</g,'\u003c')}/>
 </section>
