@@ -136,7 +136,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
       model.roof.position.y=2.3+model.open*2.65;model.roof.position.z=-model.open*.8;model.roof.rotation.x=-model.open*.10;
       const dim=activeModel&&!selected? .28:1;
       for(const item of model.materials){item.material.opacity=item.base*dim;item.material.transparent=item.material.opacity<.99;item.material.depthWrite=item.material.opacity>.95;}
-      model.glass.material.opacity=(1-model.open)*.15*dim;
+      model.glass.material.opacity=(1-model.open)*.15*dim;model.glass.visible=model.open<.95;
       for(const room of model.rooms){room.accent.material.opacity=(!state.room||state.room===room.project.slug||hoverRoom===room.project.slug)?1:.2;}
     }
     if(activeModel)root.dataset.roofOpen=activeModel.open.toFixed(3);else root.dataset.roofOpen='0';
@@ -147,6 +147,11 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     for(const model of exhibitModels.filter(m=>m.group.visible)){
       const anchor=model.group.position.clone();anchor.y+=1.1;anchor.project(camera);
       const button=root.querySelector<HTMLElement>(`[data-showroom-model="${model.data.category}"]`);
+      if(button){button.dataset.worldX=((anchor.x*.5+.5)*canvas.clientWidth).toFixed(1);button.dataset.worldY=((-anchor.y*.5+.5)*canvas.clientHeight).toFixed(1);}
+    }
+    if(activeModel)for(const room of activeModel.rooms){
+      const anchor=room.screen.getWorldPosition(new THREE.Vector3()).project(camera);
+      const button=root.querySelector<HTMLElement>(`[data-showroom-room="${room.project.slug}"]`);
       if(button){button.dataset.worldX=((anchor.x*.5+.5)*canvas.clientWidth).toFixed(1);button.dataset.worldY=((-anchor.y*.5+.5)*canvas.clientHeight).toFixed(1);}
     }
   }

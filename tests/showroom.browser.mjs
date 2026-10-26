@@ -29,7 +29,7 @@ try{
  await page.waitForFunction(()=>Number(document.querySelector('[data-showroom]').dataset.roofOpen)>.98);
  await page.waitForFunction(()=>Number(document.querySelector('[data-showroom]').dataset.readyPreviews)>=2);
  await page.screenshot({path:out+'/category-desktop.png'});
- await page.locator('[data-showroom-room="impex-automotive"]').click();await view(page,'project');
+ const roomPoint=await page.locator('[data-showroom-room="impex-automotive"]').evaluate(b=>({x:Number(b.dataset.worldX),y:Number(b.dataset.worldY)}));await page.mouse.click(roomPoint.x,roomPoint.y);await view(page,'project');
  await page.screenshot({path:out+'/room-desktop.png'});
  await page.locator('[data-showroom-case]').click();await page.waitForSelector('[data-project-dialog][open]');
  assert.ok((await page.locator('[data-project-dialog]').innerText()).includes('A B2B ordering experience built around the business'));
