@@ -36,12 +36,12 @@ export function createProjectExhibit(root:HTMLElement) {
   window.addEventListener('resize',()=>closeLift(true));
   // A projected CSS3D surface is not consistently included in native scroll chaining.
   // Route reading gestures explicitly, keeping them separate from room navigation.
-  root.addEventListener('wheel',event=>{
+  document.addEventListener('wheel',event=>{
     if(root.dataset.mediaLift!=='open'||event.ctrlKey)return;
     const box=lifted.getBoundingClientRect();
     if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)return;
     event.preventDefault();liftScroll.scrollTop+=gesturePixels(event.deltaY,event.deltaMode,liftScroll.clientHeight);
-  },{passive:false});
+  },{passive:false,capture:true});
   let readingTouch:{id:number;y:number;origin:number;moved:boolean}|undefined;
   liftScroll.addEventListener('pointerdown',event=>{if(event.pointerType==='mouse')return;readingTouch={id:event.pointerId,y:event.clientY,origin:event.clientY,moved:false};liftScroll.setPointerCapture(event.pointerId);});
   liftScroll.addEventListener('pointermove',event=>{
