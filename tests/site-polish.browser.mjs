@@ -27,10 +27,17 @@ try {
  assert.equal(await page.locator('.hero-actions .btn-gold').getAttribute('href'),'/contact/');
  await services.first().click();await page.waitForURL('**/solutions/#website');assert.ok(await page.locator('#website-title').isVisible());
  await page.setViewportSize({width:390,height:844});await page.goto(base+'/work/?project=impex-automotive');
- const dialog=page.locator('dialog');await dialog.waitFor({state:'visible'});
- const lead=dialog.locator('.detail-lead'),copy=dialog.locator('.detail-copy');
- assert.ok((await lead.boundingBox()).y < (await copy.boundingBox()).y,'Mobile project proof must precede case-study copy');
- assert.equal(await dialog.getByText('View full size',{exact:true}).count(),0);
+ if(await page.locator('[data-exhibit]').count()) {
+  await page.locator('[data-exhibit]:not([hidden])').waitFor({state:'visible'});
+  assert.equal(await page.locator('[data-project-dialog]').count(),0);
+  assert.ok((await page.locator('[data-exhibit-title]').innerText()).includes('Impex Automotive'));
+  assert.ok(await page.locator('[data-exhibit-stage] [data-media-id]').count()>0);
+ } else {
+  const dialog=page.locator('[data-project-dialog]');await dialog.waitFor({state:'visible'});
+  const lead=dialog.locator('.detail-lead'),copy=dialog.locator('.detail-copy');
+  assert.ok((await lead.boundingBox()).y < (await copy.boundingBox()).y,'Mobile project proof must precede case-study copy');
+  assert.equal(await dialog.getByText('View full size',{exact:true}).count(),0);
+ }
  await page.keyboard.press('Escape');
  for(const route of ['/','/solutions/','/about/','/contact/']){await page.goto(base+route);const menu=page.locator('.menu-toggle');await menu.click();await page.locator('#site-nav a[href="/work/"]').focus();await page.keyboard.press('Escape');assert.ok(await menu.evaluate(el=>el===document.activeElement));}
  assert.equal((await fetch(base+'/favicon.svg')).status,200);assert.equal((await fetch(base+'/images/generated/social-preview.png')).status,200);
@@ -40,3 +47,4 @@ try {
  writeFileSync(output+'/media-delivery.json',JSON.stringify(savings,null,2));
  assert.deepEqual(errors,[]);console.log('Passed: five-page responsive review, service and inquiry journeys, theme-aware focus, menu restoration, earlier project media, metadata and static delivery.');
 } finally {await browser?.close();server.kill('SIGTERM');}
+

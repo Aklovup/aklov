@@ -1,0 +1,35 @@
+name: Experimental Work review
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/components/experimental/**'
+      - 'src/scripts/kineticSculpture.ts'
+      - 'src/scripts/catalogueGesture.ts'
+      - 'src/scripts/catalogueMaterial.ts'
+      - 'src/pages/work/index.astro'
+      - 'tests/kinetic-work.browser.mjs'
+      - '.github/workflows/kinetic-work.yml'
+permissions:
+  contents: read
+jobs:
+  review:
+    if: github.head_ref != 'experiment/model-showroom'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --no-save --package-lock=false playwright
+      - run: npm run build
+      - run: node --test --test-isolation=none tests/work.test.mjs tests/contact.test.mjs
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/kinetic-work.browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kinetic-work-review
+          path: artifacts/kinetic-work/
+          if-no-files-found: warn

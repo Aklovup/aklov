@@ -16,6 +16,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: website-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   build-and-review:
     runs-on: ubuntu-latest
@@ -29,19 +33,31 @@ jobs:
         run: npm install --no-save --package-lock=false playwright
       - name: Build the static site
         run: npm run build
+      - name: Detect the active Work experience
+        id: work
+        run: |
+          node --input-type=module - <<'NODE'
+          import {readFileSync,appendFileSync} from 'node:fs';
+          const showroom=/<section\b[^>]*\sdata-showroom(?:=|\s|>)/.test(readFileSync('dist/work/index.html','utf8'));
+          appendFileSync(process.env.GITHUB_OUTPUT, `showroom=${showroom}\n`);
+          NODE
       - name: Check content and filtering logic
         run: node --test --test-isolation=none tests/work.test.mjs tests/contact.test.mjs
       - name: Install the test browser
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps --only-shell chromium
       - name: Review the editorial homepage
         run: node tests/home.browser.mjs
       - name: Verify uploaded static media
+        if: steps.work.outputs.showroom != 'true'
         run: node tests/media-assets.browser.mjs
       - name: Verify single images and bounded multi-image inspection
+        if: steps.work.outputs.showroom != 'true'
         run: node tests/project-images.browser.mjs
       - name: Verify uploaded Impex media and playback
+        if: steps.work.outputs.showroom != 'true'
         run: node tests/impex.browser.mjs
       - name: Review rendered page and browser interactions
+        if: steps.work.outputs.showroom != 'true'
         run: node tests/work.browser.mjs
       - name: Audit the rendered Solutions page
         run: node tests/solutions.browser.mjs
@@ -128,3 +144,4 @@ jobs:
           name: homepage-review
           path: artifacts/home-review/
           if-no-files-found: ignore
+

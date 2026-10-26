@@ -2,58 +2,9 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { orderProjects } from '../../lib/projectOrder';
-import ProjectGallery from '../../components/work/ProjectGallery.astro';
-
-const projects = orderProjects(await getCollection('projects'));
+import Showroom from '../../components/showroom/Showroom.astro';
+const projects=orderProjects(await getCollection('projects'));
 ---
-
 <BaseLayout title="Work — Aklov®" description="Aklov portfolio: client projects and independent concepts across websites, customer and sales systems, workflow automation, custom applications, integrations and reporting.">
-  <section class="work-intro" aria-labelledby="work-title">
-    <div class="wrap">
-      <div class="intro-meta mono">
-        <span>Websites, business systems &amp; digital solutions</span>
-        <span>Portfolio / Aklov</span>
-      </div>
-      <div class="intro-composition">
-        <h1 id="work-title">Work<span>.</span></h1>
-        <div class="intro-note">
-          <p>Client projects <em>&amp; independent concepts.</em></p>
-          <a class="index-link" href="#projects">Explore projects <span aria-hidden="true">↓</span></a>
-        </div>
-      </div>
-      <div class="intro-bottom">
-        <span class="mono">{String(projects.length).padStart(2, '0')} projects</span>
-        <span class="mono">05 categories</span>
-      </div>
-    </div>
-  </section>
-  <ProjectGallery projects={projects} />
+  <Showroom projects={projects}/>
 </BaseLayout>
-
-<style>
-  .work-intro { background: var(--charcoal); color: var(--ivory); padding-top: clamp(32px, 4vw, 56px); }
-  .intro-meta { display: flex; justify-content: space-between; gap: 24px; color: var(--gold); }
-  .intro-meta span:last-child { color: var(--on-dark); text-align: right; }
-  .intro-composition { display: grid; grid-template-columns: 1.35fr .65fr; align-items: end; gap: 36px; padding-block: clamp(32px, 4vw, 64px) clamp(40px, 5vw, 76px); }
-  h1 { margin: 0; font-family: var(--display); font-size: clamp(112px, 20vw, 350px); font-weight: 400; line-height: .75; letter-spacing: -.05em; }
-  h1 span { color: var(--gold); }
-  .intro-note { max-width: 380px; padding-bottom: 3px; }
-  .intro-note p { margin: 0; font-family: var(--display); font-size: clamp(30px, 3.5vw, 58px); line-height: 1.04; letter-spacing: -.02em; }
-  .intro-note em { display: block; color: var(--gold); font-weight: 400; }
-  .index-link { display: inline-flex; align-items: center; gap: 32px; min-height: 44px; margin-top: 22px; border-bottom: 1px solid var(--line-dark); font-size: 12px; }
-  .index-link span { font-size: 20px; transition: transform .2s ease; }
-  .intro-bottom { display: flex; justify-content: space-between; gap: 20px; padding-block: 18px; border-top: 1px solid var(--line-dark); color: var(--on-dark); }
-  @media (hover: hover) { .index-link:hover { color: var(--gold); } .index-link:hover span { transform: translateY(3px); } }
-  @media (max-width: 1000px) { .intro-composition { grid-template-columns: 1fr .8fr; } }
-  @media (max-width: 640px) {
-    .intro-meta { font-size: 9px; letter-spacing: 1px; }
-    .intro-meta span:first-child { max-width: 24ch; }
-    .intro-meta span:last-child { white-space: nowrap; }
-    .intro-composition { grid-template-columns: 1fr; gap: 30px; padding-block: 38px 32px; }
-    h1 { font-size: clamp(110px, 31vw, 190px); }
-    .intro-note { max-width: 300px; margin-left: auto; }
-    .intro-note p { font-size: clamp(30px, 8vw, 42px); }
-    .index-link { margin-top: 16px; }
-    .intro-bottom { font-size: 9px; }
-  }
-</style>
