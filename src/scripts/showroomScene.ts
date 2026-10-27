@@ -355,14 +355,21 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
       if(!state.room){const hit=pick(event.clientX,event.clientY);hoverModel=hit?.category;hoverRoom=hit?.room;}if(!paused)sync();
     }
   },{passive:false});
-  function end(event:PointerEvent,cancelled=false){
-    if(!gesture||gesture.id!==event.pointerId)return;const moved=gesture.dragged;clearGesture();if(moved){suppressClickUntil=performance.now()+350;return;}
-    if(cancelled||interactive(event)||state.room||lifted())return;
-    const hit=pick(event.clientX,event.clientY);if(!hit?.category)return;if(hit.exit&&activeModel?.data.category===hit.category)options.retreat();else if(!activeModel||activeModel.data.category!==hit.category)options.selectModel(hit.category);else if(hit.room)options.selectRoom(hit.room);
+  function end(event:PointerEvent){
+    if(!gesture||gesture.id!==event.pointerId)return;const moved=gesture.dragged;clearGesture();if(moved)suppressClickUntil=performance.now()+350;
   }
-  root.addEventListener('pointerup',event=>end(event));root.addEventListener('pointercancel',event=>end(event,true));root.addEventListener('lostpointercapture',event=>{if(gesture?.id===event.pointerId){gesture=undefined;dragging=false;delete root.dataset.dragging;}});
+  root.addEventListener('pointerup',event=>end(event));root.addEventListener('pointercancel',event=>end(event));root.addEventListener('lostpointercapture',event=>{if(gesture?.id===event.pointerId){gesture=undefined;dragging=false;delete root.dataset.dragging;}});
   window.addEventListener('blur',clearGesture);
   document.addEventListener('click',event=>{if(performance.now()<suppressClickUntil){event.preventDefault();event.stopImmediatePropagation();}},true);
+  // Finish the native activation before replacing the stage. Touch browsers can
+  // retarget a click into new content when navigation happens during pointerup.
+  root.addEventListener('click',event=>{
+    if(interactive(event)||state.room||lifted()||!(event.target as Element).closest('[data-showroom-viewport]'))return;
+    const hit=pick(event.clientX,event.clientY);if(!hit?.category)return;
+    if(hit.exit&&activeModel?.data.category===hit.category)options.retreat();
+    else if(!activeModel||activeModel.data.category!==hit.category)options.selectModel(hit.category);
+    else if(hit.room)options.selectRoom(hit.room);
+  });
   root.addEventListener('wheel',event=>{
     if(compact()&&!(event.target as Element).closest('[data-showroom-viewport]'))return;
     if(event.ctrlKey||options.isIndexOpen()||lifted()||flat()||(event.target as Element).closest('input,select,textarea'))return;
