@@ -61,22 +61,26 @@ async function checkLayout(page, width) {
   const secondary = page.locator('[data-about-work-secondary]');
   assert.equal(await secondary.evaluate(el => el.classList.contains('btn')), false, 'Secondary work link should remain quieter than the primary button.');
   const frame = await page.locator('.portrait-frame').boundingBox();
-  assert.ok(Math.abs(frame.width / frame.height - .8) < .01, 'Portrait ratio changed.');
+  assert.ok(Math.abs(frame.width / frame.height - 1) < .01, 'The portrait uses the square editorial crop.');
   const portraitLayout = await page.locator('.hero-composition').evaluate(el => {
     const box = selector => {const b=el.querySelector(selector).getBoundingClientRect();return {x:b.x,right:b.right,top:b.top,bottom:b.bottom,width:b.width};};
-    return {heading:box('.hero-heading'),portrait:box('.hero-portrait'),frame:box('.portrait-frame'),name:box('.portrait-name')};
+    return {heading:box('h1'),opening:box('.opening-line'),portrait:box('.hero-portrait'),frame:box('.portrait-frame'),caption:box('figcaption'),name:box('.portrait-name')};
   });
   assert(portraitLayout.name.x >= portraitLayout.frame.x && portraitLayout.name.right <= portraitLayout.frame.right, 'Portrait name should fit the frame');
-  assert(portraitLayout.name.bottom <= portraitLayout.frame.bottom, 'Portrait name must remain inside its ivory panel');
-  if(width>640)assert(portraitLayout.portrait.x>=portraitLayout.heading.right,'Portrait and headline must not overlap');
+  assert(portraitLayout.name.top >= portraitLayout.frame.bottom, 'The clean name caption follows the photograph');
+  assert(portraitLayout.name.bottom <= portraitLayout.caption.bottom, 'Name must fit its gold caption');
+  for(const line of await page.locator('h1 > span').all()) {
+    const bounds=await line.evaluate(el=>{const r=document.createRange();r.selectNodeContents(el);const b=r.getBoundingClientRect(),h=el.closest('h1').getBoundingClientRect();return {left:b.left,right:b.right,edgeLeft:h.left,edgeRight:h.right};});
+    assert(bounds.left>=bounds.edgeLeft-1&&bounds.right<=bounds.edgeRight+1, 'Headline glyphs exceed the column at '+width+': '+JSON.stringify(bounds));
+  }
+  if(width>1000)assert(portraitLayout.portrait.x>=portraitLayout.heading.right,'Portrait and headline must not overlap');
+  else assert(portraitLayout.portrait.top>=portraitLayout.heading.bottom,'Tablet and mobile portrait follows the full-width headline');
   if(width>1000)assert(portraitLayout.portrait.width<=561,'Portrait should remain composed on wide monitors');
   if (width <= 640) {
-    const heading = await page.locator('.hero-heading').boundingBox();
     const portrait = await page.locator('.hero-portrait').boundingBox();
-    const copy = await page.locator('.hero-opening').boundingBox();
+    const copy = await page.locator('.intro-detail').boundingBox();
     const opening = await page.locator('.hero-heading .opening-line').boundingBox();
     assert.ok(opening.y + opening.height <= portrait.y + 1, 'Opening sentence must precede the portrait.');
-    assert.ok(heading.y + heading.height <= portrait.y + 1);
     assert.ok(portrait.y + portrait.height <= copy.y + 1);
   }
 }
@@ -100,7 +104,8 @@ try {
   assert.deepEqual((await page.locator('[data-approved-copy]').allInnerTexts()).map(normalize), expectedParagraphs.map(normalize));
   assert.equal(expectedParagraphs.length, 39);
   assert.equal(await page.locator('.hero-heading .opening-line').innerText(), about.introduction.paragraphs[0]);
-  assert.equal(await page.locator('.hero-opening [data-approved-copy]').count(), 2);
+  assert.equal(await page.locator('.about-hero [data-approved-copy]').count(), 1);
+  assert.equal(await page.locator('.intro-detail [data-approved-copy]').count(), 4);
   assert.equal(await page.locator('.together-story .reading-copy [data-approved-copy]').count(), 5);
   assert.deepEqual(await page.locator('.stage-list h3').allInnerTexts(), about.approach.stages.map((stage) => stage.title));
   assert.equal(await page.locator('.stage-list li').count(), 4);
@@ -118,8 +123,9 @@ try {
   }
   assert.equal(await page.locator('.designation').innerText(), profile.designation);
   assert.equal(normalize(await page.locator('.portrait-name').innerText()), profile.name);
-  assert.equal(await page.locator('.portrait-frame .portrait-name').count(), 1);
-  assert.equal(await page.locator('figcaption .portrait-name').count(), 0);
+  assert.equal(await page.locator('.portrait-frame .portrait-name').count(), 0);
+  assert.equal(await page.locator('figcaption .portrait-name').count(), 1);
+  assert.equal(await page.locator('.portrait-signature, .signature-panel').count(), 0);
   assert.equal(await page.locator('.portrait-fallback').count(), 0);
   const portraitImage = page.locator('[data-about-portrait] img');
   assert.equal(await portraitImage.getAttribute('src'), profile.portrait.src);
@@ -154,7 +160,7 @@ try {
       let background = element;
       while (background && rgba(getComputedStyle(background).backgroundColor)[3] === 0) background = background.parentElement;
       const text = luminance(rgba(style.color));
-      const backdrop = luminance(rgba(element.matches('.portrait-name') ? getComputedStyle(document.querySelector('.signature-fill')).fill : getComputedStyle(background || document.body).backgroundColor));
+      const backdrop = luminance(rgba(getComputedStyle(background || document.body).backgroundColor));
       const ratio = (Math.max(text, backdrop) + .05) / (Math.min(text, backdrop) + .05);
       const large = parseFloat(style.fontSize) >= 24 || (parseFloat(style.fontSize) >= 18.66 && parseFloat(style.fontWeight) >= 700);
       return ratio + .01 < (large ? 3 : 4.5) ? [{ text: element.textContent.slice(0, 70), ratio }] : [];
@@ -223,5 +229,6 @@ try {
   await browser?.close();
   server.kill('SIGTERM');
 }
+
 
 
