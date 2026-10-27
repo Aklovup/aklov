@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { links } from '../data/links';
 import SelectedWork from '../components/home/SelectedWork.astro';
+import Starfield from '../components/home/Starfield.astro';
 
 const services = [
   {
@@ -65,7 +66,8 @@ const principles = [
   description="Aklov designs distinctive websites and improves business systems, operational workflows, custom applications and integrations for growing businesses."
   contactHref="#contact"
 >
-  <section class="dark" aria-labelledby="hero-title">
+  <section class="dark home-hero" aria-labelledby="hero-title">
+    <Starfield />
     <div class="wrap hero">
       <p class="hero-meta mono">Websites, business systems &amp; digital solutions</p>
       <h1 id="hero-title">
@@ -175,7 +177,8 @@ const principles = [
 <style>
   h1, h2, h3, p { margin: 0; }
   .dark { background: var(--charcoal); color: var(--ivory); --focus-color: var(--gold); }
-  .hero { padding-block: clamp(44px, 4.5vw, 76px) clamp(48px, 4.5vw, 76px); }
+  .home-hero { position: relative; isolation: isolate; overflow: hidden; }
+  .hero { position: relative; z-index: 1; padding-block: clamp(44px, 4.5vw, 76px) clamp(48px, 4.5vw, 76px); }
   .hero-meta { margin-bottom: 28px; color: var(--gold); }
   h1 { font-family: var(--display); font-size: clamp(46px, 13vw, 226px); font-weight: 400; line-height: .87; letter-spacing: -.045em; }
   h1 span { display: block; }
@@ -299,3 +302,4 @@ const principles = [
     .contact h2 { font-size: clamp(48px, 10vw, 66px); }
   }
 </style>
+

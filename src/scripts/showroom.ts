@@ -1,3 +1,4 @@
+import { compactShowroom } from './showroomResponsive';
 import { createShowroomScene } from './showroomScene';
 import { createProjectExhibit } from './projectExhibit';
 import { modelsFor, stateFromUrl, urlForState, type ShowroomProject, type ShowroomState } from './showroomState';
@@ -16,6 +17,22 @@ export function mountShowroom(root:HTMLElement) {
   const category=root.querySelector<HTMLButtonElement>('[data-showroom-category]')!;
   const exit=root.querySelector<HTMLButtonElement>('[data-showroom-exit]')!;
   const status=root.querySelector<HTMLElement>('[data-showroom-status]')!;
+  const coarse=matchMedia('(pointer:coarse)');
+  function responsiveLayout(){
+    root.dataset.layout=compactShowroom(innerWidth,innerHeight,coarse.matches)?'compact':'wide';
+    const header=document.querySelector<HTMLElement>('#site-header');
+    if(header){
+      const toggle=header.querySelector<HTMLElement>('.menu-toggle'),brand=header.querySelector<HTMLElement>('.brand');
+      const style=getComputedStyle(header);
+      const height=toggle&&getComputedStyle(toggle).display!=='none'
+        ? Math.max(toggle.offsetHeight,brand?.offsetHeight||0)+parseFloat(style.paddingTop)+parseFloat(style.paddingBottom)+1
+        : header.getBoundingClientRect().height;
+      for(const element of [root,index])element.style.setProperty('--showroom-header',`${Math.ceil(height)}px`);
+    }
+    options.style.gridTemplateColumns=root.dataset.layout==='wide'?`repeat(${Math.min(4,options.children.length)},minmax(0,1fr))`:'';
+  }
+  responsiveLayout();window.addEventListener('resize',responsiveLayout);coarse.addEventListener('change',responsiveLayout);
+  const header=document.querySelector('#site-header');if(header)new ResizeObserver(responsiveLayout).observe(header);
   const exhibit=createProjectExhibit(root);
   let state=stateFromUrl(new URL(location.href),projects);
   let scene:ReturnType<typeof createShowroomScene>|undefined;
@@ -39,7 +56,7 @@ export function mountShowroom(root:HTMLElement) {
     heading.textContent=room?.title||model?.label||'Select a model.';
     description.textContent=room?.description||(model?'Select a project room, or scroll forward to enter. Reverse your gesture to return to the showroom.':'Move to look around. Select a model, or scroll forward to approach.');
     const entries=model?model.projects.map((p,i)=>({id:p.slug,label:p.title,count:'',number:i+1,room:true})):models.map((m,i)=>({id:m.category,label:m.label,count:String(m.projects.length).padStart(2,'0'),number:i+1,room:false}));
-    options.setAttribute('aria-label',model?'Choose a project room':'Choose a category model');options.style.gridTemplateColumns=innerWidth>800?`repeat(${Math.min(4,entries.length)},minmax(0,1fr))`:'';
+    options.setAttribute('aria-label',model?'Choose a project room':'Choose a category model');options.style.gridTemplateColumns=root.dataset.layout==='wide'?`repeat(${Math.min(4,entries.length)},minmax(0,1fr))`:'';
     options.replaceChildren(...entries.map(item=>{
       const button=document.createElement('button');button.type='button';button.dataset[item.room?'showroomRoom':'showroomModel']=item.id;
       button.setAttribute('aria-pressed',String(item.room&&item.id===room?.slug));button.setAttribute('aria-label',`${item.room?'Enter project room':'Open category model'}: ${item.label}`);
@@ -47,6 +64,9 @@ export function mountShowroom(root:HTMLElement) {
       const label=document.createElement('span');label.textContent=item.label;const count=document.createElement('span');count.className='option-count';count.textContent=item.count;
       button.append(number,label,count);return button;
     }));
+    const markers=root.querySelector<HTMLElement>('[data-showroom-markers]')!;
+    markers.replaceChildren(...entries.map(item=>{const marker=document.createElement('span');marker.dataset.marker=item.id;marker.textContent=String(item.number).padStart(2,'0');return marker;}));
+    root.querySelector('[data-showroom-touch-hint]')!.textContent=model?'Drag to turn · Tap a room':'Drag to turn · Tap a model';
     exhibit.setProject(room?.slug);scene?.setState(state);
     root.querySelector('[data-showroom-hint]')!.textContent=room?'Scroll to walk · Sideways to turn · Click image to enlarge':'Move to look · Scroll to travel · Select a model';
     status.textContent=room?`${room.title}. Project exhibition.`:model?`${model.label}. ${model.projects.length} project rooms.`:`${state.group==='concepts'?'Independent concepts':'Client projects'}. ${models.length} category models.`;
@@ -95,5 +115,6 @@ export function mountShowroom(root:HTMLElement) {
   });
   const initial=new URL(location.href);
   if(initial.searchParams.has('category')&&!initial.searchParams.has('model')&&!initial.searchParams.has('room')&&!initial.searchParams.has('project'))setIndex(true,false);
-  window.addEventListener('resize',()=>{options.style.gridTemplateColumns=innerWidth>800?`repeat(${Math.min(4,options.children.length)},minmax(0,1fr))`:'';});
+
 }
+

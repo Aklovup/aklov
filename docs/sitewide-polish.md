@@ -31,6 +31,6 @@ The workflow builds the site, runs 19 content/form/filter logic checks and rende
 
 Chrome DevTools trace tooling is not connected, so no Lighthouse/Core Web Vitals scores are claimed. Verified derivative sizes and browser request behavior substantiate the image-delivery changes.
 
-The supplied portraits are 438 × 570; sharper originals are still needed for high-density displays. Portfolio media for Moving Company CRM, GuideYusuf, InstantResidency, VÉRA and Vortex, plus Wound Concierge's customer workflow, remains pending. No client screenshots or results are fabricated.
+The current replacement About portrait is 447 × 558px; a larger original would improve high-density display detail. Portfolio media for Moving Company CRM, GuideYusuf, InstantResidency, VÉRA and Vortex, plus Wound Concierge's customer workflow, remains pending. No client screenshots or results are fabricated.
 
 Preview: `https://feat-static-images.aklov.pages.dev/`. Local preview: `npm install`, then `npm run dev`; optimized media is prepared automatically. Publishing/merging still requires the owner's review.

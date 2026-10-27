@@ -19,7 +19,7 @@ export function createRoomSurfaces(root:HTMLElement,scene:THREE.Scene,camera:THR
   const lifted=exhibit.querySelector<HTMLElement>('[data-lift-display]')!,liftObject=new CSS3DObject(lifted);
   htmlScene.add(liftObject);liftObject.visible=false;
   const liftMask=new THREE.Mesh(new THREE.PlaneGeometry(1000,700),aperture);liftMask.visible=false;scene.add(liftMask);
-  let node:THREE.Object3D|undefined,flat=innerWidth<800,failed=false;
+  let node:THREE.Object3D|undefined,flat=root.dataset.layout==='compact',failed=false;
   let parked=false,savedLiftStyle='';
   let lift:{progress:number;target:number;from:THREE.Vector3;to:THREE.Vector3;rotation:THREE.Quaternion;facing:THREE.Quaternion;scale:THREE.Vector3;targetScale:THREE.Vector3}|undefined;
   function detach(){for(const s of surfaces){s.mask.visible=false;exhibit.append(s.element);s.element.style.removeProperty('display');}liftMask.visible=false;exhibit.append(lifted);lifted.style.removeProperty('display');renderer.domElement.hidden=true;root.dataset.surfaceMode='flat';root.dataset.wallMounted='false';}
@@ -82,7 +82,8 @@ export function createRoomSurfaces(root:HTMLElement,scene:THREE.Scene,camera:THR
     if(lift.progress===lift.target){if(lift.target)park();if(!lift.target){liftObject.visible=false;liftMask.visible=false;}root.dispatchEvent(new CustomEvent('aklov:media-lift-settled',{detail:{open:!!lift.target}}));}
   }
   function render(){if(node&&!flat&&!failed)renderer.render(htmlScene,camera);}
-  function resize(w:number,h:number){renderer.setSize(w,h);const next=w<800;if(next!==flat){flat=next;bind(node);}if(flat||failed)detach();}
+  function resize(w:number,h:number){renderer.setSize(w,h);const next=root.dataset.layout==='compact';if(next!==flat){flat=next;bind(node);}if(flat||failed)detach();}
   function fallback(){failed=true;detach();}
   return {bind,render,resize,fallback,update,animating:()=>!!lift&&lift.progress!==lift.target};
 }
+

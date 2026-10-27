@@ -20,11 +20,11 @@ Large italic heading accents, process numbers and highlighted quote phrases use 
 
 ## Portrait
 
-The supplied transparent portrait is `public/images/portraits/Portrait_about.png`, referenced through `profile.portrait` in `src/data/about.ts`. Its actual dimensions are 438 × 570px.
+The replacement transparent jacket portrait is `public/images/portraits/About_Portraits.png`, referenced through `profile.portrait` in `src/data/about.ts`. Its actual dimensions are 447 × 558px.
 
 `src/components/about/AboutPortrait.astro` preserves the reserved 4:5 gold frame, ivory name panel, and attached gold contour. It has descriptive alternative text, an eager image, and a typographic fallback used only if no portrait source is configured. Do not add a fade or alter this approved treatment as part of unrelated updates.
 
-A higher-resolution approved transparent original would improve sharpness when the current source is displayed wider than 438px. Upscaling this file cannot restore detail. When a replacement is supplied, update the source path and actual dimensions, check responsive delivery and crop, and preserve the composition.
+A higher-resolution approved transparent original would improve sharpness when the current source is displayed wider than 447px. Upscaling this file cannot restore detail. When a replacement is supplied, update the source path and actual dimensions, check responsive delivery and crop, and preserve the composition.
 
 ## Destinations
 

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
+import sharp from 'sharp';
 import { contact, inquiryDelivery } from '../src/data/contact.ts';
 import { inquiryServices } from '../src/lib/inquiry.ts';
 import { links } from '../src/data/links.ts';
@@ -61,6 +62,8 @@ try {
   assert.equal(await page.title(), contact.metadata.title);
   assert.equal(await page.locator('meta[name="description"]').getAttribute('content'), contact.metadata.description);
   assert.equal(await page.locator('h1').count(), 1);
+  assert.equal(await page.locator('.contact-page').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(216, 189, 120)');
+  assert.equal(await page.locator('.contact-page h1 em').evaluate(el=>getComputedStyle(el).color),'rgb(21, 21, 21)');
   assert.equal(normalize(await page.locator('h1').innerText()), contact.headline);
   assert.equal(await page.locator('.kicker').innerText(), contact.eyebrow);
   assert.deepEqual((await page.locator('[data-approved-copy]').allInnerTexts()).map(normalize), [...contact.introduction, contact.direct.body, contact.closing]);
@@ -133,8 +136,11 @@ try {
   }
   await page.setViewportSize({ width: 1440, height: 1100 });
   await page.screenshot({ path: output + '/contact-desktop.png', fullPage: true });
+  console.log('VISUAL_REVIEW_CONTACT_1440:'+(await sharp(await page.screenshot()).resize({width:960}).jpeg({quality:65}).toBuffer()).toString('base64'));
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: output + '/contact-mobile.png', fullPage: true });
+  console.log('VISUAL_REVIEW_CONTACT_390:'+(await sharp(await page.screenshot()).jpeg({quality:65}).toBuffer()).toString('base64'));
+  assert((await page.locator('.form-column').boundingBox()).y < 700, 'The mobile form should begin in the opening viewport');
   await page.setViewportSize({ width: 768, height: 1000 });
   await page.screenshot({ path: output + '/contact-tablet.png', fullPage: true });
   await page.goto(base + '/contact/');
@@ -273,3 +279,4 @@ try {
   await browser?.close();
   server.kill('SIGTERM');
 }
+

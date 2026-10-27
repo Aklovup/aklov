@@ -40,17 +40,18 @@ export function createProjectExhibit(root:HTMLElement) {
     root.dispatchEvent(new CustomEvent('aklov:media-lift',{detail:{open:true,kind}}));
     document.dispatchEvent(new CustomEvent('aklov:project-open',{detail:{root:liftScroll}}));liftScroll.focus({preventScroll:true});
   }
-  window.addEventListener('resize',()=>closeLift(true));
+  let readerWidth=innerWidth;window.addEventListener('resize',()=>{if(Math.abs(innerWidth-readerWidth)>1)closeLift(true);readerWidth=innerWidth;});
+  const nativeReader=()=>root.dataset.surfaceMode==='flat'||root.dataset.renderer==='fallback';
   // A projected CSS3D surface is not consistently included in native scroll chaining.
   // Route reading gestures explicitly, keeping them separate from room navigation.
   document.addEventListener('wheel',event=>{
-    if(root.dataset.mediaLift!=='open'||event.ctrlKey)return;
+    if(nativeReader()||root.dataset.mediaLift!=='open'||event.ctrlKey)return;
     const box=lifted.getBoundingClientRect();
     if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)return;
     event.preventDefault();liftScroll.scrollTop+=gesturePixels(event.deltaY,event.deltaMode,liftScroll.clientHeight);
   },{passive:false,capture:true});
   let readingTouch:{id:number;y:number;origin:number;moved:boolean}|undefined;
-  liftScroll.addEventListener('pointerdown',event=>{if(event.pointerType==='mouse')return;readingTouch={id:event.pointerId,y:event.clientY,origin:event.clientY,moved:false};});
+  liftScroll.addEventListener('pointerdown',event=>{if(nativeReader()||event.pointerType==='mouse')return;readingTouch={id:event.pointerId,y:event.clientY,origin:event.clientY,moved:false};});
   liftScroll.addEventListener('pointermove',event=>{
     if(!readingTouch||readingTouch.id!==event.pointerId)return;
     const distance=readingTouch.y-event.clientY;readingTouch.y=event.clientY;
@@ -88,6 +89,7 @@ export function createProjectExhibit(root:HTMLElement) {
     const selected=assets.find(a=>a.dataset.id===layout.main);if(selected)stage.append(selected.cloneNode(true));stage.dataset.available=selected?.dataset.available||'false';stage.setAttribute('aria-disabled',String(selected?.dataset.available!=='true'));
     exhibit.querySelector('[data-media-position]')!.textContent=selected?.dataset.available==='true'?`${assets.indexOf(selected)+1} / ${assets.length} media`:'Media pending';
     exhibit.querySelector<HTMLElement>('[data-media-layout]')!.dataset.single=String(!layout.rail.length);rail.hidden=!layout.rail.length;
+    rail.style.setProperty('--rail-count',String(Math.max(1,layout.rail.length)));
     rail.style.gridTemplateRows=`repeat(${Math.max(1,layout.rail.length)},minmax(0,1fr))`;
     rail.replaceChildren(...layout.rail.map(id=>{
       const asset=assets.find(a=>a.dataset.id===id)!,button=document.createElement('button');button.type='button';button.dataset.mediaChoice=id;

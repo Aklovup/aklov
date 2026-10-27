@@ -44,7 +44,7 @@ jobs:
       - name: Check content and filtering logic
         run: node --test --test-isolation=none tests/work.test.mjs tests/contact.test.mjs
       - name: Install the test browser
-        run: npx playwright install --with-deps --only-shell chromium
+        run: npx playwright install --only-shell chromium
       - name: Review the editorial homepage
         run: node tests/home.browser.mjs
       - name: Verify uploaded static media
@@ -145,3 +145,23 @@ jobs:
           path: artifacts/home-review/
           if-no-files-found: ignore
 
+
+  responsive-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --no-save --package-lock=false playwright
+      - run: npm run build
+      - run: npx playwright install --only-shell chromium
+      - name: Audit responsive layouts and native touch navigation
+        run: node tests/responsiveness.browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: responsiveness-review
+          path: artifacts/responsiveness/
+          if-no-files-found: warn

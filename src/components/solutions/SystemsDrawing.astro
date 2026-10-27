@@ -1,0 +1,110 @@
+<!-- A decorative capability drawing; the real service links remain ordinary HTML. -->
+<figure class="systems-drawing" data-solutions-drawing aria-hidden="true">
+  <svg viewBox="0 0 1000 620" fill="none" focusable="false" aria-hidden="true">
+    <defs>
+      <linearGradient id="system-paper" x1="460" y1="210" x2="630" y2="540" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#fffdf8" /><stop offset="1" stop-color="#e4dfd3" />
+      </linearGradient>
+      <linearGradient id="system-ink" x1="420" y1="240" x2="610" y2="420" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#373630" /><stop offset="1" stop-color="#151515" />
+      </linearGradient>
+      <radialGradient id="system-shadow">
+        <stop stop-color="#151515" stop-opacity=".16" /><stop offset="1" stop-color="#151515" stop-opacity="0" />
+      </radialGradient>
+    </defs>
+
+    <!-- A single work surface connects the five independently drawn modules. -->
+    <ellipse cx="542" cy="459" rx="442" ry="119" fill="url(#system-shadow)" />
+    <path d="M110 357 563 137 956 331 503 556Z" fill="#d4cdbd" />
+    <path d="M110 345 563 125 956 319 503 544Z" fill="url(#system-paper)" stroke="#b6ad99" stroke-width="1" />
+    <path d="M110 345v12l393 199v-12M503 544l453-225v12" stroke="#b6ad99" stroke-width="1" />
+    <g class="drawing-grid" stroke-width=".8">
+      <path d="m200 302 393 196M291 258l393 195M381 214l393 194M472 169l393 195" />
+      <path d="m189 385 453-221M268 425l453-222M346 464l453-222M425 504l453-222" />
+    </g>
+
+    <!-- Gold routes have no direction arrows: these are related capabilities, not a mandatory funnel. -->
+    <g class="drawing-route" stroke-width="3" stroke-linejoin="round">
+      <path d="m281 400 74 37 128-64M430 251l69 35 62-30M704 213l64 32-91 45M824 342l-60 30-56-28" />
+      <path d="m357 436 50 25 122-60M768 245l59 29" stroke-width="1" />
+    </g>
+
+    <!-- Websites: an open, layered front door. -->
+    <g>
+      <path d="m164 357 139-69 117 58v24l-139 69-117-58Z" fill="#262622" />
+      <path d="m164 357 117 58 139-69M281 415v24" stroke="#777166" stroke-width="1" />
+      <path d="m164 357 139-69 117 58-139 69Z" fill="url(#system-ink)" stroke="#151515" />
+      <path d="m184 351 119-59 97 48-119 59Z" stroke="#d8bd78" stroke-width="1.5" />
+      <path d="m206 346 75 37 96-48M230 334l75 37M256 321l75 37" stroke="#aaa28e" stroke-opacity=".45" />
+      <path d="m173 365 108 54 130-64" stroke="#d8bd78" stroke-width="1.5" />
+    </g>
+
+    <!-- Customer and sales systems: records organised on a shared plane. -->
+    <g>
+      <path d="m306 213 139-68 111 55v24l-139 69-111-55Z" fill="#c2b9a5" />
+      <path d="m306 213 139-68 111 55-139 69Z" fill="#fffdf8" stroke="#aaa08b" />
+      <path d="m306 213 111 56v24M417 269l139-69" stroke="#aaa08b" />
+      <path d="m334 213 108-53 84 42-108 53Z" fill="#e5decc" />
+      <path d="m353 212 23-11 66 33-23 11ZM391 194l23-11 66 33-23 11ZM429 176l13-6 66 33-13 6Z" fill="#25251f" />
+      <path d="m333 229 84 42 111-55" stroke="#d8bd78" stroke-width="2" />
+    </g>
+
+    <!-- Workflow automation: connected stages at different levels. -->
+    <g>
+      <path d="m590 181 130-64 109 54v26l-130 64-109-54Z" fill="#25251f" />
+      <path d="m590 181 130-64 109 54-130 64Z" fill="url(#system-ink)" stroke="#151515" />
+      <path d="m590 181 109 54v26M699 235l130-64" stroke="#7c7565" />
+      <path d="m617 181 38-19 29 14-38 19Zm44-22 38-19 29 14-38 19Zm44-22 14-7 29 14-14 7Z" fill="#d8bd78" />
+      <path d="m647 201 72-35 57 28" stroke="#d8bd78" stroke-width="2" />
+    </g>
+
+    <!-- Custom applications anchor the drawing; their surface is purpose-built. -->
+    <g>
+      <path d="m433 351 170-84 144 72v41l-170 84-144-72Z" fill="#191918" />
+      <path d="m433 351 170-84 144 72-170 84Z" fill="url(#system-ink)" stroke="#151515" />
+      <path d="m433 351 144 72v41M577 423l170-84" stroke="#847a61" />
+      <path d="m447 349 156-77 130 65-156 77Z" stroke="#d8bd78" stroke-width="2" />
+      <path d="m472 346 131-65 105 52-131 65Z" stroke="#d8bd78" stroke-opacity=".45" />
+      <path d="m505 346 98-49 71 35-98 49Z" fill="#d8bd78" />
+      <path d="m524 345 79-39 52 26-79 39Z" fill="#25251f" />
+      <path d="m447 365 130 65 156-77M447 376l130 65 156-77" stroke="#a68b47" stroke-width="1" />
+    </g>
+
+    <!-- Integrations and reporting: a common surface for connected information. -->
+    <g>
+      <path d="m748 310 92-45 88 44v22l-92 46-88-44Z" fill="#b9ae95" />
+      <path d="m748 310 92-45 88 44-92 46Z" fill="#fffdf8" stroke="#a49a83" />
+      <path d="m748 310 88 45v22M836 355l92-46" stroke="#a49a83" />
+      <path d="m774 310 65-32 63 31-65 33Z" fill="#d8bd78" />
+      <path d="m789 310 49-24 13 6-49 25ZM815 323l49-24 13 6-49 25Z" fill="#25251f" />
+    </g>
+
+    <!-- Labels are repeated accessibly in the service index; they can recede on small screens. -->
+    <g class="drawing-leaders" stroke-width="1">
+      <path d="M177 427h-65M362 172l-47-23H166M721 115V78h-79M577 465v40M890 356v58h-71" />
+    </g>
+    <g class="drawing-labels">
+      <text x="54" y="457"><tspan class="drawing-number">01</tspan><tspan x="54" dy="26">Website Design &amp;</tspan><tspan x="54" dy="24">Development</tspan></text>
+      <text x="122" y="104"><tspan class="drawing-number">02</tspan><tspan x="122" dy="26">Customer &amp;</tspan><tspan x="122" dy="24">Sales Systems</tspan></text>
+      <text x="620" y="42"><tspan class="drawing-number">03</tspan><tspan x="650" dy="0">Workflow Automation</tspan></text>
+      <text x="432" y="550"><tspan class="drawing-number">04</tspan><tspan x="432" dy="26">Custom Business Applications</tspan></text>
+      <text x="788" y="449"><tspan class="drawing-number">05</tspan><tspan x="788" dy="26">Integrations &amp;</tspan><tspan x="788" dy="24">Reporting</tspan></text>
+    </g>
+  </svg>
+</figure>
+
+<style>
+  .systems-drawing { width: 100%; margin: 0; }
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .drawing-grid { stroke: #b4a98e; opacity: .25; }
+  .drawing-route { stroke: var(--gold-dark); }
+  .drawing-leaders { stroke: #a99b7e; }
+  .drawing-labels { fill: var(--charcoal); font: 24px var(--display); }
+  .drawing-number { fill: var(--gold-dark); font: 11px var(--sans); letter-spacing: 2px; }
+  @media (max-width: 1000px) {
+    .drawing-labels, .drawing-leaders { display: none; }
+  }
+  @media (max-width: 640px) {
+    svg { margin-block: -12px -20px; }
+  }
+</style>

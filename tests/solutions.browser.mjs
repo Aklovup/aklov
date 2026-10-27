@@ -3,12 +3,13 @@ import assert from 'node:assert/strict';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
+import sharp from 'sharp';
 const base = 'http://127.0.0.1:4333';
 const output = 'artifacts/solutions-review';
 mkdirSync(output, {recursive:true});
 const server = spawn('npm', ['run','preview','--','--host','127.0.0.1','--port','4333'], {stdio:'inherit'});
 let browser;
-const report = {pageErrors:[],layouts:[],tablet:[],image:{},links:[],mobileMenu:{}};
+const report = {pageErrors:[],layouts:[],drawing:[],image:{},links:[],mobileMenu:{}};
 try {
   for (let i=0;i<100;i++) {
     try {if ((await fetch(base+'/solutions/')).ok) break;} catch {}
@@ -33,13 +34,30 @@ try {
   assert.equal(await page.locator('.sol.is-dark, .sol.is-deep').count(),0);
   assert.equal(await page.locator('.approach').evaluate(el=>getComputedStyle(el).backgroundColor),await page.locator('.choose').evaluate(el=>getComputedStyle(el).backgroundColor));
   assert.equal(await page.locator('.choose').evaluate(el=>getComputedStyle(el).color),'rgb(21, 21, 21)');
-  const tablet = page.locator('[data-solutions-tablet]');
-  const screen = tablet.locator('.tablet-screen');
-  const screenImage = screen.locator('img');
-  await screenImage.evaluate(img=>img.decode());
-  assert.ok((await screenImage.getAttribute('src')).includes('/images/generated/projects/vortex-gym-concept/'));
-  assert.equal(await tablet.locator('figcaption').count(),0);
-  assert.equal(await page.locator('.hero-introduction .hero-actions .btn-gold').getAttribute('href'),'/contact/');
+  const drawing = page.locator('[data-solutions-drawing]');
+  assert.equal(await drawing.count(),1);
+  assert.equal(await drawing.getAttribute('aria-hidden'),'true');
+  assert.equal(await page.locator('[data-solutions-tablet]').count(),0);
+  assert.equal(await page.locator('.hero-surface').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(245, 242, 234)');
+  assert.equal(await page.locator('.hero-introduction .hero-actions .btn-dark').getAttribute('href'),'/contact/');
+  const heroContrast = () => page.evaluate(() => {
+    const canvas=document.createElement('canvas');canvas.width=canvas.height=1;
+    const context=canvas.getContext('2d');
+    const rgba=color=>{context.clearRect(0,0,1,1);context.fillStyle=color;context.fillRect(0,0,1,1);return [...context.getImageData(0,0,1,1).data];};
+    const luminance=rgb=>rgb.slice(0,3).map(c=>{const v=c/255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;}).reduce((s,v,i)=>s+v*[.2126,.7152,.0722][i],0);
+    return [...document.querySelectorAll('.hero-meta span,.hero-copy,.hero-actions a,.idx-top,.idx-n,.idx-t,.idx-a,#page-title,#page-title em')].flatMap(el=>{
+      const style=getComputedStyle(el);let backdrop=el;
+      while(backdrop&&rgba(getComputedStyle(backdrop).backgroundColor)[3]===0)backdrop=backdrop.parentElement;
+      const a=luminance(rgba(style.color)),b=luminance(rgba(getComputedStyle(backdrop||document.body).backgroundColor));
+      const ratio=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+      const large=parseFloat(style.fontSize)>=24||(parseFloat(style.fontSize)>=18.66&&parseFloat(style.fontWeight)>=700);
+      return ratio+.01<(large?3:4.5)?[{text:el.textContent.trim(),ratio}]:[];
+    });
+  });
+  assert.deepEqual(await heroContrast(),[],'Solutions hero text contrast failed');
+  await page.locator('.hero-explore').hover();
+  assert.deepEqual(await heroContrast(),[],'Solutions hero hover contrast failed');
+  await page.mouse.move(0,0);
   const destinations=['website','customer','workflow','applications','integrations'];
   assert.deepEqual(await page.locator('.idx-row').evaluateAll(items=>items.map(a=>a.getAttribute('href'))),destinations.map(id=>'#'+id));
   for(const id of destinations) {
@@ -51,7 +69,7 @@ try {
   await page.keyboard.press('Tab');
   await page.locator('.idx-row').first().focus();
   assert.equal(await page.locator('.idx-row').first().evaluate(el=>getComputedStyle(el).outlineStyle),'solid');
-  assert.equal(await page.locator('.idx-row').first().evaluate(el=>getComputedStyle(el).outlineColor),'rgb(216, 189, 120)');
+  assert.equal(await page.locator('.idx-row').first().evaluate(el=>getComputedStyle(el).outlineColor),'rgb(21, 21, 21)');
   await page.locator('.idx-row').first().evaluate(el=>el.blur());
   report.links=await page.locator('.hero-actions a, .sol-actions a, .choose-cta a, .closing-act a').evaluateAll(links=>links.map(a=>({text:a.textContent.trim(),href:a.getAttribute('href')})));
   assert.equal(report.links.filter(link => link.href === '/contact/').length, 8);
@@ -61,25 +79,23 @@ try {
       const bounds=await line.evaluate(el=>{const r=document.createRange();r.selectNodeContents(el);const b=r.getBoundingClientRect();return {left:b.left,right:b.right};});
       assert.ok(bounds.left>=-1&&bounds.right<=width+1,'Solutions headline clips at '+width+': '+JSON.stringify(bounds));
     }
-    const deviceTransform = await tablet.locator('.tablet-device').evaluate(el=>getComputedStyle(el).transform);
-    if(width<=1000) assert.equal(deviceTransform,'none','Stacked tablet must remain straight at '+width);
-    else assert.match(deviceTransform,/matrix3d/,'Desktop tablet should retain its perspective');
-    assert.ok(await page.locator('.hero h1 .l2').evaluate(el=>parseFloat(getComputedStyle(el).paddingLeft)>0),'Gold headline line must retain its editorial indentation');
-    const { intro, actions, stage, device, index } = await page.evaluate(() => {
-      const bounds = selector => { const b=document.querySelector(selector).getBoundingClientRect(); return {x:b.x,y:b.y,width:b.width,height:b.height}; };
-      return {intro:bounds('.hero-introduction'),actions:bounds('.hero-actions'),stage:bounds('[data-solutions-tablet]'),device:bounds('.tablet-device'),index:bounds('.idx')};
+    assert.ok(await page.locator('.hero h1 .l2').evaluate(el=>parseFloat(getComputedStyle(el).paddingLeft)>0),'Emphasised headline line must retain its editorial indentation');
+    const layout = await page.evaluate(() => {
+      const bounds = selector => { const b=document.querySelector(selector).getBoundingClientRect(); return {x:b.x,y:b.y,right:b.right,bottom:b.bottom,width:b.width,height:b.height}; };
+      return {title:bounds('#page-title'),intro:bounds('.hero-introduction'),actions:bounds('.hero-actions'),art:bounds('.hero-art'),index:bounds('.idx')};
     });
-    const headlineRight = await page.locator('.hero h1').evaluate(el=>{const r=document.createRange();r.selectNodeContents(el);return r.getBoundingClientRect().right;});
-    assert.ok(headlineRight<=intro.x+intro.width+1,'Indented headline exceeds its text column at '+width);
-    assert.ok(device.x>=8&&device.x+device.width<=width-8,'Tablet clips at '+width+': '+JSON.stringify(device));
-    assert.ok(actions.y>=intro.y&&actions.y+actions.height<=intro.y+intro.height+1,'Actions outside introduction');
-    assert.ok(index.y>=device.y+device.height,'Tablet reaches the service index at '+width+': '+JSON.stringify({intro,stage,device,index}));
-    if(width>1000) {
-      assert.ok(device.x>=intro.x+intro.width+12,'Tablet overlaps the text column at '+width);
-      assert.ok(Math.abs((stage.y+stage.height/2)-(intro.y+intro.height/2))<2,'Tablet stage not vertically centered');
-    } else assert.ok(device.y>=actions.y+actions.height+8,'Tablet precedes or overlaps the mobile actions');
-    assert.ok(await screenImage.evaluate(img=>img.complete&&img.naturalWidth>0));
-    assert.ok(await screen.evaluate(el=>el.scrollHeight>el.clientHeight),'Full-page source is not cropped to the opening hero');
+    assert(layout.art.x >= 0 && layout.art.right <= width, 'Systems drawing should fit at ' + width);
+    assert(layout.actions.y >= layout.intro.y && layout.actions.bottom <= layout.intro.bottom + 1, 'Actions must remain grouped with the introduction');
+    assert(layout.intro.y >= layout.title.bottom, 'Copy must follow the wide headline');
+    if (width > 640) {
+      assert(layout.art.x >= layout.intro.right, 'Drawing must not overlap the copy');
+      assert(layout.index.y >= Math.max(layout.art.bottom,layout.intro.bottom)-1, 'Index must follow the composition');
+    } else {
+      assert(layout.index.y >= layout.intro.bottom, 'Mobile service links must follow the copy');
+      assert(layout.art.y >= layout.index.bottom, 'Mobile navigation must precede the decorative drawing');
+      assert.equal(await drawing.locator('.drawing-labels').isVisible(),false,'Do not shrink diagram labels into unreadable mobile text');
+    }
+    assert.equal(await drawing.locator('svg').evaluate(el=>el.getAnimations({subtree:true}).length),0,'The systems drawing must remain static');
     for (const service of await page.locator('.sol').all()) {
       // Measure both columns in one frame: anchor smooth-scrolling can otherwise
       // change the viewport offset between separate boundingBox calls.
@@ -99,7 +115,7 @@ try {
       const steps = await page.locator('.step').evaluateAll(items => items.map(el => el.getBoundingClientRect().top));
       assert.ok(steps.every(top => Math.abs(top - steps[0]) < 1), 'Solutions process should read as one horizontal sequence');
     }
-    report.tablet.push({width,fullyVisible:true,actionsGrouped:true,centeredOrStacked:true,sourceLoaded:true});
+    report.drawing.push({width,fullyVisible:true,actionsGrouped:true,static:true,mobileIndexFirst:width<=640});
     report.layouts.push(await page.evaluate(()=>({width:innerWidth,height:document.documentElement.scrollHeight,overflow:[...document.querySelectorAll('.hero h1,.idx,.sol-title,.sol-goal,.sol-actions a,.sol-list,.steps,.closing-grid,.choose h2,.choose-grid,.sol-summary,.sol-body,.nav,.foot-links')].filter(el=>{if(!el.getClientRects().length)return false;const b=el.getBoundingClientRect();return b.left < -1 || b.right > innerWidth+1 || el.scrollWidth > el.clientWidth+1;}).map(el=>({class:el.className,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right,scroll:el.scrollWidth,client:el.clientWidth,text:el.textContent.trim().slice(0,90)}))})));
   }
   const image=page.locator('.sols-figure img');
@@ -115,10 +131,11 @@ try {
     const expectedRatio = width === 1440 ? .8 : width === 768 ? 4/3 : 1;
     assert.ok(Math.abs(frame.width/frame.height - expectedRatio) < .01, 'Solutions image composition changed at ' + width);
     await page.locator('.sols-head').screenshot({path:output+'/solutions-image-section-'+label+'.png'});
-    await page.evaluate(()=>scrollTo(0,0));
+    await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
     await page.screenshot({path:output+'/solutions-'+label+'.png',fullPage:true});
     await page.screenshot({path:output+'/solutions-hero-'+label+'.png'});
-    await tablet.screenshot({path:output+'/solutions-tablet-'+label+'.png'});
+    await drawing.screenshot({path:output+'/solutions-drawing-'+label+'.png'});
+    if(width===1440||width===390){await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));const visual=await sharp(await page.screenshot()).resize({width:Math.min(width,960)}).jpeg({quality:65}).toBuffer();console.log('VISUAL_REVIEW_SOLUTIONS_'+width+':'+visual.toString('base64'));}
   }
   assert.ok(report.layouts.every(layout => layout.overflow.length === 0), JSON.stringify(report.layouts));
   await page.setViewportSize({width:390,height:844});
@@ -137,11 +154,12 @@ try {
   assert.ok(report.mobileMenu.noJSNavigationVisible);
   await noJS.close();
   await page.emulateMedia({reducedMotion:'reduce'});
-  assert.equal(await tablet.locator('.tablet-device').evaluate(el=>getComputedStyle(el).animationName),'none');
+  assert.equal(await drawing.locator('svg').evaluate(el=>el.getAnimations({subtree:true}).length),0);
   assert.deepEqual(report.pageErrors,[]);
   console.log('SOLUTIONS_AUDIT',JSON.stringify(report));
   writeFileSync(output+'/audit.json',JSON.stringify(report,null,2));
 } finally {await browser?.close();server.kill('SIGTERM');}
+
 
 
 
