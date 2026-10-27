@@ -1,6 +1,7 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
 import { site } from '../data/site';
 
 const {
@@ -53,6 +54,7 @@ const isPreview = Boolean(process.env.CF_PAGES_BRANCH && process.env.CF_PAGES_BR
   </main>
 
   <Footer contactHref={contactHref} />
+  <ScrollReveal />
 </body>
 </html>
 

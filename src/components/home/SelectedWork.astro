@@ -28,7 +28,7 @@ const selected = selection.map(({ slug, href }) => {
   </div>
   <svg class="water-filter" width="0" height="0" aria-hidden="true" focusable="false"><defs><filter id="home-water-ripple" x="-5%" y="-10%" width="110%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".007 .06" numOctaves="1" seed="8" result="water"/><feDisplacementMap in="SourceGraphic" in2="water" scale="5" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg>
   <div class="wrap">
-    <div class="work-heading">
+    <div class="work-heading" data-reveal>
       <div>
         <p class="kicker mono">01 / Selected work</p>
         <h2 id="selected-work-title">Built around the business.</h2>
@@ -37,7 +37,7 @@ const selected = selection.map(({ slug, href }) => {
     </div>
     <div class="selection">
       {selected.map(({ project: { data }, href }, index) => (
-        <article class="selected-project" data-selected-slug={data.slug} aria-labelledby={`selected-${data.slug}`}>
+        <article class="selected-project" data-selected-slug={data.slug} aria-labelledby={`selected-${data.slug}`} data-reveal data-reveal-delay={index * 80}>
           <div class="project-installation">
             <div class="project-display">
               <ProjectMedia cover={data.cover} number={String(index + 1).padStart(2, '0')} title={data.title} showCaption={false} imageSizes="(max-width: 460px) calc(100vw - 56px), (max-width: 700px) 404px, (max-width: 1440px) 27vw, 404px" />
@@ -119,3 +119,4 @@ const selected = selection.map(({ slug, href }) => {
   }
   @media(prefers-reduced-motion:reduce) { .preview-reflection,.water-lines { animation:none; } }
 </style>
+

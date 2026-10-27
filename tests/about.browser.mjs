@@ -10,7 +10,9 @@ const base = 'http://127.0.0.1:4321';
 const output = 'artifacts/about-review';
 const normalize = (text) => text.replace(/\s+/g, ' ').trim();
 const expectedParagraphs = [
-  ...about.introduction.paragraphs,
+  about.introduction.paragraphs[4],
+  about.introduction.paragraphs[3],
+  ...about.introduction.paragraphs.slice(0, 3),
   ...about.biography.paragraphs,
   ...about.approach.paragraphs,
   about.approach.sequenceIntroduction,
@@ -261,6 +263,7 @@ try {
   await browser?.close();
   server.kill('SIGTERM');
 }
+
 
 
 

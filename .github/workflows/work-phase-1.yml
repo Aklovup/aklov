@@ -63,6 +63,8 @@ jobs:
         run: node tests/solutions.browser.mjs
       - name: Validate sitewide refinements
         run: node tests/site-polish.browser.mjs
+      - name: Review scroll motion and section continuity
+        run: node tests/scroll-reveal.browser.mjs
       - name: Validate the About page
         run: node tests/about.browser.mjs
       - name: Validate the Contact page and form states
@@ -129,6 +131,13 @@ jobs:
           name: sitewide-polish-review
           path: artifacts/site-polish-review/
           if-no-files-found: ignore
+      - name: Save continuity and motion review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: continuity-review
+          path: artifacts/continuity-review/
+          if-no-files-found: ignore
       - name: Save full-page image viewer review
         if: always()
         uses: actions/upload-artifact@v4
@@ -165,3 +174,4 @@ jobs:
           name: responsiveness-review
           path: artifacts/responsiveness/
           if-no-files-found: warn
+
