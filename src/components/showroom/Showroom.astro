@@ -219,6 +219,8 @@ const models=modelsFor(entries,'client');
     .showroom[data-layout='compact'] .showroom-info h2 { font-size:26px; }
     .showroom[data-layout='compact'] .showroom-options { grid-column:2;grid-row:3;max-height:none; }
     .showroom[data-layout='compact'] .showroom-bottom { grid-column:1/-1;grid-row:4; }
+    .showroom[data-layout='compact'][data-view='category'] .showroom-path { display:flex;grid-column:2;grid-row:1;justify-content:flex-end; }
+    .showroom[data-layout='compact'][data-view='category'] .showroom-path>[data-showroom-home],.showroom[data-layout='compact'][data-view='category'] .showroom-path>[data-model-path] { display:none; }
     .showroom[data-layout='compact'][data-view='project'] { grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto; }
     .showroom[data-layout='compact'][data-view='project'] .showroom-path { grid-column:1;display:flex; }
     .showroom[data-layout='compact'][data-view='project'] .project-exhibit { grid-column:1; }

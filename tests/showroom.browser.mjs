@@ -119,6 +119,7 @@ try{
    await p.waitForFunction(before=>document.querySelector('[data-showroom]').dataset.cameraHeading!==before,before);assert.equal(await p.locator('[data-showroom]').getAttribute('data-view'),'showroom');await p.waitForTimeout(400);
    const point=await p.locator('[data-showroom-model="applications"]').evaluate(b=>({x:+b.dataset.worldX,y:+b.dataset.worldY}));await p.touchscreen.tap(point.x,point.y);await view(p,'category');await touch.detach();
   }else await p.locator('[data-showroom-model="applications"]').tap();
+  assert.equal(await p.locator('[data-showroom-back]').isVisible(),true,'Every compact category view needs a visible route back');
   await p.locator('[data-showroom-room="impex-automotive"]').tap();await ready(p);assert.equal(await p.locator('[data-showroom]').getAttribute('data-surface-mode'),'flat');
   const initialMobile=await p.locator('[data-exhibit-stage] [data-media-id]').getAttribute('data-media-id'),choice=await p.locator('[data-media-choice]').first().getAttribute('data-media-choice');
   await p.locator('[data-media-choice]').first().tap();assert.equal(await p.locator('[data-exhibit-stage] [data-media-id]').getAttribute('data-media-id'),choice);assert.equal(await p.locator('[data-media-choice]').count(),2);
