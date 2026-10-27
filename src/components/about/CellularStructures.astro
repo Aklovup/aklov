@@ -1,0 +1,100 @@
+---
+// Build one curved, shared-edge cellular mesh. No geometry generation runs in the browser.
+type Point = [number, number];
+const bounds = { left: -240, top: -240, right: 1680, bottom: 1240 };
+const sites: Point[] = [
+  [-30, 90], [330, 60], [720, -50], [1120, 100], [1510, 220],
+  [100, 480], [490, 420], [870, 510], [1270, 580],
+  [-80, 960], [340, 900], [750, 1030], [1140, 950], [1540, 1020],
+];
+const clip = (polygon: Point[], nx: number, ny: number, limit: number): Point[] => {
+  const result: Point[] = [];
+  for (let i = 0; i < polygon.length; i++) {
+    const a = polygon[i], b = polygon[(i + 1) % polygon.length];
+    const da = a[0] * nx + a[1] * ny - limit;
+    const db = b[0] * nx + b[1] * ny - limit;
+    if (da <= 0) result.push(a);
+    if ((da <= 0) !== (db <= 0)) {
+      const t = da / (da - db);
+      result.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+    }
+  }
+  return result;
+};
+const key = (p: Point) => p.map(v => v.toFixed(2)).join(',');
+const edges = new Map<string, [Point, Point]>();
+for (const site of sites) {
+  let polygon: Point[] = [[bounds.left, bounds.top], [bounds.right, bounds.top], [bounds.right, bounds.bottom], [bounds.left, bounds.bottom]];
+  for (const other of sites) {
+    if (other === site) continue;
+    const nx = other[0] - site[0], ny = other[1] - site[1];
+    polygon = clip(polygon, nx, ny, (other[0] ** 2 + other[1] ** 2 - site[0] ** 2 - site[1] ** 2) / 2);
+  }
+  for (let i = 0; i < polygon.length; i++) {
+    const a = polygon[i], b = polygon[(i + 1) % polygon.length];
+    const onBoundary = [bounds.left, bounds.right].some(x => Math.abs(a[0] - x) < .01 && Math.abs(b[0] - x) < .01)
+      || [bounds.top, bounds.bottom].some(y => Math.abs(a[1] - y) < .01 && Math.abs(b[1] - y) < .01);
+    if (!onBoundary) {
+      const ordered = [a, b].sort((one, two) => key(one).localeCompare(key(two)));
+      edges.set(ordered.map(key).join('|'), ordered as [Point, Point]);
+    }
+  }
+}
+const wave = (p: Point, state: number): Point => {
+  // Every shared vertex receives the same displacement, so cells remain connected.
+  const hash = p[0] * .017 + p[1] * .013;
+  return [p[0] + Math.sin(hash + state * 2.1) * 12, p[1] + Math.cos(hash * 1.4 + state * 1.8) * 10];
+};
+const curve = (edge: [Point, Point], state: number) => {
+  const a = wave(edge[0], state), b = wave(edge[1], state);
+  const dx = b[0] - a[0], dy = b[1] - a[1], length = Math.hypot(dx, dy) || 1;
+  const bend = Math.sin((edge[0][0] + edge[1][1]) * .012 + state * 1.5) * Math.min(28, length * .075);
+  const n = [-dy / length * bend, dx / length * bend];
+  const values = [a[0], a[1], a[0] + dx / 3 + n[0], a[1] + dy / 3 + n[1], a[0] + dx * 2 / 3 + n[0], a[1] + dy * 2 / 3 + n[1], b[0], b[1]].map(v => v.toFixed(2));
+  return `M${values[0]} ${values[1]} C${values.slice(2).join(' ')}`;
+};
+const paths = [...edges.values()].map(edge => [0, 1, 2, 0].map(state => curve(edge, state)));
+---
+
+<div class="cellular-field" data-cellular-structures data-running="false" aria-hidden="true">
+  <svg viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+    {paths.map(states => (
+      <path d={states[0]} fill="none" vector-effect="non-scaling-stroke">
+        <animate attributeName="d" values={states.join(';')} keyTimes="0;.36;.72;1" calcMode="spline" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1" dur="72s" begin="indefinite" repeatCount="indefinite" />
+      </path>
+    ))}
+  </svg>
+</div>
+
+<script>
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  for (const field of document.querySelectorAll<HTMLElement>('[data-cellular-structures]')) {
+    const svg = field.querySelector('svg');
+    if (!svg) continue;
+    let inView = false, started = false;
+    svg.pauseAnimations();
+    const sync = () => {
+      const running = inView && !reduced.matches && !document.hidden;
+      field.dataset.running = String(running);
+      if (running) {
+        if (!started) {
+          svg.querySelectorAll<SVGAnimationElement>('animate').forEach(animation => animation.beginElement());
+          started = true;
+        }
+        svg.unpauseAnimations();
+      } else svg.pauseAnimations();
+    };
+    new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; sync(); }).observe(field);
+    reduced.addEventListener('change', sync);
+    document.addEventListener('visibilitychange', sync);
+    window.addEventListener('pagehide', () => svg.pauseAnimations());
+    window.addEventListener('pageshow', sync);
+    sync();
+  }
+</script>
+
+<style>
+  .cellular-field { position: absolute; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; opacity: .1; mix-blend-mode: difference; mask-image: linear-gradient(90deg, #0004, #0009 45%, #000 75%); }
+  svg { display: block; width: 100%; height: 100%; }
+  path { stroke: var(--gold); stroke-width: 1.1px; stroke-linecap: round; }
+</style>

@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import AboutPortrait from '../../components/about/AboutPortrait.astro';
+import CellularStructures from '../../components/about/CellularStructures.astro';
 import { about, profile } from '../../data/about';
 import { links } from '../../data/links';
 
@@ -17,6 +18,7 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
     <section class="about-hero" aria-labelledby="about-title">
       <div class="wrap hero-composition">
         <div class="hero-gold-plane" aria-hidden="true"></div>
+        <CellularStructures />
         <p class="kicker mono hero-eyebrow">{about.introduction.eyebrow}</p>
         <h1 class="identity-name" id="about-title"><span class="identity-first">{firstName}</span>{' '}<span class="identity-surname">{surname.join(' ')}</span></h1>
         <div class="hero-statement">
