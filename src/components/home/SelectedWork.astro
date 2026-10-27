@@ -1,6 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
 import ProjectMedia from '../work/ProjectMedia.astro';
+import Starfield from './Starfield.astro';
+import { mediaPreview } from '../../lib/media';
 import { links } from '../../data/links';
 
 const selection = [
@@ -16,7 +18,15 @@ const selected = selection.map(({ slug, href }) => {
 });
 ---
 
-<section class="selected-work" id="selected-work" aria-labelledby="selected-work-title">
+<section class="selected-work" id="selected-work" aria-labelledby="selected-work-title" data-ambient-scene data-running="false">
+  <Starfield reflected />
+  <div class="water-surface" aria-hidden="true">
+    <div class="water-light"></div>
+    <svg class="water-lines" viewBox="0 0 1440 600" preserveAspectRatio="none" focusable="false">
+      {Array.from({length:13},(_,i)=><path d={`M-100 ${70+i*39} Q360 ${20+i*41} 720 ${70+i*39} T1540 ${60+i*40}`} />)}
+    </svg>
+  </div>
+  <svg class="water-filter" width="0" height="0" aria-hidden="true" focusable="false"><defs><filter id="home-water-ripple" x="-5%" y="-10%" width="110%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".007 .06" numOctaves="1" seed="8" result="water"/><feDisplacementMap in="SourceGraphic" in2="water" scale="5" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg>
   <div class="wrap">
     <div class="work-heading">
       <div>
@@ -27,8 +37,16 @@ const selected = selection.map(({ slug, href }) => {
     </div>
     <div class="selection">
       {selected.map(({ project: { data }, href }, index) => (
-        <article class:list={['selected-project', { 'lead-project': index === 0 }]} aria-labelledby={`selected-${data.slug}`}>
-          <ProjectMedia cover={data.cover} number={String(index + 1).padStart(2, '0')} title={data.title} showCaption={false} />
+        <article class="selected-project" data-selected-slug={data.slug} aria-labelledby={`selected-${data.slug}`}>
+          <div class="project-installation">
+            <div class="project-display">
+              <ProjectMedia cover={data.cover} number={String(index + 1).padStart(2, '0')} title={data.title} showCaption={false} imageSizes="(max-width: 460px) calc(100vw - 56px), (max-width: 700px) 404px, (max-width: 1440px) 27vw, 404px" />
+            </div>
+            <span class="display-foot" aria-hidden="true"></span>
+            <div class="preview-reflection" aria-hidden="true" inert>
+              <img src={mediaPreview(data.cover.url)?.variants[0].url || data.cover.poster || (data.cover.type === 'image' ? data.cover.url : undefined)} alt="" width="640" height="360" loading="lazy" decoding="async" />
+            </div>
+          </div>
           <div class="project-copy">
             <div class="project-heading">
               <p class="project-type">{data.projectType}</p>
@@ -47,36 +65,57 @@ const selected = selection.map(({ slug, href }) => {
 </section>
 
 <style>
-  .selected-work { padding-block: clamp(52px, 5vw, 80px) clamp(56px, 6vw, 96px); border-bottom: 1px solid var(--line); }
-  p, h2, h3 { margin: 0; }
-  .work-heading { display: flex; justify-content: space-between; align-items: end; gap: 32px; padding-bottom: 28px; border-bottom: 1px solid var(--charcoal); margin-bottom: 32px; }
-  h2 { max-width: 18ch; margin-top: 20px; font-family: var(--display); font-size: clamp(48px, 6vw, 96px); font-weight: 400; line-height: .98; letter-spacing: -.035em; }
-  .index-link, .project-link { display: inline-flex; align-items: center; gap: 24px; min-height: 44px; font-size: 12px; font-weight: 600; }
-  .index-link { flex-shrink: 0; border-bottom: 1px solid var(--charcoal); }
-  .index-link span, .project-link span { font-size: 19px; }
-  .selection { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(40px, 4vw, 64px) clamp(24px, 3vw, 48px); }
-  .selected-project { min-width: 0; }
-  .lead-project { grid-column: 1 / -1; }
-  .lead-project :global(.project-media > img), .lead-project :global(.gif-preview) { aspect-ratio: 2.1; }
-  .project-copy { padding-top: 22px; }
-  .project-type { margin-bottom: 10px; color: var(--gold-dark); font-size: 11px; font-weight: 600; }
-  h3 { font-family: var(--display); font-size: clamp(32px, 3vw, 48px); font-weight: 400; line-height: 1.06; letter-spacing: -.025em; }
-  h3 a { display: block; min-height: 44px; }
-  .project-summary > p { max-width: 48em; margin-top: 16px; color: var(--body); font-size: 14px; line-height: 1.8; }
-  .project-link { margin-top: 12px; }
-  .concept-link { display: flex; align-items: center; gap: 18px; width: fit-content; min-height: 44px; margin-top: 4px; border-bottom: 1px solid var(--line); color: var(--gold-dark); font-size: 12px; line-height: 1.6; }
-  .concept-link span { font-size: 18px; }
-  .lead-project .project-copy { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; }
-  .lead-project .project-summary > p { margin-top: 0; }
-  @media (hover: hover) { a:hover { color: var(--gold-dark); } }
-  @media (max-width: 640px) {
-    .work-heading { display: block; margin-bottom: 24px; }
-    h2 { font-size: clamp(44px, 10vw, 62px); }
-    .index-link { margin-top: 18px; }
-    .selection { grid-template-columns: 1fr; gap: 36px; }
-    .lead-project .project-copy { display: block; }
-    .lead-project .project-summary > p { margin-top: 16px; }
-    .lead-project :global(.project-media > img), .lead-project :global(.gif-preview) { aspect-ratio: 8 / 5; }
-    h3 { font-size: 36px; }
+  .selected-work { position:relative;isolation:isolate;overflow:hidden;background:var(--charcoal);color:var(--ivory);--focus-color:var(--gold);padding-block:clamp(58px,6vw,96px) clamp(72px,7vw,112px);border-top:1px solid #d8bd7838; }
+  .selected-work::before { content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(#151515 0%,#1c1b18 38%,#25231d 59%,#151515 90%); }
+  .selected-work::after { content:"";position:absolute;z-index:-1;top:30%;left:-10%;width:120%;height:1px;background:linear-gradient(90deg,transparent,#d8bd7860,transparent);box-shadow:0 0 30px 8px #d8bd7808; }
+  .selected-work>.wrap { position:relative;z-index:1;max-width:1440px; }
+  p,h2,h3 { margin:0; }
+  .work-heading { display:flex;justify-content:space-between;align-items:end;gap:32px;padding-bottom:28px;border-bottom:1px solid var(--line-dark);margin-bottom:clamp(40px,4vw,64px); }
+  .kicker { color:var(--gold); }
+  h2 { max-width:18ch;margin-top:20px;font-family:var(--display);font-size:clamp(48px,5vw,80px);font-weight:400;line-height:.98;letter-spacing:-.035em; }
+  .index-link,.project-link { display:inline-flex;align-items:center;gap:24px;min-height:44px;font-size:12px;font-weight:600; }
+  .index-link { flex-shrink:0;border-bottom:1px solid var(--gold); }
+  .index-link span,.project-link span { font-size:19px;color:var(--gold); }
+  .selection { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(24px,3.5vw,52px);align-items:start; }
+  .selected-project { min-width:0;max-width:420px;width:100%;justify-self:center; }
+  .selected-project:nth-child(2) { padding-top:58px; }
+  .selected-project:nth-child(3) { padding-top:18px; }
+  .project-installation { position:relative;isolation:isolate;margin-bottom:clamp(68px,6vw,86px); }
+  .project-display { position:relative;z-index:2;padding:7px;border:1px solid #d8bd7890;background:#111111;box-shadow:0 1px 0 #f5f2ea40,inset 0 0 0 2px #d8bd7812,0 20px 45px #0008; }
+  .project-display :global(.project-media>img),.project-display :global(.gif-preview) { aspect-ratio:16/9;max-height:none; }
+  .project-display :global(.project-media>img) { object-fit:cover;object-position:center top; }
+  .project-display :global(.gif-preview img),.project-display :global(.gif-preview canvas) { height:100%;aspect-ratio:auto; }
+  .project-display :global(.gif-toggle) { min-height:44px;right:8px;bottom:8px;padding-inline:12px;font-size:11px; }
+  .display-foot { position:absolute;z-index:1;top:calc(100% + 5px);height:5px;left:-5px;right:-5px;background:linear-gradient(90deg,#28251c,#bba266 18%,#e7d4a0 50%,#bba266 82%,#28251c);box-shadow:0 7px 22px #d8bd781c; }
+  .preview-reflection { position:absolute;top:calc(100% + 15px);left:8px;right:8px;height:90px;overflow:hidden;opacity:.27;mask-image:linear-gradient(#000,transparent 92%);filter:url(#home-water-ripple);pointer-events:none;animation:water-reflection 11s ease-in-out infinite alternate;animation-play-state:paused; }
+  .preview-reflection img { display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;object-position:center top;transform:scaleY(-1); }
+  .project-copy { position:relative;z-index:2; }
+  .project-type { margin-bottom:9px;color:var(--gold);font-size:11px;font-weight:500; }
+  h3 { font-family:var(--display);font-size:clamp(28px,2.3vw,38px);font-weight:400;line-height:1.08;letter-spacing:-.025em; }
+  h3 a { display:block;min-height:44px; }
+  .project-summary>p { max-width:48em;margin-top:14px;color:var(--on-dark);font-size:14px;line-height:1.8; }
+  .project-link { margin-top:13px; }
+  .concept-link { display:flex;align-items:center;gap:18px;width:fit-content;min-height:44px;margin-top:5px;border-bottom:1px solid var(--line-dark);color:var(--gold);font-size:12px;line-height:1.6; }
+  .concept-link span { font-size:18px; }
+  .water-filter { position:absolute;pointer-events:none; }
+  .water-surface { position:absolute;z-index:-1;inset:20% 0 0;overflow:hidden;pointer-events:none; }
+  .water-light { position:absolute;inset:0;background:radial-gradient(ellipse at 50% 38%,#d8bd7810,transparent 65%); }
+  .water-lines { position:absolute;inset:0;display:block;width:100%;height:100%;stroke:#d8bd78;stroke-width:.65;opacity:.075;animation:water-drift 18s ease-in-out infinite alternate;animation-play-state:paused; }
+  [data-running='true'] .preview-reflection,[data-running='true'] .water-lines { animation-play-state:running; }
+  @keyframes water-reflection { from { transform:translateX(-3px) skewX(-.8deg); } to { transform:translateX(3px) skewX(.8deg); } }
+  @keyframes water-drift { from { transform:translate(-12px,-5px) scaleX(1.02); } to { transform:translate(12px,8px) scaleX(1.04); } }
+  @media(hover:hover) { a:hover { color:var(--gold); } }
+  @media(max-width:1100px) { .selected-project:nth-child(2),.selected-project:nth-child(3) { padding-top:0; } .selection { gap:24px; } h3 { font-size:28px; } }
+  @media(max-width:700px) {
+    .work-heading { display:block;margin-bottom:40px; }
+    h2 { font-size:clamp(44px,10vw,62px); }
+    .index-link { margin-top:18px; }
+    .selection { grid-template-columns:minmax(0,1fr);gap:58px; }
+    .selected-project { max-width:420px; }
+    .project-installation { margin-bottom:64px; }
+    .preview-reflection { height:76px; }
+    h3 { font-size:36px; }
+    .selected-work::after { top:18%; }
   }
+  @media(prefers-reduced-motion:reduce) { .preview-reflection,.water-lines { animation:none; } }
 </style>

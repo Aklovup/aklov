@@ -1,4 +1,6 @@
 ---
+interface Props { reflected?:boolean; }
+const { reflected = false }=Astro.props;
 // A fixed seed keeps the server-rendered sky stable across visits and screenshots.
 // Small SVG points need no video download, canvas loop or new dependency.
 let seed = 1847;
@@ -6,7 +8,7 @@ const random = () => {
   seed = (seed * 16807) % 2147483647;
   return (seed - 1) / 2147483646;
 };
-const layers = [96, 192, 336].map((count, layer) => ({
+const layers = [96, 192, 432].map((count, layer) => ({
   layer,
   stars: Array.from({ length: count }, (_, index) => ({
     // Overscan keeps the sky filled as each layer crosses the hero edges.
@@ -22,9 +24,9 @@ const layers = [96, 192, 336].map((count, layer) => ({
 }));
 ---
 
-<div class="hero-sky" data-hero-sky data-running="false" data-paused="false">
+<div class:list={['hero-sky', { 'reflected-sky': reflected }]} data-hero-sky={reflected ? undefined : ''} data-reflected-sky={reflected ? '' : undefined} data-ambient-scene data-running="false" aria-hidden="true">
   <div class="sky-field" aria-hidden="true">
-    <svg id="home-starfield" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+    <svg id={reflected ? 'work-starfield' : 'home-starfield'} viewBox="0 0 1440 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
       {layers.map(({ layer, stars }) => (
         <g class:list={['star-drift', `depth-${layer}`]}>
           {stars.map((star) => (
@@ -34,38 +36,15 @@ const layers = [96, 192, 336].map((count, layer) => ({
       ))}
     </svg>
   </div>
-  <button class="sky-control" type="button" data-sky-toggle aria-controls="home-starfield" hidden>
-    <span class="sky-control-icon" aria-hidden="true"></span>
-    <span data-sky-label>Pause background</span>
-  </button>
 </div>
 
 <script>
-  const sky = document.querySelector<HTMLElement>('[data-hero-sky]');
-  const button = sky?.querySelector<HTMLButtonElement>('[data-sky-toggle]');
-  const label = sky?.querySelector<HTMLElement>('[data-sky-label]');
-  if (sky && button && label) {
-    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-    let userPaused = false;
-    let inView = false;
-    const sync = () => {
-      sky.dataset.running = String(!userPaused && !reduced.matches && inView && !document.hidden);
-      sky.dataset.paused = String(userPaused);
-      button.hidden = reduced.matches;
-      label.textContent = userPaused ? 'Resume background' : 'Pause background';
-    };
-    button.addEventListener('click', () => {
-      userPaused = !userPaused;
-      sync();
-    });
-    const observer = new IntersectionObserver(([entry]) => {
-      inView = entry.isIntersecting;
-      sync();
-    });
-    observer.observe(sky);
-    document.addEventListener('visibilitychange', sync);
-    reduced.addEventListener('change', sync);
-    sync();
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+  for(const scene of document.querySelectorAll<HTMLElement>('[data-ambient-scene]')){
+    let inView=false;
+    const sync=()=>{scene.dataset.running=String(inView&&!reduced.matches&&!document.hidden);};
+    new IntersectionObserver(([entry])=>{inView=entry.isIntersecting;sync();}).observe(scene);
+    reduced.addEventListener('change',sync);document.addEventListener('visibilitychange',sync);sync();
   }
 </script>
 
@@ -81,17 +60,14 @@ const layers = [96, 192, 336].map((count, layer) => ({
   .depth-2 { animation-duration: 76s; animation-delay: -46s; }
   .star, .star-drift { animation-play-state: paused; }
   [data-running='true'] .star, [data-running='true'] .star-drift { animation-play-state: running; }
-  .sky-control { position: absolute; z-index: 2; right: var(--pad); bottom: 4px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 44px; padding: 0 6px; border: 0; background: none; color: var(--on-dark-dim); font: 11px var(--sans); cursor: pointer; pointer-events: auto; }
-  .sky-control[hidden] { display: none; }
-  .sky-control:focus-visible { outline-offset: 1px; }
-  .sky-control-icon { width: 8px; height: 9px; border-inline: 2px solid currentColor; }
-  [data-paused='true'] .sky-control-icon { width: 0; height: 0; border: 5px solid transparent; border-left: 7px solid currentColor; border-right: 0; }
+  .reflected-sky { opacity:.24;inset:20% 0 0;mask-image:linear-gradient(transparent,#000 20%,#0008 70%,transparent); }
+  .reflected-sky .sky-field { background:none; }
+  .reflected-sky svg { transform:scaleY(-1);filter:blur(.45px); }
+  .reflected-sky .star-twinkle { animation:none; }
   @keyframes sky-drift { from { transform: translate(-84px, 56px); } to { transform: translate(96px, -64px); } }
   @keyframes star-breathe { from { opacity: calc(var(--brightness) * .45); } to { opacity: var(--brightness); } }
-  @media (hover: hover) { .sky-control:hover { color: var(--ivory); } }
   @media (max-width: 640px) { .sky-field svg { mask-image: linear-gradient(90deg, #0005, #0009 58%, #000); } }
   @media (prefers-reduced-motion: reduce) {
     .star, .star-drift { animation: none; }
-    .sky-control { display: none; }
   }
 </style>

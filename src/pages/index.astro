@@ -68,26 +68,32 @@ const principles = [
 >
   <section class="dark home-hero" aria-labelledby="hero-title">
     <Starfield />
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        const reveal = () => {
+          if (window.scrollY < 48) return;
+          root.dataset.homeReveal = 'shown';
+          window.removeEventListener('scroll', reveal);
+        };
+        window.addEventListener('scroll', reveal, { passive: true });
+        window.addEventListener('pageshow', reveal, { once: true });
+        root.dataset.homeReveal = 'pending';
+        reveal();
+      })();
+    </script>
     <div class="wrap hero">
       <p class="hero-meta mono">Websites, business systems &amp; digital solutions</p>
       <h1 id="hero-title">
         <span>Better systems.</span>
         <span class="hero-second">Better business.</span>
       </h1>
-      <div class="hero-lower">
-        <div class="hero-copy-block">
-          <p class="hero-copy">
-            The way a business operates matters. I help growing businesses build a stronger online presence and bring customer workflows, everyday processes and disconnected tools into systems that work with the people behind them.
-          </p>
-          <div class="hero-actions">
-            <a class="btn btn-gold" href={links.contact}>Discuss a business challenge <span aria-hidden="true">↗</span></a>
-            <a class="text-link" href="#selected-work">View selected work <span aria-hidden="true">↗</span></a>
-          </div>
-        </div>
-        <svg class="hero-joint" viewBox="0 0 320 190" fill="none" aria-hidden="true" focusable="false">
-          <path d="M12 14H184V76H222V139H308V176H184V93H148V52H12Z" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke" />
-          <path d="M148 52V85H184V176" stroke="currentColor" stroke-width="4" vector-effect="non-scaling-stroke" />
-        </svg>
+      <p class="hero-copy" data-hero-copy>
+        The way a business operates matters. I help growing businesses build a stronger online presence and bring customer workflows, everyday processes and disconnected tools into systems that work with the people behind them.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-gold" href={links.contact}>Discuss a business challenge <span aria-hidden="true">↗</span></a>
+        <a class="text-link" href="#selected-work">View selected work <span aria-hidden="true">↗</span></a>
       </div>
     </div>
   </section>
@@ -178,17 +184,16 @@ const principles = [
   h1, h2, h3, p { margin: 0; }
   .dark { background: var(--charcoal); color: var(--ivory); --focus-color: var(--gold); }
   .home-hero { position: relative; isolation: isolate; overflow: hidden; }
-  .hero { position: relative; z-index: 1; padding-block: clamp(44px, 4.5vw, 76px) clamp(48px, 4.5vw, 76px); }
-  .hero-meta { margin-bottom: 28px; color: var(--gold); }
-  h1 { font-family: var(--display); font-size: clamp(46px, 13vw, 226px); font-weight: 400; line-height: .87; letter-spacing: -.045em; }
-  h1 span { display: block; }
-  .hero-second { padding-left: clamp(16px, 8vw, 144px); color: var(--gold); }
-  .hero-lower { display: grid; grid-template-columns: minmax(0, 1fr) minmax(180px, 24%); gap: clamp(32px, 5vw, 80px); align-items: end; margin-top: clamp(32px, 3.5vw, 56px); }
-  .hero-copy { max-width: 46em; color: var(--on-dark); font-size: clamp(16px, 1.35vw, 20px); line-height: 1.7; }
-  .hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 20px 34px; margin-top: 26px; }
-  .text-link { display: inline-flex; align-items: center; gap: 16px; min-height: 44px; font-size: 13px; border-bottom: 1px solid var(--on-dark-dim); }
-  .text-link span { font-size: 18px; }
-  .hero-joint { display: block; width: 100%; max-width: 320px; height: auto; justify-self: end; color: var(--gold); }
+  .hero { position:relative;z-index:1;display:flex;flex-direction:column;min-height:calc(100svh - 97px);padding-block:clamp(36px,4vw,64px) clamp(28px,3vw,48px); }
+  .hero-meta { margin-bottom:clamp(28px,3vw,48px);color:var(--gold); }
+  h1 { font-family:var(--display);font-size:clamp(46px,16.8vw,300px);font-weight:400;line-height:.89;letter-spacing:-.045em; }
+  h1 span { display:block; }
+  .hero-second { text-align:right;color:var(--gold); }
+  .hero-copy { max-width:70ch;margin-top:auto;padding-top:clamp(30px,4vw,64px);color:var(--on-dark);font-size:clamp(16px,1.3vw,20px);line-height:1.75;opacity:1;transform:none;transition:opacity .75s ease,transform .75s cubic-bezier(.16,1,.3,1); }
+  :global(html[data-home-reveal='pending']) .hero-copy { opacity:0;transform:translateY(14px); }
+  .hero-actions { display:flex;justify-content:space-between;align-items:end;gap:24px;margin-top:clamp(30px,3vw,48px); }
+  .text-link { display:inline-flex;align-items:center;gap:16px;min-height:44px;font-size:13px;border-bottom:1px solid var(--on-dark-dim); }
+  .text-link span { font-size:18px; }
 
   .section { padding-block: clamp(64px, 7vw, 112px); }
   h2 { font-family: var(--display); font-weight: 400; letter-spacing: -.035em; }
@@ -270,7 +275,6 @@ const principles = [
     .service:hover .service-arrow { transform: translate(3px, -3px); }
   }
   @media (max-width: 1000px) {
-    .hero-lower { grid-template-columns: minmax(0, 1fr) 160px; gap: 28px; }
     .sv-head { grid-template-columns: minmax(0, 1fr) minmax(0, .8fr); gap: 24px 32px; }
     .service { grid-template-columns: 30px minmax(0, 1fr) minmax(0, 1fr) 24px; gap: 20px; }
     .ap-head { grid-template-columns: 1fr; }
@@ -282,12 +286,13 @@ const principles = [
   }
   @media (max-width: 640px) {
     .hero-meta { max-width: 34ch; font-size: 9px; letter-spacing: 1.4px; margin-bottom: 26px; }
-    h1 { font-size: clamp(46px, 12.8vw, 82px); line-height: .94; }
-    .hero-second { padding-left: 12px; }
-    .hero-lower { grid-template-columns: 1fr; gap: 26px; margin-top: 28px; }
-    .hero-actions { gap: 14px 22px; margin-top: 22px; }
-    .hero-actions .btn { padding-inline: 20px; }
-    .hero-joint { width: 112px; margin-top: -4px; }
+    .hero { min-height:calc(100svh - 85px);padding-block:32px 28px; }
+    h1 { font-size:clamp(46px,17.5vw,110px);line-height:.94; }
+    .hero-copy { padding-top:30px; }
+    .hero-actions { display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr);gap:16px;margin-top:28px; }
+    .hero-actions .btn { min-height:64px;height:auto;gap:10px;padding:12px;line-height:1.5; }
+    .hero-actions .text-link { justify-self:end;min-width:0;gap:8px;font-size:12px;line-height:1.5; }
+    .hero-actions .text-link span { flex-shrink:0;font-size:16px; }
     .sv-head { grid-template-columns: 1fr; gap: 22px; }
     .intro { justify-self: start; font-size: 14px; }
     .sv-head h2 { max-width: 14ch; font-size: clamp(48px, 10vw, 64px); }
@@ -301,5 +306,6 @@ const principles = [
     .contact-grid { grid-template-columns: 1fr; gap: 24px; margin-top: 28px; }
     .contact h2 { font-size: clamp(48px, 10vw, 66px); }
   }
+  @media(prefers-reduced-motion:reduce) { .hero-copy { transition:none;transform:none!important; } }
 </style>
 

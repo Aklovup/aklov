@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
+import sharp from 'sharp';
 import { readProjects } from './project-content.mjs';
 
 const base = 'http://127.0.0.1:4338';
@@ -38,11 +39,19 @@ try {
       assert(box && range.left >= 0 && range.right <= width + 1, 'Headline cropped at ' + width + ': ' + JSON.stringify(range));
     }
     const hero = page.locator('.hero');
-    const copy = await hero.locator('.hero-copy').boundingBox();
-    const joint = await hero.locator('.hero-joint').boundingBox();
-    if (width > 640) assert(joint.x >= copy.x + copy.width, 'Graphic overlaps copy at ' + width);
-    else assert(joint.y >= (await hero.locator('.hero-actions').boundingBox()).y, 'Mobile graphic precedes the actions');
-    assert.equal(await hero.locator('svg').getAttribute('aria-hidden'), 'true');
+    assert.equal(await hero.locator('svg,img,canvas').count(),0,'The hero is typography and sky only');
+    assert.equal(await page.locator('[data-sky-toggle],[data-showroom-motion]').count(),0);
+    const copy=hero.locator('[data-hero-copy]');
+    assert.equal(await copy.evaluate(el=>getComputedStyle(el).opacity),'0','Supporting copy starts visually hidden');
+    const beforeHeight=await hero.evaluate(el=>el.offsetHeight);
+    await page.evaluate(()=>scrollTo({top:64,behavior:'instant'}));
+    await page.waitForFunction(()=>getComputedStyle(document.querySelector('[data-hero-copy]')).opacity==='1');
+    assert.equal(await hero.evaluate(el=>el.offsetHeight),beforeHeight,'Reveal must not change the hero height');
+    await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+    assert.equal(await copy.evaluate(el=>getComputedStyle(el).opacity),'1','Revealed copy remains readable on return');
+    const actions=await hero.locator('.hero-actions').evaluate(el=>{const [one,two]=el.children,a=one.getBoundingClientRect(),b=two.getBoundingClientRect(),r=el.getBoundingClientRect();return {left:a.left,right:b.right,edgeLeft:r.left,edgeRight:r.right,bottomA:a.bottom,bottomB:b.bottom};});
+    assert.ok(Math.abs(actions.left-actions.edgeLeft)<2&&Math.abs(actions.right-actions.edgeRight)<2,'Actions occupy opposite corners');
+    assert.ok(Math.abs(actions.bottomA-actions.bottomB)<2,'Actions share the bottom edge');
     assert.equal(await hero.locator('.btn-gold').getAttribute('href'), '/contact/');
     await hero.locator('.text-link').click();
     await page.waitForURL('**/#selected-work');
@@ -54,7 +63,10 @@ try {
       assert.equal(await article.locator('.project-type').innerText(), project.projectType);
       assert.equal(await article.locator('.project-link').getAttribute('href'), '/work/?project=' + slug);
       await article.scrollIntoViewIfNeeded();
-      const image = article.locator('img');
+      const image = article.locator('.project-display img');
+      const frame=await article.locator('.project-display').boundingBox();
+      assert.ok(frame.width<=421,'No project display may be stretched wider than 420px');
+      assert.equal(await article.locator('.preview-reflection').getAttribute('aria-hidden'),'true');
       await image.evaluate(img => img.decode());
       assert.deepEqual(await image.evaluate(img => [getComputedStyle(img).objectFit,getComputedStyle(img).objectPosition]), ['cover','50% 0%']);
     }
@@ -75,7 +87,7 @@ try {
   }
   await page.setViewportSize({width:1440,height:1000});
   await page.goto(base);
-  const lead = page.locator('.lead-project');
+  const lead = page.locator('[data-selected-slug="impex-automotive"]');
   await lead.getByRole('button', {name:'Play GIF',exact:true}).click();
   await lead.locator('[data-playing-gif]').evaluate(img => img.decode());
   await lead.getByRole('button', {name:'Pause GIF',exact:true}).click();
@@ -107,11 +119,11 @@ try {
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.goto(base);
   assert.equal(await page.locator('[data-playing-gif]').count(),0);
-  assert.equal(await page.locator('.hero-joint').evaluate(el => getComputedStyle(el).animationName),'none');
+  assert.equal(await page.locator('.hero-joint').count(),0);
+  assert.equal(await page.locator('.preview-reflection').first().evaluate(el=>getComputedStyle(el).animationName),'none');
   const sky = page.locator('[data-hero-sky]');
-  const toggle = page.locator('[data-sky-toggle]');
   assert.equal(await sky.getAttribute('data-running'), 'false');
-  assert.equal(await toggle.isVisible(), false);
+  assert.equal(await page.locator('[data-sky-toggle]').count(),0);
   assert.equal(await sky.locator('.star').first().evaluate(el => getComputedStyle(el).animationName), 'none');
   await page.emulateMedia({reducedMotion:'no-preference'});
   await page.goto(base);
@@ -149,51 +161,35 @@ try {
   await page.setViewportSize({width:1440,height:1000});
   await page.goto(base);
   await page.waitForFunction(() => document.querySelector('[data-hero-sky]').dataset.running === 'true');
-  await toggle.focus();
-  await page.keyboard.press('Space');
-  assert.equal(await toggle.innerText(), 'Resume background');
-  assert.equal(await sky.getAttribute('data-running'), 'false');
-  // Let CSS animation pausing settle on the next painted frame before sampling.
-  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-  const paused = await sky.locator('.star-drift').first().evaluate(el => getComputedStyle(el).transform);
-  await page.waitForTimeout(180);
-  assert.equal(await sky.locator('.star-drift').first().evaluate(el => getComputedStyle(el).transform), paused);
-  await page.locator('#contact').scrollIntoViewIfNeeded();
-  await page.waitForFunction(() => document.querySelector('[data-hero-sky]').dataset.running === 'false');
-  await toggle.scrollIntoViewIfNeeded();
-  assert.equal(await sky.getAttribute('data-paused'), 'true', 'Scrolling must not override an explicit pause');
-  await toggle.click();
-  await page.waitForFunction(() => document.querySelector('[data-hero-sky]').dataset.running === 'true');
-  await page.locator('#contact').scrollIntoViewIfNeeded();
-  await page.waitForFunction(() => document.querySelector('[data-hero-sky]').dataset.running === 'false');
-  await toggle.scrollIntoViewIfNeeded();
-  await page.waitForFunction(() => document.querySelector('[data-hero-sky]').dataset.running === 'true');
-  await toggle.click();
+  assert.equal(await page.getByRole('button',{name:/pause (background|motion)|resume background/i}).count(),0);
   await page.emulateMedia({reducedMotion:'reduce'});
+  await page.waitForFunction(()=>document.querySelector('[data-hero-sky]').dataset.running==='false');
+  assert.equal(await sky.locator('.star-drift').first().evaluate(el=>getComputedStyle(el).animationName),'none');
   await page.emulateMedia({reducedMotion:'no-preference'});
-  assert.equal(await sky.getAttribute('data-paused'), 'true', 'Motion preference changes must preserve the user pause');
-  for (const width of [1440,390]) {
-    await page.setViewportSize({width,height:1000});
-    await page.evaluate(() => scrollTo({top:0,behavior:'instant'}));
-    await page.evaluate(() => document.fonts.ready);
-    const control = await toggle.boundingBox();
-    const joint = await page.locator('.hero-joint').boundingBox();
-    assert(control.x >= 0 && control.x + control.width <= width, 'Pause control should fit');
-    assert(control.y >= joint.y + joint.height - 1, 'Pause control must not overlap the hero graphic');
+  await page.waitForFunction(()=>document.querySelector('[data-hero-sky]').dataset.running==='true');
+  await page.locator('#contact').scrollIntoViewIfNeeded();
+  await page.waitForFunction(()=>document.querySelector('[data-hero-sky]').dataset.running==='false');
+  for(const width of [1440,390]){
+    await page.setViewportSize({width,height:1000});await page.goto(base);await page.evaluate(()=>document.fonts.ready);
     await page.locator('.home-hero').screenshot({path:`${output}/starfield-${width}.png`});
-    const visual = await page.locator('.home-hero').screenshot({type:'jpeg',quality:68});
-    console.log(`VISUAL_REVIEW_HOME_${width}:${visual.toString('base64')}`);
+    const visual=await sharp(await page.screenshot()).resize({width:Math.min(width,960)}).jpeg({quality:60}).toBuffer();console.log(`VISUAL_REVIEW_HOME_${width}:${visual.toString('base64')}`);
+    await page.locator('#selected-work').scrollIntoViewIfNeeded();
+    await page.waitForFunction(()=>document.querySelector('#selected-work').dataset.running==='true');
+    const scene=await sharp(await page.locator('#selected-work').screenshot()).resize({width:Math.min(width,960)}).jpeg({quality:60}).toBuffer();console.log(`VISUAL_REVIEW_GALLERY_${width}:${scene.toString('base64')}`);
+    assert.equal(await page.locator('.selection canvas').count(),0,'The gallery has no camera or gesture-driven canvas');
+    assert.equal(await page.locator('.selected-project').first().evaluate(el=>getComputedStyle(el).cursor),'auto');
   }
   const noJS = await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});
   const staticPage = await noJS.newPage();
   await staticPage.goto(base);
   assert.equal(await staticPage.locator('[data-hero-sky]').getAttribute('data-running'),'false');
-  assert.equal(await staticPage.locator('[data-sky-toggle]').isVisible(),false);
+  assert.equal(await staticPage.locator('[data-sky-toggle]').count(),0);
+  assert.equal(await staticPage.locator('[data-hero-copy]').evaluate(el=>getComputedStyle(el).opacity),'1','No-JS visitors can read the introduction immediately');
   assert.equal(await staticPage.locator('.star').first().evaluate(el => getComputedStyle(el).animationPlayState),'paused');
   await staticPage.locator('.hero .text-link').click();
   await staticPage.waitForURL('**/#selected-work');
   await noJS.close();
-  report.push({starfield:true,autonomousMotion:true,keyboardPause:true,pauseRemembered:true,offscreenSuspension:true,reducedMotion:true,noJS:true});
+  report.push({starfield:true,autonomousMotion:true,noAmbientControls:true,scrollReveal:true,balancedDisplays:true,offscreenSuspension:true,reducedMotion:true,noJS:true});
   assert.deepEqual(errors,[]);
   console.log('Passed: eight homepage widths, headline bounds, no overlap, exact portfolio copy, static previews, explicit GIF playback, keyboard focus, project deep links, reduced motion.');
 } finally {
