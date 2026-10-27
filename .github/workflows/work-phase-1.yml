@@ -44,7 +44,7 @@ jobs:
       - name: Check content and filtering logic
         run: node --test --test-isolation=none tests/work.test.mjs tests/contact.test.mjs
       - name: Install the test browser
-        run: npx playwright install --with-deps --only-shell chromium
+        run: npx playwright install --only-shell chromium
       - name: Review the editorial homepage
         run: node tests/home.browser.mjs
       - name: Verify uploaded static media
