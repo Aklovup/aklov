@@ -5,7 +5,6 @@ import {chromium} from 'playwright';
 import sharp from 'sharp';
 
 const base='http://127.0.0.1:4342',out='artifacts/responsiveness';
-const audit=process.env.RESPONSIVE_AUDIT==='1';
 const routes=[['home','/'],['solutions','/solutions/'],['about','/about/'],['contact','/contact/']];
 const screens=[{width:320,height:568},{width:375,height:667},{width:390,height:844},{width:640,height:360},{width:641,height:900},{width:768,height:1024},{width:820,height:1180},{width:844,height:390},{width:1000,height:768},{width:1001,height:768},{width:1024,height:768},{width:1440,height:1000}];
 const server=spawn('npm',['run','preview','--','--host','127.0.0.1','--port','4342'],{stdio:'inherit'});
@@ -68,5 +67,5 @@ try{
  await open(page,'/');await page.emulateMedia({reducedMotion:'no-preference'});const sky=page.locator('[data-hero-sky]');await page.locator('[data-sky-toggle]').tap();assert.equal(await sky.getAttribute('data-paused'),'true');await page.locator('[data-sky-toggle]').tap();assert.equal(await sky.getAttribute('data-paused'),'false');
  report.interactions.push('Native phone starfield pause and resume');assert.deepEqual(errors,[]);await context.close();
  await writeFile(`${out}/report.json`,JSON.stringify(report,null,2));console.log('RESPONSIVENESS_REPORT:'+JSON.stringify(report));
- if(!audit)assert.deepEqual(report.issues,[],'Responsive layout and touch target audit');
+ assert.deepEqual(report.issues,[],'Responsive layout and touch target audit');
 }finally{await writeFile(`${out}/report.json`,JSON.stringify(report,null,2));await browser?.close();server.kill('SIGTERM');}
