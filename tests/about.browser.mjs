@@ -33,6 +33,7 @@ async function waitForServer() {
 
 async function checkLayout(page, width) {
   await page.setViewportSize({ width, height: 1000 });
+  await page.waitForFunction(() => Number(document.querySelector('[data-cellular-structures]')?.dataset.signalRoutes) > 0);
   const overflow = await page.evaluate(() => [...document.querySelectorAll(
     '.about-page .wrap, .about-page h1, .about-page h2, .about-page h3, [data-approved-copy], .portrait-frame, .stage-list li, .closing-actions a, .nav, .foot-links'
   )].filter((element) => {
@@ -191,25 +192,39 @@ try {
   assert.equal(await cells.getAttribute('aria-hidden'), 'true');
   assert.equal(await cells.evaluate(el => getComputedStyle(el).pointerEvents), 'none');
   assert.equal(await cells.evaluate(el => getComputedStyle(el).mixBlendMode), 'difference');
-  assert.ok(await cells.evaluate(el => Number(getComputedStyle(el).opacity) <= .12), 'Cells must remain a faint background layer');
+  assert.ok(await cells.locator('[data-cell-mesh]').evaluate(el => Number(getComputedStyle(el).opacity) <= .12), 'Cells must remain a faint background layer');
+  const signal = cells.locator('[data-cell-signal]');
+  assert.equal(await signal.count(),1,'Only one light may travel through the mesh');
+  assert.equal(await cells.locator('[data-signal-core]').count(),1);
   await page.evaluate(() => scrollTo({top:0,behavior:'instant'}));
   await page.waitForFunction(() => document.querySelector('[data-cellular-structures]').dataset.running === 'false');
   assert.ok(await cells.locator('svg').evaluate(svg => svg.animationsPaused()), 'Reduced motion freezes the cellular mesh');
+  assert.equal(await signal.getAttribute('opacity'),'0','Reduced motion hides the travelling light');
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.waitForFunction(() => document.querySelector('[data-cellular-structures]').dataset.running === 'true');
+  await page.waitForFunction(() => document.querySelector('[data-cell-signal]').getAttribute('opacity') === '1');
   const heroHeight = await page.locator('.about-hero').evaluate(el => el.offsetHeight);
   const sample = () => cells.locator('path').first().evaluate(path => {const p=path.getPointAtLength(path.getTotalLength()/2);return {x:p.x,y:p.y};});
   const before = await sample();
-  await page.waitForTimeout(1200);
+  const sampleSignal = () => signal.evaluate(el => {const m=el.transform.baseVal.consolidate().matrix;return {x:m.e,y:m.f};});
+  const signalBefore = await sampleSignal();
+  await page.waitForTimeout(600);
+  const signalMiddle = await sampleSignal();
+  await page.waitForTimeout(600);
+  const signalAfter = await sampleSignal();
   const after = await sample();
   assert.ok(Math.hypot(after.x-before.x,after.y-before.y)>.001,'Cell boundaries must actually deform');
+  assert.ok(Math.hypot(signalMiddle.x-signalBefore.x,signalMiddle.y-signalBefore.y)+Math.hypot(signalAfter.x-signalMiddle.x,signalAfter.y-signalMiddle.y)>1,'The single light must visibly move');
+  await page.waitForFunction(() => {const g=document.querySelector('[data-cell-signal]');return g.dataset.junction==='true'&&Number(g.querySelector('[data-signal-core]').getAttribute('fill-opacity'))>.9;},null,{timeout:30000});
+  assert.ok(await signal.evaluate(el => {const path=el.ownerSVGElement.querySelector('[data-cell-edge="'+el.dataset.edge+'"]'),m=el.transform.baseVal.consolidate().matrix;return [0,path.getTotalLength()].some(length=>{const p=path.getPointAtLength(length);return Math.hypot(p.x-m.e,p.y-m.f)<.1;});}),'The brightening must occur at an actual junction');
   assert.equal(await page.locator('.about-hero').evaluate(el => el.offsetHeight),heroHeight,'Ambient movement must not shift the layout');
   await page.evaluate(() => scrollTo({top:document.body.scrollHeight,behavior:'instant'}));
   await page.waitForFunction(() => document.querySelector('[data-cellular-structures]').dataset.running === 'false');
   const clock = await cells.locator('svg').evaluate(svg => svg.getCurrentTime());
   await page.waitForTimeout(200);
   assert.ok(Math.abs(await cells.locator('svg').evaluate(svg => svg.getCurrentTime())-clock)<.05,'The offscreen mesh timeline must stop');
-  console.log('Passed: faint cellular mesh, real boundary deformation, reduced-motion/offscreen suspension and no layout shift.');
+  assert.equal(await signal.getAttribute('opacity'),'0','The offscreen travelling light must stop');
+  console.log('Passed: faint cellular mesh, one moving light, actual-junction brightening, reduced-motion/offscreen suspension and no layout shift.');
 
   await page.locator('[data-about-work-link]').click();
   await page.waitForURL('**/work/?type=client');
@@ -238,6 +253,7 @@ try {
   assert.ok(await noJsPage.locator('[data-about-portrait] img').isVisible());
   await noJsPage.locator('[data-about-portrait] img').evaluate(img => img.decode());
   assert.equal(await noJsPage.locator('[data-cellular-structures]').getAttribute('data-running'),'false');
+  assert.equal(await noJsPage.locator('[data-cell-signal]').getAttribute('opacity'),'0');
   assert.ok(await noJsPage.locator('[data-cellular-structures] animate').evaluateAll(items => items.length>0 && items.every(el => el.getAttribute('begin')==='indefinite')),'No-JS visitors receive the static cellular structure');
   await noJs.close();
   console.log('Passed: all 38 approved paragraphs, metadata, heading hierarchy, uploaded portrait, CTAs, navigation, keyboard focus, reduced motion, text contrast, no-JS rendering and ten viewport widths.');

@@ -53,16 +53,31 @@ const curve = (edge: [Point, Point], state: number) => {
   const values = [a[0], a[1], a[0] + dx / 3 + n[0], a[1] + dy / 3 + n[1], a[0] + dx * 2 / 3 + n[0], a[1] + dy * 2 / 3 + n[1], b[0], b[1]].map(v => v.toFixed(2));
   return `M${values[0]} ${values[1]} C${values.slice(2).join(' ')}`;
 };
-const paths = [...edges.values()].map(edge => [0, 1, 2, 0].map(state => curve(edge, state)));
+const edgeList = [...edges.values()];
+const paths = edgeList.map(edge => [0, 1, 2, 0].map(state => curve(edge, state)));
 ---
 
 <div class="cellular-field" data-cellular-structures data-running="false" aria-hidden="true">
   <svg viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
-    {paths.map(states => (
-      <path d={states[0]} fill="none" vector-effect="non-scaling-stroke">
-        <animate attributeName="d" values={states.join(';')} keyTimes="0;.36;.72;1" calcMode="spline" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1" dur="72s" begin="indefinite" repeatCount="indefinite" />
-      </path>
-    ))}
+    <defs>
+      <radialGradient id="about-cell-signal-glow">
+        <stop offset="0" stop-color="var(--gold)" stop-opacity=".7" />
+        <stop offset=".35" stop-color="var(--gold)" stop-opacity=".24" />
+        <stop offset="1" stop-color="var(--gold)" stop-opacity="0" />
+      </radialGradient>
+    </defs>
+    <g class="cell-mesh" data-cell-mesh>
+      {paths.map((states, index) => (
+        <path data-cell-edge={index} data-start={key(edgeList[index][0])} data-end={key(edgeList[index][1])} d={states[0]} fill="none" vector-effect="non-scaling-stroke">
+          <animate attributeName="d" values={states.join(';')} keyTimes="0;.36;.72;1" calcMode="spline" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1" dur="72s" begin="indefinite" repeatCount="indefinite" />
+        </path>
+      ))}
+    </g>
+    <g data-cell-signal opacity="0">
+      <circle data-signal-halo r="6" fill="url(#about-cell-signal-glow)" />
+      <circle data-signal-ring r="2" fill="none" stroke="var(--gold)" stroke-width=".75" opacity="0" vector-effect="non-scaling-stroke" />
+      <circle data-signal-core r="1.65" fill="var(--gold)" fill-opacity=".8" />
+    </g>
   </svg>
 </div>
 
@@ -71,8 +86,86 @@ const paths = [...edges.values()].map(edge => [0, 1, 2, 0].map(state => curve(ed
   for (const field of document.querySelectorAll<HTMLElement>('[data-cellular-structures]')) {
     const svg = field.querySelector('svg');
     if (!svg) continue;
+    const signal = svg.querySelector<SVGGElement>('[data-cell-signal]');
+    const core = svg.querySelector<SVGCircleElement>('[data-signal-core]');
+    const halo = svg.querySelector<SVGCircleElement>('[data-signal-halo]');
+    const ring = svg.querySelector<SVGCircleElement>('[data-signal-ring]');
+    if (!signal || !core || !halo || !ring) continue;
+    type Edge = { path: SVGPathElement; start: string; end: string };
+    const mesh = [...svg.querySelectorAll<SVGPathElement>('[data-cell-edge]')].map(path => ({ path, start: path.dataset.start!, end: path.dataset.end! }));
+    const neighbours = new Map<string, Edge[]>();
+    let eligible: Edge[] = [], active: Edge | undefined, reverse = false;
+    let progress = .4, dwell = 0, turns = 0, frame = 0, lastTime = 0, scale = 1;
     let inView = false, started = false;
     svg.pauseAnimations();
+
+    const rebuild = () => {
+      const matrix = svg.getScreenCTM(), bounds = field.getBoundingClientRect();
+      if (!matrix || bounds.width === 0) return;
+      scale = Math.hypot(matrix.a, matrix.b) || 1;
+      const inside = (p: DOMPoint) => {
+        const screen = p.matrixTransform(matrix);
+        return screen.x > bounds.left + 18 && screen.x < bounds.right - 18 && screen.y > bounds.top + 18 && screen.y < bounds.bottom - 18;
+      };
+      // Keep the walker inside the visible SVG crop, including on narrow phones.
+      eligible = mesh.filter(edge => {
+        const length = edge.path.getTotalLength();
+        return [0, .25, .5, .75, 1].every(t => inside(edge.path.getPointAtLength(length * t)));
+      });
+      neighbours.clear();
+      for (const edge of eligible) for (const node of [edge.start, edge.end]) neighbours.set(node, [...(neighbours.get(node) || []), edge]);
+      field.dataset.signalRoutes = String(eligible.length);
+      if (active && eligible.includes(active)) return;
+      const target = { x: bounds.left + bounds.width * .5, y: bounds.top + bounds.height * .55 };
+      active = eligible.reduce<Edge | undefined>((best, edge) => {
+        const distance = (item: Edge) => {
+          const p = item.path.getPointAtLength(item.path.getTotalLength() * .4).matrixTransform(matrix);
+          return Math.hypot(p.x - target.x, p.y - target.y);
+        };
+        return !best || distance(edge) < distance(best) ? edge : best;
+      }, undefined);
+      progress = .4; reverse = false; dwell = 0;
+      if (active) signal.dataset.edge = active.path.dataset.cellEdge;
+    };
+    const continueFromJunction = () => {
+      if (!active) return;
+      const node = reverse ? active.start : active.end;
+      const options = (neighbours.get(node) || []).filter(edge => edge !== active);
+      const next = options.length ? options[turns++ % options.length] : active;
+      active = next; reverse = next.end === node; progress = 0;
+      signal.dataset.edge = next.path.dataset.cellEdge;
+    };
+    const tick = (time: number) => {
+      if (field.dataset.running !== 'true') { frame = 0; return; }
+      const delta = lastTime ? Math.min((time - lastTime) / 1000, .05) : 0;
+      lastTime = time;
+      if (active) {
+        const length = active.path.getTotalLength();
+        let beat = 0;
+        if (dwell > 0) {
+          dwell = Math.max(0, dwell - delta);
+          beat = Math.sin(Math.PI * (1 - dwell / .72));
+          if (dwell === 0) continueFromJunction();
+        } else {
+          progress = Math.min(1, progress + delta * 24 / Math.max(1, length * scale));
+          if (progress === 1) dwell = .72;
+        }
+        const point = active.path.getPointAtLength((reverse ? 1 - progress : progress) * active.path.getTotalLength());
+        signal.setAttribute('transform', `translate(${point.x.toFixed(3)} ${point.y.toFixed(3)})`);
+        signal.setAttribute('opacity', '1');
+        signal.dataset.junction = String(dwell > 0);
+        core.setAttribute('r', String((1.65 + beat * 1.1) / scale));
+        core.setAttribute('fill-opacity', String(.8 + beat * .2));
+        halo.setAttribute('r', String((6 + beat * 7) / scale));
+        ring.setAttribute('r', String((3 + (1 - dwell / .72) * 10) / scale));
+        ring.setAttribute('opacity', dwell > 0 ? String(beat * .2) : '0');
+      } else signal.setAttribute('opacity', '0');
+      frame = requestAnimationFrame(tick);
+    };
+    const stopSignal = () => {
+      cancelAnimationFrame(frame); frame = 0; lastTime = 0;
+      signal.setAttribute('opacity', '0');
+    };
     const sync = () => {
       const running = inView && !reduced.matches && !document.hidden;
       field.dataset.running = String(running);
@@ -82,19 +175,23 @@ const paths = [...edges.values()].map(edge => [0, 1, 2, 0].map(state => curve(ed
           started = true;
         }
         svg.unpauseAnimations();
-      } else svg.pauseAnimations();
+        if (!active) rebuild();
+        if (!frame) frame = requestAnimationFrame(tick);
+      } else { svg.pauseAnimations(); stopSignal(); }
     };
+    new ResizeObserver(rebuild).observe(field);
     new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; sync(); }).observe(field);
     reduced.addEventListener('change', sync);
     document.addEventListener('visibilitychange', sync);
-    window.addEventListener('pagehide', () => svg.pauseAnimations());
+    window.addEventListener('pagehide', () => { svg.pauseAnimations(); stopSignal(); });
     window.addEventListener('pageshow', sync);
     sync();
   }
 </script>
 
 <style>
-  .cellular-field { position: absolute; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; opacity: .1; mix-blend-mode: difference; mask-image: linear-gradient(90deg, #0004, #0009 45%, #000 75%); }
+  .cellular-field { position: absolute; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; mix-blend-mode: difference; mask-image: linear-gradient(90deg, #0004, #0009 45%, #000 75%); }
   svg { display: block; width: 100%; height: 100%; }
+  .cell-mesh { opacity: .1; }
   path { stroke: var(--gold); stroke-width: 1.1px; stroke-linecap: round; }
 </style>
