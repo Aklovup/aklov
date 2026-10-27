@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { links } from '../../data/links';
 import { mediaPreview } from '../../lib/media';
-import SolutionsTablet from '../../components/solutions/SolutionsTablet.astro';
+import SystemsDrawing from '../../components/solutions/SystemsDrawing.astro';
 
 const sectionImage = mediaPreview('/images/solutions/Solutions_img.jpg')!;
 
@@ -154,19 +154,19 @@ const steps = [
   contactHref="#contact"
 >
   <!-- Hero -->
-  <section class="dark hero-surface" aria-labelledby="page-title">
+  <section class="hero-surface" aria-labelledby="page-title">
     <div class="wrap hero">
       <div class="hero-meta mono">
         <span>What I help businesses do</span>
         <span>Solutions / Aklov</span>
       </div>
+      <h1 id="page-title">
+        <span class="l1">Better ways to run,</span>
+        <span class="l2"><em>connect and grow</em></span>
+        <span class="l3"> your business.</span>
+      </h1>
       <div class="hero-composition">
         <div class="hero-introduction">
-          <h1 id="page-title">
-            <span class="l1">Better ways to run,</span>
-            <span class="l2"><em>connect and grow</em></span>
-            <span class="l3">your business.</span>
-          </h1>
           <div class="hero-copy-block">
             <p class="hero-copy">
               A business needs more than individual tools. It needs a website that communicates its value, workflows that keep work moving, and systems that help people stay organized.
@@ -176,11 +176,11 @@ const steps = [
             </p>
           </div>
           <div class="hero-actions">
-            <a class="btn btn-gold" href={links.contact}>Discuss Your Project <span aria-hidden="true">↗</span></a>
+            <a class="btn btn-dark" href={links.contact}>Discuss Your Project <span aria-hidden="true">↗</span></a>
             <a class="hero-explore" href="#solutions">Explore My Solutions <span aria-hidden="true">↓</span></a>
           </div>
         </div>
-        <SolutionsTablet />
+        <div class="hero-art"><SystemsDrawing /></div>
       </div>
       <nav class="idx" aria-label="My solutions">
         <div class="idx-top mono">Explore My Solutions</div>
@@ -346,32 +346,33 @@ const steps = [
 <style>
   h1, h2, h3, h4, p, ul, figure { margin: 0; }
 
-  /* A compact editorial opening, related to Home without repeating its graphic. */
-  .dark { background: var(--charcoal); color: var(--ivory); --focus-color: var(--gold); }
+  /* A wide ivory drawing plate gives Solutions its own opening composition. */
+  .hero-surface { background: var(--ivory); color: var(--charcoal); --focus-color: var(--charcoal); border-bottom: 1px solid var(--line); }
   .hero { padding-block: clamp(40px, 4.5vw, 72px) 0; }
-  .hero-meta { display: flex; justify-content: space-between; gap: 24px; margin-bottom: 30px; color: var(--gold); }
-  .hero-meta span:last-child { color: var(--on-dark-dim); text-align: right; }
-  .hero h1 { font-family: var(--display); font-size: clamp(52px, 6.2vw, 108px); font-weight: 400; line-height: .94; letter-spacing: -.04em; }
-  .hero h1 span { display: block; }
-  .hero h1 .l2 { padding-left: clamp(20px, 3.4vw, 60px); }
-  .hero h1 em { color: var(--gold); font-style: italic; }
-  .hero-composition { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: center; gap: clamp(40px, 5vw, 80px); padding-bottom: 42px; }
+  .hero-meta { display: flex; justify-content: space-between; gap: 24px; margin-bottom: 30px; color: var(--gold-dark); }
+  .hero-meta span:last-child { color: var(--body); text-align: right; }
+  .hero h1 { font-family: var(--display); font-size: clamp(54px, 7.3vw, 126px); font-weight: 400; line-height: .98; letter-spacing: -.04em; }
+  .hero h1 .l1 { display: block; }
+  .hero h1 .l2 { padding-left: clamp(20px, 4.2vw, 76px); }
+  .hero h1 em { color: #a5852e; font-style: italic; }
+  .hero-composition { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); align-items: center; gap: clamp(32px, 4vw, 64px); padding-block: 12px 24px; }
   .hero-introduction { min-width: 0; }
-  .hero-copy-block { max-width: 620px; margin-top: 28px; }
-  .hero-copy { color: var(--on-dark); font-size: 16px; line-height: 1.8; }
-  .hero-copy + .hero-copy { margin-top: 14px; color: var(--ivory); }
+  .hero-copy-block { max-width: 52ch; }
+  .hero-copy { color: var(--body); font-size: 16px; line-height: 1.8; }
+  .hero-copy + .hero-copy { margin-top: 18px; color: var(--charcoal); }
   .hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 16px 28px; margin-top: 26px; }
-  .hero-explore { display: inline-flex; align-items: center; gap: 20px; min-height: 44px; border-bottom: 1px solid var(--line-dark); font-size: 12px; font-weight: 600; }
+  .hero-explore { display: inline-flex; align-items: center; gap: 20px; min-height: 44px; border-bottom: 1px solid var(--line); font-size: 12px; font-weight: 600; }
   .hero-explore span { font-size: 18px; }
-  .idx { width: 100%; min-width: 0; padding-block: 22px 26px; border-top: 1px solid var(--line-dark); color: var(--ivory); background: transparent; --focus-color: var(--gold); }
-  .idx-top { margin-bottom: 16px; color: var(--gold); font-size: 9px; }
+  .hero-art { width: 100%; max-width: 800px; justify-self: end; }
+  .idx { width: 100%; min-width: 0; padding-block: 22px 26px; border-top: 1px solid var(--line); color: var(--charcoal); background: transparent; --focus-color: var(--charcoal); }
+  .idx-top { margin-bottom: 16px; color: var(--gold-dark); font-size: 9px; }
   .idx-links { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
-  .idx-row { min-width: 0; display: grid; grid-template-columns: 20px minmax(0, 1fr) 20px; gap: 10px; align-items: baseline; min-height: 64px; padding: 8px 20px; border-left: 1px solid var(--line-dark); }
+  .idx-row { min-width: 0; display: grid; grid-template-columns: 20px minmax(0, 1fr) 20px; gap: 10px; align-items: baseline; min-height: 64px; padding: 8px 20px; border-left: 1px solid var(--line); }
   .idx-row:first-child { border-left: 0; padding-left: 0; }
   .idx-row:last-child { padding-right: 0; }
-  .idx-n { color: var(--gold); font-size: 10px; }
+  .idx-n { color: var(--gold-dark); font-size: 10px; }
   .idx-t { overflow-wrap: anywhere; font-family: var(--display); font-size: clamp(20px, 1.7vw, 28px); line-height: 1.12; }
-  .idx-a { color: var(--gold); font-size: 16px; }
+  .idx-a { color: var(--gold-dark); font-size: 16px; }
 
   /* Introduction */
 
@@ -529,19 +530,21 @@ const steps = [
     .text-link:hover span { transform: translateX(4px); }
     .idx-a { transition: transform .2s ease; }
     .idx-row:hover .idx-a { transform: translateY(3px); }
-    .idx-row:hover .idx-t { color: var(--gold); }
-    .hero-explore:hover { color: var(--gold); border-color: var(--gold); }
+    .idx-row:hover .idx-t { color: var(--gold-dark); }
+    .hero-explore:hover { color: var(--gold-dark); border-color: var(--gold-dark); }
 
   }
 
   /* Tablet */
 
   @media (max-width: 1000px) {
-    .hero-composition { grid-template-columns: 1fr; gap: 16px; padding-bottom: 24px; }
+    .hero-composition { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; padding-block: 28px; }
+    .hero h1 { font-size: clamp(52px, 7.2vw, 74px); }
+    .hero h1 span { display: block; }
     .hero-copy-block { max-width: 720px; }
     .hero-actions { flex-direction: row; flex-wrap: wrap; gap: 16px 24px; align-items: center; }
     .idx-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .idx-row { border-left: 0; padding: 14px 0; border-bottom: 1px solid var(--line-dark); }
+    .idx-row { border-left: 0; padding: 14px 0; border-bottom: 1px solid var(--line); }
     .idx-row:nth-child(even) { padding-left: 24px; }
     .idx-t { font-size: 24px; }
 
@@ -563,18 +566,25 @@ const steps = [
   /* Mobile */
 
   @media (max-width: 640px) {
-    .hero { padding-top: 38px; }
+    .hero { display: grid; grid-template-columns: minmax(0, 1fr); padding-top: 38px; }
+    .hero-meta { order: 0; }
+    .hero h1 { order: 1; }
+    .hero-composition { display: contents; }
+    .hero-introduction { order: 2; margin-top: 24px; }
+    .idx { order: 3; margin-top: 30px; }
+    .hero-art { order: 4; max-width: 500px; justify-self: center; padding-block: 16px 28px; }
     .hero-meta { font-size: 9px; letter-spacing: 1.2px; }
     .hero-meta span:last-child { display: none; }
     .hero h1 { font-size: clamp(38px, 9.8vw, 66px); line-height: 1; }
     .hero h1 .l2 { padding-left: clamp(16px, 5vw, 28px); }
     .hero-copy { font-size: 15px; }
-    .hero-copy-block { margin-top: 24px; }
+    .hero-copy-block { margin-top: 0; }
     .hero-actions { gap: 14px 24px; }
     .idx { width: 100%; min-width: 0; padding-block: 20px; }
-    .idx-links { grid-template-columns: 1fr; }
-    .idx-row, .idx-row:nth-child(even) { min-height: 52px; padding: 12px 0; }
-    .idx-t { font-size: 22px; }
+    .idx-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .idx-row, .idx-row:nth-child(even) { grid-template-columns: 16px minmax(0, 1fr) 12px; gap: 8px; min-height: 64px; padding: 12px 0; }
+    .idx-row:nth-child(even) { padding-left: 16px; }
+    .idx-t { font-size: 18px; line-height: 1.2; }
 
     .intro h2 { font-size: clamp(44px, 10.5vw, 64px); }
 
@@ -600,5 +610,6 @@ const steps = [
     .closing h2 { font-size: clamp(44px, 11.5vw, 68px); }
   }
 </style>
+
 
 

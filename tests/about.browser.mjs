@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
+import sharp from 'sharp';
 import { about, profile } from '../src/data/about.ts';
 import { links } from '../src/data/links.ts';
 
@@ -61,6 +62,14 @@ async function checkLayout(page, width) {
   assert.equal(await secondary.evaluate(el => el.classList.contains('btn')), false, 'Secondary work link should remain quieter than the primary button.');
   const frame = await page.locator('.portrait-frame').boundingBox();
   assert.ok(Math.abs(frame.width / frame.height - .8) < .01, 'Portrait ratio changed.');
+  const portraitLayout = await page.locator('.hero-composition').evaluate(el => {
+    const box = selector => {const b=el.querySelector(selector).getBoundingClientRect();return {x:b.x,right:b.right,top:b.top,bottom:b.bottom,width:b.width};};
+    return {heading:box('.hero-heading'),portrait:box('.hero-portrait'),frame:box('.portrait-frame'),name:box('.portrait-name')};
+  });
+  assert(portraitLayout.name.x >= portraitLayout.frame.x && portraitLayout.name.right <= portraitLayout.frame.right, 'Portrait name should fit the frame');
+  assert(portraitLayout.name.bottom <= portraitLayout.frame.bottom, 'Portrait name must remain inside its ivory panel');
+  if(width>640)assert(portraitLayout.portrait.x>=portraitLayout.heading.right,'Portrait and headline must not overlap');
+  if(width>1000)assert(portraitLayout.portrait.width<=561,'Portrait should remain composed on wide monitors');
   if (width <= 640) {
     const heading = await page.locator('.hero-heading').boundingBox();
     const portrait = await page.locator('.hero-portrait').boundingBox();
@@ -158,8 +167,10 @@ try {
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: output + '/about-desktop.png', fullPage: true });
   await page.screenshot({ path: output + '/about-desktop-introduction.png', fullPage: false });
+  console.log('VISUAL_REVIEW_ABOUT_1440:'+(await sharp(await page.screenshot()).resize({width:960}).jpeg({quality:65}).toBuffer()).toString('base64'));
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: output + '/about-mobile.png', fullPage: true });
+  console.log('VISUAL_REVIEW_ABOUT_390:'+(await sharp(await page.screenshot()).jpeg({quality:65}).toBuffer()).toString('base64'));
   await page.setViewportSize({ width: 768, height: 1000 });
   await page.screenshot({ path: output + '/about-tablet.png', fullPage: true });
 
@@ -212,4 +223,5 @@ try {
   await browser?.close();
   server.kill('SIGTERM');
 }
+
 
