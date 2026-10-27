@@ -40,7 +40,7 @@ try {
   assert.equal(await page.locator('[data-solutions-tablet]').count(),0);
   assert.equal(await page.locator('.hero-surface').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(245, 242, 234)');
   assert.equal(await page.locator('.hero-introduction .hero-actions .btn-dark').getAttribute('href'),'/contact/');
-  const lowHeroContrast = await page.evaluate(() => {
+  const heroContrast = () => page.evaluate(() => {
     const canvas=document.createElement('canvas');canvas.width=canvas.height=1;
     const context=canvas.getContext('2d');
     const rgba=color=>{context.clearRect(0,0,1,1);context.fillStyle=color;context.fillRect(0,0,1,1);return [...context.getImageData(0,0,1,1).data];};
@@ -54,7 +54,10 @@ try {
       return ratio+.01<(large?3:4.5)?[{text:el.textContent.trim(),ratio}]:[];
     });
   });
-  assert.deepEqual(lowHeroContrast,[],'Solutions hero text contrast failed');
+  assert.deepEqual(await heroContrast(),[],'Solutions hero text contrast failed');
+  await page.locator('.hero-explore').hover();
+  assert.deepEqual(await heroContrast(),[],'Solutions hero hover contrast failed');
+  await page.mouse.move(0,0);
   const destinations=['website','customer','workflow','applications','integrations'];
   assert.deepEqual(await page.locator('.idx-row').evaluateAll(items=>items.map(a=>a.getAttribute('href'))),destinations.map(id=>'#'+id));
   for(const id of destinations) {
