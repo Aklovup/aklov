@@ -79,6 +79,7 @@ const models=modelsFor(entries,'client');
   .showroom[data-renderer='fallback'] canvas[data-showroom-canvas] { visibility:hidden;pointer-events:none; }
   .showroom[data-dragging] canvas { cursor:grabbing; }
   .showroom-shade { z-index:2;position:absolute;inset:0;pointer-events:none;background:linear-gradient(0deg,#111111fa 0%,#111111eb 18%,#111111aa 36%,transparent 60%,#11111145); }
+  .showroom[data-view='project'] .showroom-viewport { pointer-events:none; }
   .showroom[data-view='project'] .showroom-shade { background:linear-gradient(0deg,#11111188,transparent 16%,transparent 86%,#11111188); }
   .showroom-toolbar { position:absolute;z-index:3;top:112px;left:var(--pad);right:var(--pad);display:flex;justify-content:space-between;align-items:center;gap:20px; }
   .showroom-toolbar>.mono { color:#c6c1b7; }
