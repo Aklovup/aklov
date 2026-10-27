@@ -332,7 +332,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   root.addEventListener('pointerover',event=>{const next=!!(event.target as Element).closest('.story-wall');if(next!==reading){reading=next;sync();}});
   const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
   function pick(x:number,y:number){const r=canvas.getBoundingClientRect();pointer.set((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1);raycaster.setFromCamera(pointer,camera);const hits=raycaster.intersectObjects(exhibitModels.filter(m=>m.group.visible).map(m=>m.group),true).filter(hit=>{let n:THREE.Object3D|null=hit.object;while(n){if(!n.visible)return false;n=n.parent;}return true;});if(!hits[0])return;let n:THREE.Object3D|null=hits[0].object,room:string|undefined,category:string|undefined,exit=false;while(n){room ||= n.userData.room;category ||= n.userData.model;exit ||= !!n.userData.exit;n=n.parent;}return {room,category,exit};}
-  let gesture:{id:number;x:number;y:number;lastX:number;lastY:number;dragged:boolean}|undefined,keyboardNavigation=false,suppressClickUntil=0;
+  let gesture:{id:number;x:number;y:number;lastX:number;lastY:number;dragged:boolean}|undefined,keyboardNavigation=false,suppressClickUntil=0,consumeReleaseClick=false;
   const interactive=(e:Event)=>(e.target as Element).closest('button,a,input,select,textarea,video');
   const lifted=()=>root.dataset.mediaLift==='open'||root.dataset.mediaLift==='closing';
   const flat=()=>root.dataset.renderer==='fallback'||(!!state.room&&root.dataset.surfaceMode==='flat');
@@ -355,21 +355,24 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
       if(!state.room){const hit=pick(event.clientX,event.clientY);hoverModel=hit?.category;hoverRoom=hit?.room;}if(!paused)sync();
     }
   },{passive:false});
-  function end(event:PointerEvent){
-    if(!gesture||gesture.id!==event.pointerId)return;const moved=gesture.dragged;clearGesture();if(moved)suppressClickUntil=performance.now()+350;
-  }
-  root.addEventListener('pointerup',event=>end(event));root.addEventListener('pointercancel',event=>end(event));root.addEventListener('lostpointercapture',event=>{if(gesture?.id===event.pointerId){gesture=undefined;dragging=false;delete root.dataset.dragging;}});
-  window.addEventListener('blur',clearGesture);
-  document.addEventListener('click',event=>{if(performance.now()<suppressClickUntil){event.preventDefault();event.stopImmediatePropagation();}},true);
-  // Finish the native activation before replacing the stage. Touch browsers can
-  // retarget a click into new content when navigation happens during pointerup.
-  root.addEventListener('click',event=>{
-    if(interactive(event)||state.room||lifted()||!(event.target as Element).closest('[data-showroom-viewport]'))return;
+  function end(event:PointerEvent,cancelled=false){
+    if(!gesture||gesture.id!==event.pointerId)return;const moved=gesture.dragged;clearGesture();if(moved){suppressClickUntil=performance.now()+350;return;}
+    if(cancelled||interactive(event)||state.room||lifted())return;
     const hit=pick(event.clientX,event.clientY);if(!hit?.category)return;
-    if(hit.exit&&activeModel?.data.category===hit.category)options.retreat();
-    else if(!activeModel||activeModel.data.category!==hit.category)options.selectModel(hit.category);
-    else if(hit.room)options.selectRoom(hit.room);
-  });
+    // Touch may retarget the click following this release into the new media.
+    // Consume that activation only; the next pointerdown starts a fresh tap.
+    if(hit.exit&&activeModel?.data.category===hit.category){consumeReleaseClick=true;options.retreat();}
+    else if(!activeModel||activeModel.data.category!==hit.category){consumeReleaseClick=true;options.selectModel(hit.category);}
+    else if(hit.room){consumeReleaseClick=true;options.selectRoom(hit.room);}
+  }
+  root.addEventListener('pointerup',event=>end(event));root.addEventListener('pointercancel',event=>end(event,true));root.addEventListener('lostpointercapture',event=>{if(gesture?.id===event.pointerId){gesture=undefined;dragging=false;delete root.dataset.dragging;}});
+  window.addEventListener('blur',clearGesture);
+  document.addEventListener('pointerdown',()=>{consumeReleaseClick=false;},true);
+  document.addEventListener('click',event=>{
+    const released=consumeReleaseClick&&event.detail>0;
+    if(released)consumeReleaseClick=false;
+    if(released||performance.now()<suppressClickUntil){event.preventDefault();event.stopImmediatePropagation();}
+  },true);
   root.addEventListener('wheel',event=>{
     if(compact()&&!(event.target as Element).closest('[data-showroom-viewport]'))return;
     if(event.ctrlKey||options.isIndexOpen()||lifted()||flat()||(event.target as Element).closest('input,select,textarea'))return;
