@@ -79,6 +79,7 @@ const layers = Array.from({ length: 3 }, (_, layer) => ({
   [data-running='true'] .star, [data-running='true'] .star-drift { animation-play-state: running; }
   .sky-control { position: absolute; z-index: 2; right: var(--pad); bottom: 4px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 44px; padding: 0 6px; border: 0; background: none; color: var(--on-dark-dim); font: 11px var(--sans); cursor: pointer; pointer-events: auto; }
   .sky-control[hidden] { display: none; }
+  .sky-control:focus-visible { outline-offset: 1px; }
   .sky-control-icon { width: 8px; height: 9px; border-inline: 2px solid currentColor; }
   [data-paused='true'] .sky-control-icon { width: 0; height: 0; border: 5px solid transparent; border-left: 7px solid currentColor; border-right: 0; }
   @keyframes sky-drift { from { transform: translate(-5px, 7px); } to { transform: translate(14px, -9px); } }
