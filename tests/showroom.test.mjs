@@ -64,3 +64,19 @@ test('backward movement follows the viewing direction; the side wall can be face
  assert.equal(moveOnFloor(0,1,Math.PI,600).exit,true,'Walking forward toward the doorway also exits');
  assert.equal(gesturePixels(.25,0,900),.25);assert.equal(gesturePixels(2,1,900),32);assert.equal(gesturePixels(3000,0,900),600);
 });
+
+const {compactShowroom,showroomQuality,framingDistance}=await import('../src/scripts/showroomResponsive.ts');
+test('compact layout follows available space and tablet input without changing desktop',()=>{
+ assert.equal(compactShowroom(390,844,true),true);assert.equal(compactShowroom(844,390,true),true);
+ assert.equal(compactShowroom(1024,768,true),true);assert.equal(compactShowroom(1024,768,false),false);
+ assert.equal(compactShowroom(1440,1000,false),false);
+});
+test('rendering keeps phone edges sharp while bounding physical GPU work',()=>{
+ const phone=showroomQuality(350,400,3,true);assert.equal(phone.pixelRatio,2.5);assert.equal(phone.postProcessing,false);
+ for(const [w,h,dpr,compact] of [[390,844,3,true],[1024,768,2,true],[3840,2160,3,false]]){
+  const q=showroomQuality(w,h,dpr,compact);assert.ok(w*h*q.pixelRatio**2<=(compact?3_000_000:6_000_000)+1);assert.ok(q.pixelRatio<=dpr);
+ }
+ assert.equal(showroomQuality(1440,1000,1,false).pixelRatio,1);
+ assert.ok(framingDistance(12,8,5,.5)>framingDistance(12,8,5,2),'Portrait camera backs up enough to fit the same buildings');
+ assert.ok(Number.isFinite(framingDistance(2,3,1,0)));
+});

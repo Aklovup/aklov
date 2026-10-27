@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {showroomQuality,framingDistance} from './showroomResponsive';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { Reflector } from 'three/addons/objects/Reflector.js';
@@ -15,11 +16,13 @@ interface Options { selectModel:(category:string)=>void; selectRoom:(slug:string
 
 export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],options:Options) {
   const canvas=root.querySelector<HTMLCanvasElement>('canvas')!;
+  const viewport=root.querySelector<HTMLElement>('[data-showroom-viewport]')!;
+  const compact=()=>root.dataset.layout==='compact';
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
   const pause=root.querySelector<HTMLButtonElement>('[data-showroom-motion]')!;
   let renderer:THREE.WebGLRenderer;
   try {renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:innerWidth<800?'low-power':'high-performance'});}catch {root.dataset.renderer='fallback';root.dataset.roomReady='true';return {setState:(_state:ShowroomState)=>{},hover:(_key?:string)=>{},start:()=>{}};}
-  renderer.setPixelRatio(Math.min(devicePixelRatio||1,innerWidth<800?1.1:1.4));
+  renderer.setPixelRatio(1);
   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   const scene=new THREE.Scene();scene.background=new THREE.Color('#151515');scene.fog=new THREE.FogExp2('#292827',.012);
@@ -50,7 +53,21 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   box(table,10.2,2.8,7.5,charcoal,0,1.4,0,.2);
   for(let i=-4;i<=4;i++)box(table,.055,2.55,.08,gold,i*1.04,1.4,3.8,.01);
   const floor=new Reflector(new THREE.PlaneGeometry(180,180),{color:0x555350,textureWidth:innerWidth<800?320:640,textureHeight:innerWidth<800?320:640,clipBias:.003,multisample:0});floor.rotation.x=-Math.PI/2;floor.position.y=-.03;scene.add(floor);
-  const composer=new EffectComposer(renderer);composer.addPass(new RenderPass(scene,camera));composer.addPass(new UnrealBloomPass(new THREE.Vector2(1,1),.25,.7,1.3));composer.addPass(new OutputPass());
+  const matteFloor=new THREE.Mesh(new THREE.PlaneGeometry(180,180),new THREE.MeshStandardMaterial({color:'#292827',roughness:.9}));matteFloor.rotation.x=-Math.PI/2;matteFloor.position.y=-.035;matteFloor.receiveShadow=true;scene.add(matteFloor);
+  // The default framebuffer is antialiased on compact screens. The desktop composer
+  // needs its own multisampled target: canvas antialiasing does not apply to it.
+  let composer:EffectComposer|undefined;
+  function configureQuality(w:number,h:number){
+    const quality=showroomQuality(w,h,devicePixelRatio,compact());renderer.setPixelRatio(quality.pixelRatio);
+    if(quality.postProcessing&&!composer){
+      const target=new THREE.WebGLRenderTarget(1,1,{type:THREE.HalfFloatType,samples:Math.min(2,renderer.capabilities.maxSamples)});
+      composer=new EffectComposer(renderer,target);composer.addPass(new RenderPass(scene,camera));composer.addPass(new UnrealBloomPass(new THREE.Vector2(1,1),.25,.7,1.3));composer.addPass(new OutputPass());
+    }else if(!quality.postProcessing&&composer){for(const pass of composer.passes)pass.dispose();composer.dispose();composer=undefined;}
+    composer?.setPixelRatio(quality.pixelRatio);composer?.setSize(w,h);
+    key.shadow.autoUpdate=!compact();key.shadow.needsUpdate=true;
+    root.dataset.renderDpr=quality.pixelRatio.toFixed(3);root.dataset.postProcessing=String(!!composer);root.dataset.antialias=String(renderer.getContext().getContextAttributes()?.antialias||!!composer);
+  }
+  const anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
   const dustGeometry=new THREE.BufferGeometry();
   const dustPositions=new Float32Array(60*3);for(let i=0;i<60;i++){dustPositions[i*3]=(Math.sin(i*2.39)*13);dustPositions[i*3+1]=5+(i%9);dustPositions[i*3+2]=Math.cos(i*1.71)*10;}
   dustGeometry.setAttribute('position',new THREE.BufferAttribute(dustPositions,3));
@@ -60,13 +77,13 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   function preview(project:ShowroomProject,index:number,label=project.src?'Preview loading':'Preview pending') {
     const c=document.createElement('canvas');c.width=512;c.height=288;const ctx=c.getContext('2d')!;
     ctx.fillStyle='#202020';ctx.fillRect(0,0,512,288);ctx.strokeStyle='#b79d67';ctx.strokeRect(15,15,482,258);ctx.fillStyle='#dfc489';ctx.font=`100px ${displayFont}`;ctx.fillText(String(index+1).padStart(2,'0'),34,150);ctx.fillStyle='#f5f2ea';ctx.font=`16px ${sansFont}`;ctx.fillText(label,35,220);
-    const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;return texture;
+    const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=anisotropy;return texture;
   }
   function modelSign(model:ShowroomModel,index:number) {
     const c=document.createElement('canvas');c.width=640;c.height=180;const ctx=c.getContext('2d')!;
     ctx.fillStyle='#202020';ctx.fillRect(0,0,640,180);ctx.fillStyle='#d8bd78';ctx.font=`22px ${sansFont}`;ctx.fillText(`${String(index+1).padStart(2,'0')} / ${model.projects.length} ${model.projects.length===1?'PROJECT':'PROJECTS'}`,26,43);
     ctx.fillStyle='#f5f2ea';ctx.font=`32px ${displayFont}`;const words=model.label.split(' ');let line='',y=99;for(const word of words){if(ctx.measureText(line+' '+word).width>580){ctx.fillText(line,26,y);line=word;y+=38;}else line+=(line?' ':'')+word;}ctx.fillText(line,26,y);
-    const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;return new THREE.MeshBasicMaterial({map:tex,toneMapped:false});
+    const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=anisotropy;return new THREE.MeshBasicMaterial({map:tex,toneMapped:false});
   }
   const exhibitModels=[...modelsFor(projects,'client'),...modelsFor(projects,'concepts')].map((data)=>{
     const group=new THREE.Group();group.userData.model=data.category;group.userData.group=data.group;scene.add(group);group.position.y=3.45;
@@ -123,7 +140,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     const layout=mediaSelection.get(p.slug,items.map(item=>item.id),p.initialMedia);
     const version=room.node.userData.previewVersion=(room.node.userData.previewVersion||0)+1;
     const ids=[layout.main,...layout.rail],media=ids.map(id=>items.find(item=>item.id===id)).filter(Boolean);
-    if(!media.length){if(p.src){loader.load(p.src,texture=>{texture.colorSpace=THREE.SRGBColorSpace;const old=room.material.map;room.material.map=texture;old?.dispose();room.material.needsUpdate=true;room.ready=true;draw();});}return;}
+    if(!media.length){if(p.src){loader.load(p.src,texture=>{texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=anisotropy;const old=room.material.map;room.material.map=texture;old?.dispose();room.material.needsUpdate=true;room.ready=true;draw();});}return;}
     const images=await Promise.all(media.map(item=>bitmap(item!.src!).catch(()=>undefined)));
     if(room.node.userData.previewVersion!==version)return;
     const c=document.createElement('canvas');c.width=1080;c.height=760;const ctx=c.getContext('2d')!;ctx.fillStyle='#151515';ctx.fillRect(0,0,1080,760);
@@ -131,14 +148,14 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     function imageFit(image:HTMLImageElement|undefined,x:number,y:number,w:number,h:number,cover=true){if(!image)return;const scale=(cover?Math.max:Math.min)(w/image.width,h/image.height);ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();ctx.drawImage(image,x+(w-image.width*scale)/2,y,image.width*scale,image.height*scale);ctx.restore();}
     const mainWidth=media.length>1?760:1016;imageFit(images[0],32,160,mainWidth,540,media[0]?.type==='image');
     if(media.length>1){const h=540/(media.length-1);for(let i=1;i<media.length;i++){ctx.strokeStyle='#a08b55';ctx.strokeRect(818,160+(i-1)*h,230,h-12);imageFit(images[i],824,166+(i-1)*h,218,h-24);}}
-    const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;const old=room.material.map;room.material.map=texture;old?.dispose();room.material.needsUpdate=true;room.ready=true;room.node.userData.previewId=layout.main;root.dataset.previewMedia=JSON.stringify(Object.fromEntries(exhibitModels.flatMap(m=>m.rooms).filter(r=>r.node.userData.previewId).map(r=>[r.project.slug,r.node.userData.previewId])));
+    const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=anisotropy;const old=room.material.map;room.material.map=texture;old?.dispose();room.material.needsUpdate=true;room.ready=true;room.node.userData.previewId=layout.main;root.dataset.previewMedia=JSON.stringify(Object.fromEntries(exhibitModels.flatMap(m=>m.rooms).filter(r=>r.node.userData.previewId).map(r=>[r.project.slug,r.node.userData.previewId])));
     root.dataset.readyPreviews=String(exhibitModels.flatMap(m=>m.rooms).filter(r=>r.ready).length);draw();
   }
   function ensureMedia(model:typeof exhibitModels[number]){for(const room of model.rooms){if(room.loaded)continue;room.loaded=true;void updatePreview(room).catch(()=>{root.dataset.previewErrors=String(Number(root.dataset.previewErrors||0)+1);});}}
   root.addEventListener('aklov:media-selection',event=>{const slug=(event as CustomEvent).detail.slug;const room=exhibitModels.flatMap(m=>m.rooms).find(r=>r.project.slug===slug);if(room)void updatePreview(room).catch(()=>{});});
   const surfaces=createRoomSurfaces(root,scene,camera);
   let state:ShowroomState={group:'client'},hoverModel:string|undefined,hoverRoom:string|undefined;
-  let paused=motion.matches,lost=false,started=false,frame=0,last=0,elapsed=0,intro=paused?0:.8,yaw=0,targetYaw=0,dragging=false,reading=false;
+  let paused=motion.matches,lost=false,started=false,frame=0,last=0,elapsed=0,intro=paused?0:.8,yaw=0,targetYaw=0,pitch=0,targetPitch=0,dragging=false,reading=false;
   let activeModel:typeof exhibitModels[number]|undefined;let recentRoom:string|undefined;
   const roomEye=new THREE.Vector3(0,1.18,1.95);let roomHeading=0,viewHeading=0;let travelCommit=false;
   const pointerTarget=new THREE.Vector2(),pointerCurrent=new THREE.Vector2();
@@ -156,7 +173,20 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     surfaces.bind(roomFor(state)?.node);
   }
   function basePose(location:ShowroomState){
-    const eye=new THREE.Vector3(),look=new THREE.Vector3(),mobile=innerWidth<800,model=modelFor(location),room=roomFor(location);
+    const eye=new THREE.Vector3(),look=new THREE.Vector3(),mobile=compact(),model=modelFor(location),room=roomFor(location);
+    if(mobile&&!room){
+      const visible=model?[model]:exhibitModels.filter(m=>m.data.group===location.group),bounds=new THREE.Box3();
+      for(const m of visible){const center=m.group.position.clone().add(new THREE.Vector3(0,1.18,0));bounds.union(new THREE.Box3().setFromCenterAndSize(center,new THREE.Vector3(m.w*.84,2.5,m.d*.84)));}
+      bounds.getCenter(look);
+      const direction=(model?new THREE.Vector3(.45,.65,1.2):new THREE.Vector3(-.6,1,1.3)).normalize();
+      direction.applyAxisAngle(new THREE.Vector3(0,1,0),yaw);
+      const right=new THREE.Vector3().crossVectors(new THREE.Vector3(0,1,0),direction).normalize();
+      direction.applyAxisAngle(right,pitch);
+      const up=new THREE.Vector3().crossVectors(direction,right).normalize();
+      let horizontal=0,vertical=0,depth=0;
+      for(const x of [bounds.min.x,bounds.max.x])for(const y of [bounds.min.y,bounds.max.y])for(const z of [bounds.min.z,bounds.max.z]){const point=new THREE.Vector3(x,y,z).sub(look);horizontal=Math.max(horizontal,Math.abs(point.dot(right))*2);vertical=Math.max(vertical,Math.abs(point.dot(up))*2);depth=Math.max(depth,Math.abs(point.dot(direction))*2);}
+      eye.copy(look).addScaledVector(direction,framingDistance(horizontal,vertical,depth,camera.aspect,camera.fov)+intro*5);return {eye,look};
+    }
     if(room){eye.copy(room.node.localToWorld(roomEye.clone()));look.copy(worldPoint(room,roomEye.x-Math.sin(roomHeading)*3,roomEye.y,roomEye.z-Math.cos(roomHeading)*3));}
     else if(model){model.group.getWorldPosition(look);look.y+=1;eye.copy(look).add(mobile?new THREE.Vector3(8.4,11.7,19.5):new THREE.Vector3(5.5,6.4,10.5));}
     else{look.set(0,4.1,0);const single=modelsFor(projects,location.group).length===1;eye.set(mobile?(single?-5:-10):(single?-8:-13),mobile?(single?21:29):(single?13:16),mobile?(single?30:40):(single?20:24));eye.z+=intro*12;}
@@ -182,13 +212,14 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   function updateModels(dt:number){
     const activeRoom=roomFor(state),local=activeRoom?activeRoom.node.worldToLocal(currentEye.clone()):undefined;
     const inside=!!local&&local.x>-1.18&&local.x<1.18&&local.z>-.95&&local.z<2.8&&local.y<2.2;
-    floor.visible=!inside;root.dataset.insideRoom=String(inside);root.dataset.visibleRoom=inside?activeRoom!.project.slug:'';
+    floor.visible=!inside&&!compact();matteFloor.visible=!inside&&compact();root.dataset.insideRoom=String(inside);root.dataset.visibleRoom=inside?activeRoom!.project.slug:'';
     for(const model of exhibitModels){
       model.group.visible=model.data.group===state.group&&(!inside||model===activeModel);if(!model.group.visible)continue;
       const selected=model===activeModel,target=selected?1:(!paused&&hoverModel===model.data.category ? .06 : 0);
       model.open=paused?target:THREE.MathUtils.damp(model.open,target,5.5,dt||.016);
       model.roof.position.y=2.3+model.open*2.65;model.roof.position.z=-model.open*.8;model.roof.rotation.x=-model.open*.10;
       for(const object of model.shell)object.visible=!inside;
+      model.sign.visible=!inside&&!compact();model.roof.visible=!(compact()&&selected);
       const dim=activeModel&&!selected ? .28 : 1;
       for(const item of model.materials){item.material.opacity=item.base*dim;item.material.transparent=item.material.opacity<.99;item.material.depthWrite=item.material.opacity>.95;}
       model.glass.material.opacity=(1-model.open)*.15*dim;model.glass.visible=!inside&&model.open<.95;
@@ -204,22 +235,26 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   function draw(){
     if(lost)return;
     scene.updateMatrixWorld(true);surfaces.render();
-    if(state.room){scene.background=null;renderer.setClearColor('#151515',0);renderer.render(scene,camera);}
-    else{scene.background=new THREE.Color('#151515');renderer.setClearColor('#151515',1);composer.render();}
-    root.dataset.rendered='true';
+    if(compact()&&state.room){/* Native project surfaces need no hidden GPU render. */}
+    else if(state.room){scene.background=null;renderer.setClearColor('#151515',0);renderer.render(scene,camera);}
+    else{scene.background=new THREE.Color('#151515');renderer.setClearColor('#151515',1);if(composer)composer.render();else renderer.render(scene,camera);}
+    root.dataset.rendered='true';root.dataset.renderWidth=String(canvas.width);root.dataset.renderHeight=String(canvas.height);
     const settled=currentEye.distanceTo(targetEye)+currentLook.distanceTo(targetLook)<.06&&!flight&&intro<.01;
     root.dataset.transitionSettled=String(settled);root.dataset.roomReady=String(!!state.room&&settled);
     root.dataset.roomX=roomEye.x.toFixed(4);root.dataset.roomZ=roomEye.z.toFixed(4);root.dataset.roomHeading=roomHeading.toFixed(4);
     root.dataset.cameraError=(currentEye.distanceTo(targetEye)+currentLook.distanceTo(targetLook)).toFixed(4);root.dataset.cameraHeading=Math.atan2(currentLook.x-currentEye.x,currentLook.z-currentEye.z).toFixed(5);root.dataset.cameraX=currentEye.x.toFixed(4);root.dataset.cameraZ=currentEye.z.toFixed(4);root.dataset.ambientTime=elapsed.toFixed(2);
-    for(const model of exhibitModels.filter(m=>m.group.visible)){
-      const anchor=model.group.position.clone();anchor.y+=1.1;anchor.project(camera);const b=root.querySelector<HTMLElement>(`[data-showroom-model="${model.data.category}"]`);
-      if(b){b.dataset.worldX=((anchor.x*.5+.5)*canvas.clientWidth).toFixed(1);b.dataset.worldY=((-anchor.y*.5+.5)*canvas.clientHeight).toFixed(1);}
+    const rect=canvas.getBoundingClientRect();
+    function anchor(id:string,point:THREE.Vector3,selector:string){
+      point.project(camera);const x=(point.x*.5+.5)*rect.width,y=(-point.y*.5+.5)*rect.height;
+      const button=root.querySelector<HTMLElement>(`[${selector}="${id}"]`);if(button){button.dataset.worldX=(rect.left+x).toFixed(1);button.dataset.worldY=(rect.top+y).toFixed(1);}
+      const marker=root.querySelector<HTMLElement>(`[data-marker="${id}"]`);if(marker){marker.style.left=`${x}px`;marker.style.top=`${y}px`;marker.hidden=!compact()||point.z>1||x<14||x>rect.width-14||y<14||y>rect.height-14;}
     }
-    if(activeModel)for(const room of activeModel.rooms){const anchor=room.screen.getWorldPosition(new THREE.Vector3()).project(camera),b=root.querySelector<HTMLElement>(`[data-showroom-room="${room.project.slug}"]`);if(b){b.dataset.worldX=((anchor.x*.5+.5)*canvas.clientWidth).toFixed(1);b.dataset.worldY=((-anchor.y*.5+.5)*canvas.clientHeight).toFixed(1);}}
+    if(!state.model)for(const model of exhibitModels.filter(m=>m.group.visible)){anchor(model.data.category,model.group.position.clone().add(new THREE.Vector3(0,1.8,0)),'data-showroom-model');}
+    if(activeModel)for(const room of activeModel.rooms)anchor(room.project.slug,room.screen.getWorldPosition(new THREE.Vector3()),'data-showroom-room');
     const room=roomFor(state);root.dataset.exitDistance=room?(Math.hypot(roomEye.x,Math.max(0,2.80-roomEye.z))*.84).toFixed(3):walking?(walking.length-walking.distance).toFixed(3):'0';
   }
-  function resize(){const r=root.getBoundingClientRect();camera.aspect=r.width/r.height;camera.updateProjectionMatrix();renderer.setSize(r.width,r.height,false);composer.setSize(r.width,r.height);surfaces.resize(r.width,r.height);pose();if(paused||!started){currentEye.copy(targetEye);currentLook.copy(targetLook);}camera.position.copy(currentEye);camera.lookAt(currentLook);updateModels(.016);draw();if(started)sync();}
-  function needsFrame(){return !!flight||surfaces.animating()||currentEye.distanceTo(targetEye)+currentLook.distanceTo(targetLook)>.002||Math.abs(yaw-targetYaw)>.001||(!paused&&!reading&&root.dataset.mediaLift!=='open');}
+  function resize(){const r=viewport.getBoundingClientRect();configureQuality(r.width,r.height);camera.aspect=r.width/Math.max(1,r.height);camera.updateProjectionMatrix();renderer.setSize(r.width,r.height,false);surfaces.resize(root.clientWidth,root.clientHeight);pose();currentEye.copy(targetEye);currentLook.copy(targetLook);camera.position.copy(currentEye);camera.lookAt(currentLook);updateModels(.016);draw();if(started)sync();}
+  function needsFrame(){return !!flight||surfaces.animating()||currentEye.distanceTo(targetEye)+currentLook.distanceTo(targetLook)>.002||Math.abs(yaw-targetYaw)>.001||Math.abs(pitch-targetPitch)>.001||(!paused&&!reading&&!(compact()&&state.room)&&root.dataset.mediaLift!=='open');}
   function tick(now:number){
     frame=0;if(!started||document.hidden||lost||options.isIndexOpen())return;
     if(last&&now-last<15){frame=requestAnimationFrame(tick);return;}
@@ -228,7 +263,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     const lifting=root.dataset.mediaLift==='open'||root.dataset.mediaLift==='closing';
     if(!lifting){
       if(flight){flight.progress=Math.min(1,flight.progress+delta/1.7);if(flight.progress>=1)flight=undefined;}
-      yaw=THREE.MathUtils.damp(yaw,targetYaw,10,dt);pointerCurrent.lerp(pointerTarget,1-Math.exp(-5*dt));pose();
+      yaw=THREE.MathUtils.damp(yaw,targetYaw,10,dt);pitch=THREE.MathUtils.damp(pitch,targetPitch,10,dt);pointerCurrent.lerp(pointerTarget,1-Math.exp(-5*dt));pose();
       currentEye.lerp(targetEye,1-Math.exp(-11*dt));
       const room=roomFor(state);
       if(room&&!flight&&!walking){viewHeading=THREE.MathUtils.damp(viewHeading,roomHeading,12,dt);const direction=new THREE.Vector3(-Math.sin(viewHeading),0,-Math.cos(viewHeading)).applyQuaternion(room.node.getWorldQuaternion(new THREE.Quaternion()));currentLook.copy(currentEye).addScaledVector(direction,3*.84);}
@@ -249,10 +284,10 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   function setState(next:ShowroomState){
     if(lost){state=next;root.dataset.roomReady='true';return;}
     const previous=state,changed=previous.group!==next.group||previous.model!==next.model||previous.room!==next.room,previousRoom=roomFor(previous);
-    if(previous.room&&!next.room)recentRoom=previous.room;state=next;if(changed){targetYaw=0;walking=undefined;root.style.setProperty('--travel','0');if(next.model)intro=0;root.dataset.roomReady='false';roomEye.set(0,1.18,1.95);roomHeading=0;viewHeading=0;root.dataset.roomStation='overview';}
-    updateLayout();canvas.style.pointerEvents=next.room?'none':'auto';root.querySelector<HTMLElement>('[data-showroom-exit]')!.hidden=root.dataset.surfaceMode==='flat'?!next.model:true;
-    if(changed&&!travelCommit&&started&&!motion.matches&&previous.group===next.group&&(previousRoom||roomFor(next))){const dest=basePose(next),room=roomFor(next)||previousRoom!;flight={curve:route(currentEye.clone(),dest.eye,room,!!next.room),fromLook:currentLook.clone(),toLook:dest.look,progress:0,room:room.project.slug};}
-    if(motion.matches||!started){yaw=targetYaw;settle();}else sync();
+    if(previous.room&&!next.room)recentRoom=previous.room;state=next;if(changed){targetYaw=0;targetPitch=0;walking=undefined;root.style.setProperty('--travel','0');if(next.model)intro=0;root.dataset.roomReady='false';roomEye.set(0,1.18,1.95);roomHeading=0;viewHeading=0;root.dataset.roomStation='overview';}
+    updateLayout();key.shadow.needsUpdate=true;canvas.style.pointerEvents=next.room?'none':'auto';root.querySelector<HTMLElement>('[data-showroom-exit]')!.hidden=root.dataset.surfaceMode==='flat'?!next.model:true;
+    if(changed&&!compact()&&!travelCommit&&started&&!motion.matches&&previous.group===next.group&&(previousRoom||roomFor(next))){const dest=basePose(next),room=roomFor(next)||previousRoom!;flight={curve:route(currentEye.clone(),dest.eye,room,!!next.room),fromLook:currentLook.clone(),toLook:dest.look,progress:0,room:room.project.slug};}
+    if(motion.matches||!started||compact()){yaw=targetYaw;pitch=targetPitch;settle();}else sync();
   }
   function station(name:string){
     const room=roomFor(state);if(!room)return;
@@ -288,7 +323,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   updateLayout();pose();currentEye.copy(targetEye);currentLook.copy(targetLook);resize();root.dataset.renderer='webgl';pause.hidden=false;
   pause.addEventListener('click',()=>{paused=!paused;if(paused){intro=0;yaw=targetYaw;settle();}sync();});
   motion.addEventListener('change',()=>{paused=motion.matches;intro=0;if(paused)settle();sync();});
-  new ResizeObserver(resize).observe(root);document.addEventListener('visibilitychange',sync);document.addEventListener('aklov:showroom-index',sync);
+  new ResizeObserver(resize).observe(viewport);window.addEventListener('resize',resize);document.addEventListener('visibilitychange',sync);document.addEventListener('aklov:showroom-index',sync);
   root.addEventListener('aklov:room-station',event=>station((event as CustomEvent).detail));root.addEventListener('aklov:room-exit',()=>options.retreat());
   root.addEventListener('aklov:media-lift',event=>{
     if((event as CustomEvent).detail.open){flight=undefined;walking=undefined;const room=roomFor(state);if(room){roomEye.copy(room.node.worldToLocal(currentEye.clone()));roomHeading=viewHeading;targetEye.copy(currentEye);targetLook.copy(currentLook);}}
@@ -300,10 +335,10 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   let gesture:{id:number;x:number;y:number;lastX:number;lastY:number;dragged:boolean}|undefined,keyboardNavigation=false,suppressClickUntil=0;
   const interactive=(e:Event)=>(e.target as Element).closest('button,a,input,select,textarea,video');
   const lifted=()=>root.dataset.mediaLift==='open'||root.dataset.mediaLift==='closing';
-  const flat=()=>root.dataset.surfaceMode==='flat'||root.dataset.renderer==='fallback';
+  const flat=()=>root.dataset.renderer==='fallback'||(!!state.room&&root.dataset.surfaceMode==='flat');
   function clearGesture(){if(gesture&&root.hasPointerCapture(gesture.id))root.releasePointerCapture(gesture.id);gesture=undefined;dragging=false;delete root.dataset.dragging;}
   root.addEventListener('pointerdown',event=>{
-    suppressClickUntil=0;keyboardNavigation=false;if(lifted()||flat()||(event.pointerType==='mouse'&&event.button!==0)||(event.target as Element).closest('input,select,textarea'))return;
+    suppressClickUntil=0;keyboardNavigation=false;if(!event.isPrimary){clearGesture();return;}if(compact()&&!(event.target as Element).closest('[data-showroom-viewport]'))return;if(lifted()||flat()||(event.pointerType==='mouse'&&event.button!==0)||(event.target as Element).closest('input,select,textarea'))return;
     clearGesture();gesture={id:event.pointerId,x:event.clientX,y:event.clientY,lastX:event.clientX,lastY:event.clientY,dragged:false};
   });
   root.addEventListener('pointermove',event=>{
@@ -314,7 +349,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
       gesture.dragged=true;dragging=true;root.dataset.dragging='';if(!root.hasPointerCapture(event.pointerId))root.setPointerCapture(event.pointerId);
       gesture.lastX=event.clientX;gesture.lastY=event.clientY;event.preventDefault();flight=undefined;
       if(state.room){roomHeading-=dx*.0032;if(Math.abs(dy)>Math.abs(dx)*.5)walkRoom(dy);else respond();}
-      else{targetYaw=THREE.MathUtils.clamp(targetYaw-dx*.003,-1.25,1.25);if(Math.abs(dy)>Math.abs(dx)*.5)walkOutside(dy);else respond();}
+      else{targetYaw=THREE.MathUtils.clamp(targetYaw-dx*.003,-1.25,1.25);if(compact()){targetPitch=THREE.MathUtils.clamp(targetPitch+dy*.002,-.18,.18);respond();}else if(Math.abs(dy)>Math.abs(dx)*.5)walkOutside(dy);else respond();}
     }else if(event.pointerType==='mouse'){
       pointerTarget.set(event.clientX/root.clientWidth*2-1,1-event.clientY/root.clientHeight*2);root.dataset.pointerX=pointerTarget.x.toFixed(3);
       if(!state.room){const hit=pick(event.clientX,event.clientY);hoverModel=hit?.category;hoverRoom=hit?.room;}if(!paused)sync();
@@ -329,6 +364,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   window.addEventListener('blur',clearGesture);
   document.addEventListener('click',event=>{if(performance.now()<suppressClickUntil){event.preventDefault();event.stopImmediatePropagation();}},true);
   root.addEventListener('wheel',event=>{
+    if(compact()&&!(event.target as Element).closest('[data-showroom-viewport]'))return;
     if(event.ctrlKey||options.isIndexOpen()||lifted()||flat()||(event.target as Element).closest('input,select,textarea'))return;
     event.preventDefault();clearGesture();
     const x=gesturePixels(event.deltaX,event.deltaMode,innerHeight),y=gesturePixels(event.deltaY,event.deltaMode,innerHeight);
@@ -345,3 +381,4 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();lost=true;cancelAnimationFrame(frame);surfaces.fallback();root.dataset.renderer='fallback';root.dataset.roomReady='true';root.querySelector<HTMLElement>('[data-showroom-exit]')!.hidden=!state.model;pause.hidden=true;});
   return {setState,hover:(key?:string)=>{hoverModel=key;if(!paused&&!frame)sync();},start:()=>{started=true;for(const model of exhibitModels){model.sign.material=modelSign(model.data,modelsFor(projects,model.data.group).findIndex(m=>m.key===model.data.key));if(model===activeModel)for(const room of model.rooms)void updatePreview(room).catch(()=>{});}if(paused)settle();sync();}};
 }
+

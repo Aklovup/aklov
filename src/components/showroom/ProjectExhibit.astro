@@ -25,7 +25,7 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
     </div>
   </section>
   <section class="lifted-media" data-lift-display hidden role="dialog" aria-modal="true" aria-label="Full project media" tabindex="-1">
-    <button type="button" class="lift-close" data-media-lift-close>Return display to wall</button>
+    <button type="button" class="lift-close" data-media-lift-close aria-label="Return display to wall">Close ×</button>
     <div class="lift-scroll" data-media-lift-scroll tabindex="0" role="region" aria-label="Full project image; scroll to explore"></div>
   </section>
   <button type="button" class="door-plaque" data-wall-door data-room-door>Showroom ↗</button>
@@ -135,4 +135,36 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   .showroom:is([data-renderer='fallback'],[data-surface-mode='flat']) .case-copy h3 { font-size:32px; }
   .showroom:is([data-renderer='fallback'],[data-surface-mode='flat']) .case-categories { font-size:12px; }
   @media(max-width:800px) { .showroom:is([data-renderer='fallback'],[data-surface-mode='flat']) .project-exhibit { display:block;overflow:auto; } .showroom:is([data-renderer='fallback'],[data-surface-mode='flat']) .room-panel { width:100%;height:540px;margin-bottom:20px; } }
+
+  /* Real, readable document surfaces on touch devices, not scaled-down 3D typography. */
+  .showroom[data-layout='compact'] .project-exhibit { display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-content:start;overflow:auto;overscroll-behavior:contain;touch-action:pan-y pinch-zoom;pointer-events:auto;z-index:4; }
+  .showroom[data-layout='compact'] .room-panel { width:100%;height:auto;min-width:0;margin:0;padding:18px; }
+  .showroom[data-layout='compact'] .wall-heading { height:auto;min-height:68px;padding-bottom:14px;margin-bottom:14px; }
+  .showroom[data-layout='compact'] .wall-heading h2 { font-size:28px;line-height:1.05; }
+  .showroom[data-layout='compact'] .wall-heading p { font-size:10px;letter-spacing:1.3px; }
+  .showroom[data-layout='compact'] .wall-media-layout { height:auto;display:flex;flex-direction:column;gap:12px; }
+  .showroom[data-layout='compact'] .media-primary { flex:none;height:clamp(230px,42dvh,360px); }
+  .showroom[data-layout='compact'] .installation-label { padding:8px 10px;font-size:11px; }
+  .showroom[data-layout='compact'] .room-panel .installation-media figcaption { padding:8px 10px;font-size:12px;line-height:1.5; }
+  .showroom[data-layout='compact'] .media-rail { height:100px;grid-template-rows:minmax(0,1fr)!important;grid-template-columns:repeat(var(--rail-count,1),minmax(0,1fr));gap:8px;flex:none; }
+  .showroom[data-layout='compact'] .media-rail button { min-width:0;min-height:44px;padding:4px; }
+  .showroom[data-layout='compact'] .media-rail span { font-size:10px; }
+  .showroom[data-layout='compact'] .room-panel .gif-toggle { min-height:44px;font-size:12px;padding:8px 12px; }
+  .showroom[data-layout='compact'] .story-wall { padding:28px 22px; }
+  .showroom[data-layout='compact'] .story-cover { height:auto;min-height:260px; }
+  .showroom[data-layout='compact'] .story-type { font-size:10px;letter-spacing:1.3px;margin-bottom:14px; }
+  .showroom[data-layout='compact'] .story-project { font-size:26px;margin-bottom:22px; }
+  .showroom[data-layout='compact'] .story-cover h2 { font-size:clamp(34px,7vw,48px);line-height:1.02;margin-bottom:20px; }
+  .showroom[data-layout='compact'] .story-intro { font-size:14px; }
+  .showroom[data-layout='compact'] .story-rule { margin-top:24px; }
+  .showroom:is([data-layout='compact'],[data-renderer='fallback']) .lifted-media { inset:calc(var(--showroom-header,85px) + 8px) 12px max(12px,env(safe-area-inset-bottom));width:calc(100% - 24px);height:auto;padding-top:48px;z-index:8; }
+  .showroom:is([data-layout='compact'],[data-renderer='fallback']) .lift-close { clip-path:none;width:auto;height:44px;min-height:44px;top:2px;left:auto;right:4px;padding:8px 14px;background:var(--charcoal);border:1px solid var(--gold-dark);color:var(--ivory);font:500 12px var(--sans); }
+  .showroom:is([data-layout='compact'],[data-renderer='fallback']) .lifted-media[data-kind='story'] .lift-close { background:var(--ivory);color:var(--charcoal); }
+  .showroom:is([data-layout='compact'],[data-renderer='fallback']) .lift-scroll { touch-action:pan-y pinch-zoom;-webkit-overflow-scrolling:touch; }
+  .showroom[data-layout='compact'] .case-article { padding:22px 20px 40px; }
+  .showroom[data-layout='compact'] .case-article h2 { font-size:clamp(36px,8vw,60px); }
+  .showroom[data-layout='compact'] .case-links { font-size:14px; }
+  .showroom[data-layout='compact'] .lift-scroll figcaption { font-size:12px; }
+  @media(min-width:700px) { .showroom[data-layout='compact'] .project-exhibit { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 </style>
+

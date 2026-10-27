@@ -11,6 +11,7 @@ const models=modelsFor(entries,'client');
 ---
 <script is:inline>document.documentElement.dataset.showroomJs='';</script>
 <section class="showroom" data-showroom data-view="showroom" aria-labelledby="work-title">
+  <div class="showroom-viewport" data-showroom-viewport>
   <svg class="showroom-fallback" viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
     <defs><radialGradient id="room-light"><stop stop-color="#55534e"/><stop offset="1" stop-color="#151515"/></radialGradient><linearGradient id="table-light"><stop stop-color="#b9ad89"/><stop offset="1" stop-color="#655d46"/></linearGradient></defs>
     <rect width="1440" height="1000" fill="url(#room-light)"/>
@@ -19,6 +20,9 @@ const models=modelsFor(entries,'client');
     {[{x:430,y:460},{x:770,y:430},{x:590,y:600},{x:920,y:580}].map(({x,y})=><g transform={`translate(${x} ${y})`}><path d="M0 0L120 -45L220 10L100 65Z" fill="#eee9db"/><path d="M0 0V80L100 145V65Z" fill="#c7c3b8"/><path d="M100 65L220 10V90L100 145Z" fill="#8c8880"/><path d="M120 65L200 28V78L120 115Z" fill="#292929"/></g>)}
   </svg>
   <canvas data-showroom-canvas aria-hidden="true"></canvas>
+  <div class="showroom-markers" data-showroom-markers aria-hidden="true"></div>
+  <p class="showroom-touch-hint" data-showroom-touch-hint aria-hidden="true">Drag to turn · Tap a model</p>
+  </div>
   <div class="showroom-shade" aria-hidden="true"></div>
   <div class="showroom-arrival" data-showroom-arrival><span class="arrival-brand">aklov<span>.</span></span><p role="status">Preparing the showroom</p><a href="#showroom-index" data-arrival-rescue hidden>Explore the project index →</a></div>
   <div class="showroom-toolbar">
@@ -64,6 +68,8 @@ const models=modelsFor(entries,'client');
   body:has(.showroom) .header-surface { position:absolute;z-index:10;top:0;left:0;width:100%;background:linear-gradient(#151515e6,transparent); }
   body:has(.showroom) .footer { display:none; }
   .showroom { touch-action:none;position:relative;isolation:isolate;width:100%;height:100dvh;min-height:0;overflow:hidden;background:#151515;color:var(--ivory);--focus-color:var(--gold); }
+  .showroom-viewport { position:absolute;inset:0;z-index:1;min-width:0;min-height:0; }
+  .showroom-markers,.showroom-touch-hint { display:none; }
   .showroom[data-surface-mode='flat'] { touch-action:pan-y pinch-zoom; }
   .showroom canvas[data-showroom-canvas],.showroom-fallback { position:absolute;inset:0;width:100%;height:100%; }
   .showroom canvas[data-showroom-canvas] { z-index:1;opacity:0;transition:opacity .65s;touch-action:none;cursor:grab; }
@@ -148,8 +154,8 @@ const models=modelsFor(entries,'client');
   .showroom[data-arrival='ready'] .showroom-arrival { opacity:0;visibility:hidden;pointer-events:none; }
   .showroom:not([data-arrival='ready'])>.showroom-toolbar,.showroom:not([data-arrival='ready'])>.showroom-path,.showroom:not([data-arrival='ready'])>.showroom-title,.showroom:not([data-arrival='ready'])>.showroom-info,.showroom:not([data-arrival='ready'])>.showroom-options,.showroom:not([data-arrival='ready'])>.showroom-bottom { opacity:0; }
   .showroom[data-view='project']>.showroom-info,.showroom[data-view='project']>.showroom-options { display:none; }
-  .spatial-exit { position:absolute;z-index:5;left:clamp(20px,var(--exit-x,4vw),calc(100% - 160px));top:clamp(230px,var(--exit-y,60%),calc(100% - 160px));display:flex;align-items:center;gap:12px;min-height:64px;padding:12px 16px;border:1px solid #d8bd7880!important;background:#0e2023ed!important;box-shadow:0 0 30px #d8bd7815;color:var(--gold)!important; }
-  .spatial-exit:hover { border-color:var(--gold)!important;background:#172e30!important; }
+  .spatial-exit { position:absolute;z-index:5;left:clamp(20px,var(--exit-x,4vw),calc(100% - 160px));top:clamp(230px,var(--exit-y,60%),calc(100% - 160px));display:flex;align-items:center;gap:12px;min-height:64px;padding:12px 16px;border:1px solid #d8bd7880!important;background:#151515ed!important;box-shadow:0 0 30px #d8bd7815;color:var(--gold)!important; }
+  .spatial-exit:hover { border-color:var(--gold)!important;background:#252522!important; }
   .exit-threshold { display:block;width:16px;height:27px;border:1px solid var(--gold);border-bottom:0;box-shadow:inset 3px 0 #d8bd7850; }
   .travel-indicator { position:absolute;left:var(--pad);bottom:68px;z-index:5;width:100px;height:1px;background:#ffffff25;pointer-events:none; }
   .travel-indicator>span { display:block;width:100%;height:100%;background:var(--gold);transform:scaleX(var(--travel,0));transform-origin:left; }
@@ -160,4 +166,66 @@ const models=modelsFor(entries,'client');
   @media(prefers-reduced-motion:reduce) { .showroom-arrival,.showroom canvas[data-showroom-canvas] { transition:none; } }
   .showroom[data-view='project'][data-renderer='webgl'] .showroom-toolbar { display:none; }
   .showroom[data-view='project'][data-renderer='webgl'] .showroom-path { top:94px; }
+
+  body:has(.showroom) .header-surface:has(.top.is-open) { background:var(--charcoal); }
+  /* Compact screens get a real canvas stage, rather than text covering a full-page render. */
+  .showroom[data-layout='compact'] { display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(120px,1fr) auto auto auto;gap:8px;padding:calc(var(--showroom-header,85px) + 10px) var(--pad) max(8px,env(safe-area-inset-bottom));touch-action:pan-y pinch-zoom; }
+  .showroom[data-layout='compact'] .showroom-toolbar { position:static;grid-row:1;display:block; }
+  .showroom[data-layout='compact'] .showroom-toolbar>.mono { display:none; }
+  .showroom[data-layout='compact'] .showroom-types { width:100%;display:grid;grid-template-columns:1fr 1.3fr;gap:8px; }
+  .showroom[data-layout='compact'] .showroom-types button { min-width:0;min-height:44px;padding:0 8px;font-size:12px; }
+  .showroom[data-layout='compact'] .showroom-title { position:static;grid-row:2;padding-block:6px 0; }
+  .showroom[data-layout='compact'] .showroom-title h1 { font-size:52px;margin:0; }
+  .showroom[data-layout='compact'] .showroom-title p { display:none; }
+  .showroom[data-layout='compact']:not([data-view='showroom']) .showroom-title { display:none; }
+  .showroom[data-layout='compact'] .showroom-path { position:static;grid-row:2;min-width:0;gap:8px; }
+  .showroom[data-layout='compact'][data-view='showroom'] .showroom-path { display:none; }
+  .showroom[data-layout='compact'] .showroom-path [data-model-path] { min-width:0;flex:1;max-width:none;gap:8px; }
+  .showroom[data-layout='compact'] [data-showroom-category] { max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+  .showroom[data-layout='compact'] .showroom-path button { font-size:12px;flex-shrink:0; }
+  .showroom[data-layout='compact'] .showroom-path [data-showroom-category] { flex-shrink:1; }
+  .showroom[data-layout='compact'] .showroom-viewport { position:relative;inset:auto;grid-row:3;min-height:120px;width:100%;height:100%;overflow:hidden;border-radius:2px;touch-action:pinch-zoom; }
+  .showroom[data-layout='compact'] canvas[data-showroom-canvas] { touch-action:pinch-zoom; }
+  .showroom[data-layout='compact'] .showroom-shade { display:none; }
+  .showroom[data-layout='compact'] .showroom-markers { display:block;position:absolute;inset:0;z-index:2;pointer-events:none; }
+  .showroom-markers span { position:absolute;display:grid;place-items:center;width:25px;height:25px;border:1px solid #d8bd7899;border-radius:50%;background:#151515e8;color:var(--gold);font:500 10px var(--sans);transform:translate(-50%,-50%); }
+  .showroom[data-layout='compact'] .showroom-touch-hint { display:block;position:absolute;z-index:2;bottom:0;left:50%;transform:translateX(-50%);margin:0;white-space:nowrap;background:#151515d9;padding:5px 9px;border-radius:99px;color:var(--on-dark);font:11px/1.4 var(--sans);pointer-events:none; }
+  .showroom[data-layout='compact'] .showroom-info { position:static;grid-row:4;width:auto;max-width:none;max-height:none;overflow:visible;padding:0; }
+  .showroom[data-layout='compact'] .showroom-eyebrow { font-size:10px;margin-bottom:3px; }
+  .showroom[data-layout='compact'] .showroom-info h2 { font-size:clamp(24px,6.2vw,32px);line-height:1.05;margin:0; }
+  .showroom[data-layout='compact'] .showroom-info>p { display:none; }
+  .showroom[data-layout='compact'] .showroom-options { position:static;grid-row:5;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px;max-height:22dvh;min-height:0;overflow:auto;overscroll-behavior:contain;touch-action:pan-y pinch-zoom; }
+  .showroom[data-layout='compact'] .showroom-options button { min-height:48px;font-size:12px;gap:7px;padding:9px 0; }
+  .showroom[data-layout='compact'] .option-number,.showroom[data-layout='compact'] .option-count { font-size:10px; }
+  .showroom[data-layout='compact'] .showroom-bottom { position:static;grid-row:6;gap:12px;padding-top:0; }
+  .showroom[data-layout='compact'] .showroom-bottom button { min-height:44px;font-size:12px; }
+  .showroom[data-layout='compact'] .showroom-bottom>span,.showroom[data-layout='compact'] .travel-indicator,.showroom[data-layout='compact'] .spatial-exit { display:none; }
+  .showroom[data-layout='compact'][data-view='project'] { grid-template-rows:auto minmax(0,1fr) auto; }
+  .showroom[data-layout='compact'][data-view='project'] .showroom-toolbar,.showroom[data-layout='compact'][data-view='project'] .showroom-info,.showroom[data-layout='compact'][data-view='project'] .showroom-options { display:none; }
+  .showroom[data-layout='compact'][data-view='project'] .showroom-path { grid-row:1;display:flex; }
+  .showroom[data-layout='compact'][data-view='project'] .showroom-viewport { position:absolute;inset:0;visibility:hidden;pointer-events:none; }
+  .showroom[data-layout='compact'][data-view='project'] .project-exhibit { position:relative;inset:auto;grid-row:2;min-height:0; }
+  .showroom[data-layout='compact'][data-view='project'] .showroom-bottom { grid-row:3; }
+  .showroom-index { inset:var(--showroom-header,96px) 0 0;height:calc(100dvh - var(--showroom-header,96px)); }
+  @media(max-width:1000px) { .index-bar { gap:12px;align-items:center; } .index-bar h2 { min-width:0;font-size:28px; } .index-bar button { max-width:48%;font-size:12px;text-align:right; } }
+  @media(min-width:600px) and (max-height:600px) {
+    .showroom[data-layout='compact'] { grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;gap:6px 18px; }
+    .showroom[data-layout='compact'] .showroom-toolbar { grid-column:1/-1; }
+    .showroom[data-layout='compact'] .showroom-types { max-width:370px; }
+    .showroom[data-layout='compact'] .showroom-title,.showroom[data-layout='compact'] .showroom-path { display:none; }
+    .showroom[data-layout='compact'] .showroom-viewport { grid-column:1;grid-row:2/4; }
+    .showroom[data-layout='compact'] .showroom-info { grid-column:2;grid-row:2; }
+    .showroom[data-layout='compact'] .showroom-info h2 { font-size:26px; }
+    .showroom[data-layout='compact'] .showroom-options { grid-column:2;grid-row:3;max-height:none; }
+    .showroom[data-layout='compact'] .showroom-bottom { grid-column:1/-1;grid-row:4; }
+    .showroom[data-layout='compact'][data-view='project'] { grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto; }
+    .showroom[data-layout='compact'][data-view='project'] .showroom-path { grid-column:1;display:flex; }
+    .showroom[data-layout='compact'][data-view='project'] .project-exhibit { grid-column:1; }
+    .showroom[data-layout='compact'][data-view='project'] .showroom-bottom { grid-row:3; }
+  }
+  html:not([data-showroom-js]),html:not([data-showroom-js]) body:has(.showroom) { height:auto;overflow:auto; }
+  html:not([data-showroom-js]) body:has(.showroom) .header-surface { position:relative; }
+  html:not([data-showroom-js]) .showroom { display:none; }
+  html:not([data-showroom-js]) .showroom-index { position:relative;inset:auto;height:auto;max-height:none;overflow:visible; }
 </style>
+

@@ -49,3 +49,15 @@ The media wall retains its working 75/25 gallery with quieter metadata, smaller 
 ## Detachment and return
 
 An active display has a single visible copy. From opening through the end of return travel, the story cover is absent from its dark recessed mount, or the main media item is absent from its media screen. The physical frame and media thumbnail strip remain in place. The source is restored only when the shared lift finishes closing, preserving the selected media, rail arrangement and camera position. This also applies to the reduced-motion and flat alternatives.
+
+
+
+## Compact screens and render quality
+
+Work measures its header and gives the canvas a separate grid row on phones and tablets. In short landscape viewports the stage sits beside the category controls. Camera distance fits the current model bounds and stage aspect ratio; small raster model signs are replaced by HTML numbers tied to the category/room list. Native touch dragging rotates the stage; a tap selects a model or room. UI scrolling does not capture showroom gestures.
+
+Compact devices render directly to the antialiased WebGL framebuffer, using up to 2.5 device pixels per CSS pixel within a 3-million-pixel budget. They skip bloom and the second planar reflection render; static shadows update when the view changes. Wide screens retain bloom and reflection, with a separately multisampled compositor target and a 6-million-pixel budget. Texture anisotropy improves angled preview clarity. DPR and camera framing are recomputed on viewport/orientation changes.
+
+Project covers, media thumbnails and editorial stories use native readable document layouts on compact screens. Readers have a visible 44px close control and native momentum scrolling/pinch zoom. Height-only browser chrome changes preserve an open reader; orientation/width changes return it to its source. Media selection, source detachment, full originals, category filters, project URLs, history, reduced motion and desktop spatial wall flight remain shared. Hidden compact project scenes stop rendering once settled.
+
+`tests/showroom.browser.mjs` covers real touch input and high-DPR drawing buffers at 320px and 390px, tablet portrait/landscape, short landscape, desktop regression, fallback and no-JavaScript access. Browser emulation does not measure a physical phone's GPU frame rate.
