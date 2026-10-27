@@ -117,7 +117,7 @@ try {
     await page.screenshot({path:output+'/solutions-'+label+'.png',fullPage:true});
     await page.screenshot({path:output+'/solutions-hero-'+label+'.png'});
     await drawing.screenshot({path:output+'/solutions-drawing-'+label+'.png'});
-    if(width===1440||width===390){const visual=await sharp(await page.screenshot()).resize({width:Math.min(width,960)}).jpeg({quality:65}).toBuffer();console.log('VISUAL_REVIEW_SOLUTIONS_'+width+':'+visual.toString('base64'));}
+    if(width===1440||width===390){await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));const visual=await sharp(await page.screenshot()).resize({width:Math.min(width,960)}).jpeg({quality:65}).toBuffer();console.log('VISUAL_REVIEW_SOLUTIONS_'+width+':'+visual.toString('base64'));}
   }
   assert.ok(report.layouts.every(layout => layout.overflow.length === 0), JSON.stringify(report.layouts));
   await page.setViewportSize({width:390,height:844});
