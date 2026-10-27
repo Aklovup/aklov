@@ -21,7 +21,7 @@ try{
  await context.route('https://api.web3forms.com/**',route=>{submissions++;return route.abort();});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  for(const [name,path] of routes){
-  await open(page,path);const approved=await page.locator('main').textContent();
+  await open(page,path);assert.equal(await page.locator('[data-sky-toggle],[data-showroom-motion]').count(),0);const approved=await page.locator('main').textContent();
   for(const screen of screens){
    await page.setViewportSize(screen);await page.evaluate(()=>new Promise(requestAnimationFrame));
    const metrics=await page.evaluate(()=>{
@@ -64,8 +64,8 @@ try{
  for(const viewport of [{width:390,height:420},{width:844,height:390},{width:390,height:844}]){await page.setViewportSize(viewport);await page.locator('#inquiry-message').focus();await page.locator('#inquiry-message').scrollIntoViewIfNeeded();assert.equal(await page.locator('#inquiry-name').inputValue(),'Layout review');assert.equal(await page.locator('#inquiry-email').inputValue(),'review@example.com');assert.equal(await page.locator('#inquiry-message').inputValue(),'Local responsiveness check only; do not send.');}
  assert.equal(submissions,0,'Responsiveness review must not send contact submissions');
  report.interactions.push('Home selected-work touch link; Solutions service anchors; contact field values/focus across height and orientation changes; no contact submission');
- await open(page,'/');await page.emulateMedia({reducedMotion:'no-preference'});const sky=page.locator('[data-hero-sky]');await page.locator('[data-sky-toggle]').tap();assert.equal(await sky.getAttribute('data-paused'),'true');await page.locator('[data-sky-toggle]').tap();assert.equal(await sky.getAttribute('data-paused'),'false');
- report.interactions.push('Native phone starfield pause and resume');assert.deepEqual(errors,[]);await context.close();
+ await open(page,'/');await page.emulateMedia({reducedMotion:'no-preference'});assert.equal(await page.locator('[data-sky-toggle]').count(),0);
+ report.interactions.push('Autonomous ambient motion without pause controls; GIF controls preserved');assert.deepEqual(errors,[]);await context.close();
  await writeFile(`${out}/report.json`,JSON.stringify(report,null,2));console.log('RESPONSIVENESS_REPORT:'+JSON.stringify(report));
  assert.deepEqual(report.issues,[],'Responsive layout and touch target audit');
 }finally{await writeFile(`${out}/report.json`,JSON.stringify(report,null,2));await browser?.close();server.kill('SIGTERM');}

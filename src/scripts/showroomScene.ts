@@ -19,7 +19,6 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   const viewport=root.querySelector<HTMLElement>('[data-showroom-viewport]')!;
   const compact=()=>root.dataset.layout==='compact';
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
-  const pause=root.querySelector<HTMLButtonElement>('[data-showroom-motion]')!;
   let renderer:THREE.WebGLRenderer;
   try {renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:compact()?'low-power':'high-performance'});}catch {root.dataset.renderer='fallback';root.dataset.roomReady='true';return {setState:(_state:ShowroomState)=>{},hover:(_key?:string)=>{},start:()=>{}};}
   renderer.setPixelRatio(1);
@@ -275,7 +274,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     if(needsFrame())frame=requestAnimationFrame(tick);
   }
   function sync(){
-    root.dataset.motion=paused?'paused':'playing';pause.textContent=paused?'Play motion':'Pause motion';pause.setAttribute('aria-pressed',String(paused));
+    root.dataset.motion=paused?'paused':'playing';
     if((!started||document.hidden||lost||options.isIndexOpen())){cancelAnimationFrame(frame);frame=0;return;}
     if(!frame){last=0;frame=requestAnimationFrame(tick);}
   }
@@ -320,8 +319,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     const complete=walking.distance>=walking.length,atStart=walking.distance===0&&pixels*walking.sign<0;
     respond();if(complete&&motion.matches)finishWalking();else if(atStart)walking=undefined;
   }
-  updateLayout();pose();currentEye.copy(targetEye);currentLook.copy(targetLook);resize();root.dataset.renderer='webgl';pause.hidden=false;
-  pause.addEventListener('click',()=>{paused=!paused;if(paused){intro=0;yaw=targetYaw;settle();}sync();});
+  updateLayout();pose();currentEye.copy(targetEye);currentLook.copy(targetLook);resize();root.dataset.renderer='webgl';
   motion.addEventListener('change',()=>{paused=motion.matches;intro=0;if(paused)settle();sync();});
   new ResizeObserver(resize).observe(viewport);window.addEventListener('resize',resize);document.addEventListener('visibilitychange',sync);document.addEventListener('aklov:showroom-index',sync);
   root.addEventListener('aklov:room-station',event=>station((event as CustomEvent).detail));root.addEventListener('aklov:room-exit',()=>options.retreat());
@@ -388,7 +386,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     else if(key==='arrowup'||key==='arrowdown'||key==='w'||key==='s'){event.preventDefault();walkRoom(key==='arrowup'||key==='w'?65:-65);}
     else if(key==='a'||key==='d'){event.preventDefault();walkRoom(0,key==='a'?-65:65);}
   });
-  canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();lost=true;cancelAnimationFrame(frame);surfaces.fallback();root.dataset.renderer='fallback';root.dataset.roomReady='true';root.querySelector<HTMLElement>('[data-showroom-exit]')!.hidden=!state.model;pause.hidden=true;});
+  canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();lost=true;cancelAnimationFrame(frame);surfaces.fallback();root.dataset.renderer='fallback';root.dataset.roomReady='true';root.querySelector<HTMLElement>('[data-showroom-exit]')!.hidden=!state.model;});
   return {setState,hover:(key?:string)=>{hoverModel=key;if(!paused&&!frame)sync();},start:()=>{started=true;for(const model of exhibitModels){model.sign.material=modelSign(model.data,modelsFor(projects,model.data.group).findIndex(m=>m.key===model.data.key));if(model===activeModel)for(const room of model.rooms)void updatePreview(room).catch(()=>{});}if(paused)settle();sync();}};
 }
 

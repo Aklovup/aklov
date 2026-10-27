@@ -107,7 +107,6 @@ export function mountShowroom(root:HTMLElement) {
     scene=createShowroomScene(root,projects,{selectModel,selectRoom,retreat,isIndexOpen:()=>!index.hidden});scene.setState(state);
   } catch {
     scene=undefined;root.dataset.renderer='fallback';root.dataset.roomReady='true';
-    root.querySelector<HTMLButtonElement>('[data-showroom-motion]')!.hidden=true;
   }
   root.dataset.ready='true';
   Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,2500))]).then(()=>{

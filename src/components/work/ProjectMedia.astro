@@ -9,12 +9,13 @@ interface Props {
   presentation?: 'card' | 'detail';
   showCaption?: boolean;
   bounded?: boolean;
+  imageSizes?: string;
 }
-const { cover, number, title, presentation = 'card', showCaption = true, bounded = false } = Astro.props;
+const { cover, number, title, presentation = 'card', showCaption = true, bounded = false, imageSizes } = Astro.props;
 const boundedImage = presentation === 'detail' && bounded && cover.type === 'image' && !!cover.url;
 const preview = mediaPreview(cover.url);
 const poster = cover.poster || (cover.type === 'gif' ? preview?.src : undefined);
-const sizes = presentation === 'card' ? '(max-width: 640px) calc(100vw - 40px), 55vw' : '(max-width: 1000px) calc(100vw - 80px), 45vw';
+const sizes = imageSizes || (presentation === 'card' ? '(max-width: 640px) calc(100vw - 40px), 55vw' : '(max-width: 1000px) calc(100vw - 80px), 45vw');
 const label = cover.type === 'gif' ? 'GIF preview' : cover.type === 'video' ? 'Video preview' : 'Image preview';
 ---
 
