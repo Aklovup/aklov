@@ -27,7 +27,7 @@ try {
   const page=await context.newPage();const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   const measurements=[];
-  for(const [route,selector] of routes){
+  for(const [route,selector] of [routes[0]]){
     await page.goto(base+route);await page.evaluate(()=>document.fonts.ready);
     const target=page.locator(selector).first();
     await target.waitFor();await page.waitForFunction(s=>document.querySelector(s).dataset.motionState==='armed',selector);
@@ -96,6 +96,23 @@ try {
   const firstService=await page.locator('#website').evaluate(el=>el.getBoundingClientRect().top+scrollY);
   assert(firstService<2000,'Keep the tighter Solutions bridge');
 
+  // About has a different reading moment: two existing phrases gain gold ink
+  // in order. The quotation is visible and stationary throughout.
+  await page.goto(base+'/about/');await page.evaluate(()=>document.fonts.ready);
+  const quote=page.locator('.approach-closing');
+  await page.waitForFunction(()=>document.querySelector('.approach-closing').hasAttribute('data-motion-ready'));
+  const quoteBox=await position(quote);
+  await place(page,quoteBox.top,.65);await page.waitForTimeout(160);
+  const phases=await quote.locator('em').evaluateAll(items=>items.map(el=>Number(el.style.getPropertyValue('--phrase-progress'))));
+  assert(phases[0]>0&&phases[0]<1&&phases[1]===0,'First phrase gains emphasis before the second');
+  assert.equal(await quote.evaluate(el=>getComputedStyle(el).opacity),'1');
+  assert.equal(await quote.evaluate(el=>getComputedStyle(el).translate),'none');
+  assert.equal(text(await quote.textContent()),text(quoteBox.text));
+  await place(page,quoteBox.top,.4);await page.waitForTimeout(160);
+  assert.deepEqual(await quote.locator('em').evaluateAll(items=>items.map(el=>Number(el.style.getPropertyValue('--phrase-progress')))),[1,1]);
+  await place(page,quoteBox.top,.8);await page.waitForTimeout(120);
+  assert.deepEqual(await quote.locator('em').evaluateAll(items=>items.map(el=>Number(el.style.getPropertyValue('--phrase-progress')))),[1,1],'Emphasis remains when returning');
+
   // Dynamic reduced motion immediately returns crisp, complete type.
   await page.goto(base);await page.evaluate(()=>document.fonts.ready);
   const motionHeading=page.locator('.sv-head h2'), motionPosition=await position(motionHeading);
@@ -113,6 +130,8 @@ try {
     for(const [route] of routes){
       await Promise.all([animated.goto(base+route),still.goto(base+route)]);
       await Promise.all([animated.evaluate(()=>document.fonts.ready),still.evaluate(()=>document.fonts.ready)]);
+      assert.equal(await animated.locator('[data-motion="type"]').count(),route==='/'?1:0,'Reserve line unfolding for one Home headline');
+      assert.equal(await animated.locator('[data-motion]').count(),{'/':4,'/solutions/':1,'/about/':1,'/contact/':0}[route],'Keep motion selective and assigned to each page');
       const geometry=page=>page.locator('[data-motion="type"]').evaluateAll(items=>items.map(el=>({height:el.offsetHeight,width:el.offsetWidth,text:el.textContent})));
       const enhanced=await geometry(animated), native=await geometry(still);
       assert.equal(enhanced.length,native.length);
@@ -133,5 +152,5 @@ try {
   for(const [route] of routes){await fallback.goto(base+route);assert.equal(await fallback.locator('.motion-ink,[data-motion-ready]').count(),0);assert(await fallback.locator('[data-motion]').evaluateAll(items=>items.every(el=>getComputedStyle(el).opacity==='1'&&getComputedStyle(el).visibility==='visible')));}
   await noJS.close();assert.deepEqual(errors,[]);
   console.log('EDITORIAL_MOTION_MEASUREMENTS:'+JSON.stringify(measurements));
-  console.log('Passed: reading-area line entrances, no opacity flashes or replay, stationary copy/gallery, scroll-drawn process, framed photograph, original hover, exact typography geometry, reduced motion and no-JS access.');
+  console.log('Passed: one Home headline entrance, Home process drawing, Solutions framed photograph, sequential About emphasis, quiet Contact, no flashes/replay, stationary copy/gallery, original hover, typography geometry, reduced motion and no-JS access.');
 }finally{await browser?.close();server.kill('SIGTERM');}

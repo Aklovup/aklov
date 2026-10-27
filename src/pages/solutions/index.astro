@@ -202,7 +202,7 @@ const steps = [
     <div class="wrap intro-spread">
       <div class="intro-narrative">
       <div class="kicker mono">The right solution starts with the problem</div>
-      <h2 id="intro-title" data-motion="type">When the way you work starts <em>holding you back.</em></h2>
+      <h2 id="intro-title">When the way you work starts <em>holding you back.</em></h2>
 
       <div class="intro-grid">
         <p class="intro-big">
@@ -232,7 +232,7 @@ const steps = [
   <div class="service-catalogue">
     {solutions.map((s) => (
       <section class="sol" id={s.id} aria-labelledby={`${s.id}-title`}>
-        <div class="wrap" data-motion="rule">
+        <div class="wrap">
           <div class="sol-summary">
             <div class="sol-top">
               <span class="sol-num mono" aria-hidden="true">{s.number}</span>
@@ -273,11 +273,11 @@ const steps = [
   <section class="section approach" aria-labelledby="approach-title">
     <div class="wrap">
       <div class="kicker mono">My approach</div>
-      <h2 id="approach-title" data-motion="type">Understand the work before changing the system.</h2>
+      <h2 id="approach-title">Understand the work before changing the system.</h2>
 
       <div class="steps">
         {steps.map((step) => (
-          <article class="step" data-motion="step">
+          <article class="step">
             <div class="step-n" aria-hidden="true">{step.number}</div>
             <h3>{step.title}</h3>
             <p>{step.description}</p>
@@ -322,7 +322,7 @@ const steps = [
   <section class="closing" id="contact" aria-labelledby="closing-title">
     <div class="wrap">
       <div class="kicker mono">Let’s talk about your business</div>
-      <h2 id="closing-title" data-motion="type">What would you change if your <em>systems worked better?</em></h2>
+      <h2 id="closing-title">What would you change if your <em>systems worked better?</em></h2>
 
       <div class="closing-grid">
         <div>

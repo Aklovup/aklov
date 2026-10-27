@@ -3,7 +3,7 @@
  (() => {
   const preference = matchMedia('(prefers-reduced-motion: reduce)');
   const headings = [...document.querySelectorAll<HTMLElement>('[data-motion="type"]')];
-  const details = [...document.querySelectorAll<HTMLElement>('[data-motion="rule"], [data-motion="step"], [data-motion="photo"], [data-motion="quote"]')];
+  const details = [...document.querySelectorAll<HTMLElement>('[data-motion="step"], [data-motion="photo"], [data-motion="quote"]')];
   if ((!headings.length && !details.length) || !('IntersectionObserver' in window) || !Element.prototype.animate) return;
 
   interface Line { anchor: HTMLElement; inks: HTMLElement[]; started: boolean; }
@@ -16,6 +16,13 @@
   let disposed = false;
   let viewportWidth = innerWidth;
   const clamp = (value: number) => Math.max(0, Math.min(1, value));
+  const setProgress = (element: HTMLElement, value: number) => {
+    element.style.setProperty('--motion-progress', String(value));
+    if (element.dataset.motion === 'quote') {
+      const phrases = [...element.querySelectorAll<HTMLElement>('em')];
+      phrases.forEach((phrase, index) => phrase.style.setProperty('--phrase-progress', String(clamp(value * phrases.length - index))));
+    }
+  };
 
   const finishTitle = (title: Title) => {
     title.lines.forEach(line => {
@@ -111,7 +118,7 @@
       const next = clamp((innerHeight * (photo ? .88 : .77) - box.top) / (innerHeight * (photo ? .68 : .32)));
       const value = Math.max(progress.get(element) || 0, next);
       progress.set(element, value);
-      element.style.setProperty('--motion-progress', String(value));
+      setProgress(element, value);
       if (value >= 1) {
         element.dataset.motionState = 'settled';
         activeDetails.delete(element); detailObserver.unobserve(element);
@@ -134,7 +141,7 @@
     cancelAnimationFrame(frame); frame = 0;
     titles.forEach(finishTitle);
     for (const element of details) {
-      element.style.setProperty('--motion-progress', '1');
+      setProgress(element, 1);
       element.dataset.motionState = 'settled';
     }
     activeDetails.clear(); detailObserver.disconnect();
@@ -147,7 +154,7 @@
       if (element.getBoundingClientRect().top < innerHeight) continue;
       element.dataset.motionReady = '';
       element.dataset.motionState = 'armed';
-      element.style.setProperty('--motion-progress', '0');
+      setProgress(element, 0);
       detailObserver.observe(element);
     }
     schedule();
@@ -175,16 +182,12 @@
   .motion-word, .motion-ink { display: inline-block; vertical-align: baseline; }
   /* Overscan protects Instrument Serif's accents, swashes and descenders. */
   .motion-word { clip-path: inset(-.22em -.12em -.18em); }
-  [data-motion-ready][data-motion="rule"],
   [data-motion-ready][data-motion="step"] { position: relative; border-top-color: transparent; }
-  [data-motion-ready][data-motion="rule"]::before,
   [data-motion-ready][data-motion="step"]::before {
     content: ''; position: absolute; pointer-events: none; left: 0; right: 0; top: -1px; height: 1px;
     background: var(--motion-rule, var(--line)); transform-origin: left; transform: scaleX(var(--motion-progress, 1));
     transition: transform .55s cubic-bezier(.22,1,.36,1);
   }
-  [data-motion-ready][data-motion-edge="bottom"] { border-bottom-color: transparent; }
-  [data-motion-ready][data-motion-edge="bottom"]::before { top: auto; bottom: -1px; }
   [data-motion-ready][data-motion="step"] { --motion-rule: var(--charcoal); border-left-color: transparent; }
   [data-motion-ready][data-motion="step"]::after {
     content: ''; position: absolute; pointer-events: none; left: -1px; top: 0; bottom: 0; width: 1px;
@@ -199,15 +202,14 @@
   }
   [data-motion-ready][data-motion="quote"] em {
     background-image: linear-gradient(currentColor, currentColor); background-repeat: no-repeat;
-    background-position: 0 100%; background-size: calc(100% * var(--motion-progress, 1)) 1px;
+    background-position: 0 100%; background-size: calc(100% * var(--phrase-progress, 1)) 1px;
     -webkit-box-decoration-break: clone; box-decoration-break: clone;
     transition: background-size .55s cubic-bezier(.22,1,.36,1);
   }
-  .contact-page [data-motion-ready][data-motion="rule"] { --motion-rule: var(--contact-rule); }
   @media (max-width: 1000px) { [data-motion-ready][data-motion="step"]::after { display: none; } }
-  @media (min-width: 641px) and (max-width: 1000px) { .step:nth-child(even)[data-motion-ready]::after { display: block; } }
   @media (prefers-reduced-motion: reduce) {
     .motion-ink { translate: none !important; }
     [data-motion-ready] { --motion-progress: 1 !important; }
+    [data-motion="quote"] em { --phrase-progress: 1 !important; }
   }
 </style>

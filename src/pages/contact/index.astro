@@ -16,7 +16,7 @@ import { links } from '../../data/links';
         <a class="email-shortcut" href={links.email}>{contact.email}</a>
       </section>
       <div class="form-column"><ContactForm /></div>
-      <section class="direct-contact" aria-labelledby="direct-title" data-motion="rule">
+      <section class="direct-contact" aria-labelledby="direct-title">
         <h2 id="direct-title">{contact.direct.heading}</h2>
         <p data-approved-copy>{contact.direct.body}</p>
         <div class="direct-links">
@@ -27,7 +27,7 @@ import { links } from '../../data/links';
       </section>
     </div>
     <div class="closing-note">
-      <div class="wrap"><p data-approved-copy data-motion="type">{contact.closing}</p></div>
+      <div class="wrap"><p data-approved-copy>{contact.closing}</p></div>
     </div>
   </div>
 </BaseLayout>

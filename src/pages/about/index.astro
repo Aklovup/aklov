@@ -50,7 +50,7 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
       <section class="section biography" aria-labelledby="biography-title">
         <div class="wrap biography-grid">
           <div class="section-heading">
-            <h2 id="biography-title" data-motion="type">{biographyStart}<em>about me</em>{biographyEnd}</h2>
+            <h2 id="biography-title">{biographyStart}<em>about me</em>{biographyEnd}</h2>
           </div>
           <div class="reading-copy biography-copy">
             {about.biography.paragraphs.map((paragraph, index) => (
@@ -76,7 +76,7 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
               <p class="sequence-introduction" data-approved-copy>{about.approach.sequenceIntroduction}</p>
               <ol class="stage-list" role="list">
                 {about.approach.stages.map((stage) => (
-                  <li data-motion="rule" data-motion-edge="bottom">
+                  <li>
                     <span class="stage-number" aria-hidden="true">{stage.number}</span>
                     <h3>{stage.title}</h3>
                     <p data-approved-copy>{stage.description}</p>
@@ -97,7 +97,7 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
         <div class="wrap">
           <div class="experience-heading">
             <div class="section-heading">
-              <h2 id="experience-title" data-motion="type">{experienceStart}<em>I've done</em>{experienceEnd}</h2>
+              <h2 id="experience-title">{experienceStart}<em>I've done</em>{experienceEnd}</h2>
             </div>
             <figure class="experience-proof">
               <a href={links.workImpex} aria-label={`View project: ${proof.data.title}`}>
@@ -135,7 +135,7 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
 
     <section class="closing" aria-labelledby="closing-title">
       <div class="wrap">
-        <h2 id="closing-title" data-motion="type">{about.closing.headline}</h2>
+        <h2 id="closing-title">{about.closing.headline}</h2>
         <div class="closing-grid">
           <p data-approved-copy>{about.closing.paragraph}</p>
           <div class="closing-actions">
@@ -214,6 +214,10 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
   .profile-story > .approach > .statement { max-width: 1180px; padding-top: clamp(40px, 5vw, 72px); }
   .approach-closing { max-width: 26ch; margin: 0 auto; color: var(--charcoal); font-family: var(--display); font-size: clamp(38px, 5vw, 76px); font-style: italic; line-height: 1.08; letter-spacing: -.025em; }
   .approach-closing em { color: var(--about-display-gold); font-style: inherit; }
+  .approach-closing[data-motion-ready] em {
+    color: color-mix(in srgb, var(--charcoal) calc(100% - var(--phrase-progress, 0) * 100%), var(--about-display-gold));
+    transition: color .65s ease, background-size .65s ease;
+  }
 
   /* A single piece of real work anchors a magazine-like reading spread. */
   .experience > .wrap { grid-template-columns: minmax(0, .65fr) minmax(0, 1.35fr); }
