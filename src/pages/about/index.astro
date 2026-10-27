@@ -1,10 +1,11 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import AboutPortrait from '../../components/about/AboutPortrait.astro';
-import { about } from '../../data/about';
+import { about, profile } from '../../data/about';
 import { links } from '../../data/links';
 
-const [headlineLead, headlineEnd] = about.introduction.headline.split(' with understanding ');
+const [firstName, ...surname] = profile.name.split(' ');
+const [headlineStart, headlineEnd] = about.introduction.headline.split('understanding');
 const [biographyStart, biographyEnd] = about.biography.heading.split('about me');
 const [approachStart, approachEnd] = about.approach.heading.split('the work');
 const [experienceStart, experienceEnd] = about.work.heading.split("I've done");
@@ -15,10 +16,12 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
   <div class="about-page">
     <section class="about-hero" aria-labelledby="about-title">
       <div class="wrap hero-composition">
-        <div class="hero-heading">
-          <p class="kicker mono">{about.introduction.eyebrow}</p>
-          <h1 id="about-title"><span>{headlineLead}</span>{' '}<span>with <em>understanding</em></span>{' '}<span>{headlineEnd}</span></h1>
-          <p class="opening-line" data-approved-copy>{about.introduction.paragraphs[0]}</p>
+        <div class="hero-gold-plane" aria-hidden="true"></div>
+        <p class="kicker mono hero-eyebrow">{about.introduction.eyebrow}</p>
+        <h1 class="identity-name" id="about-title"><span class="identity-first">{firstName}</span>{' '}<span class="identity-surname">{surname.join(' ')}</span></h1>
+        <div class="hero-statement">
+          <p class="hero-principle">{headlineStart}<em>understanding</em>{headlineEnd}</p>
+          <p class="designation">{profile.designation}</p>
         </div>
         <div class="hero-portrait"><AboutPortrait /></div>
       </div>
@@ -28,7 +31,7 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
       <div class="intro-detail">
         <div class="wrap intro-detail-grid">
           <div class="intro-context">
-            {about.introduction.paragraphs.slice(1, 3).map((paragraph) => <p data-approved-copy>{paragraph}</p>)}
+            {about.introduction.paragraphs.slice(0, 3).map((paragraph) => <p data-approved-copy>{paragraph}</p>)}
           </div>
           <div class="intro-profile">
             {about.introduction.paragraphs.slice(3).map((paragraph) => <p data-approved-copy>{paragraph}</p>)}
@@ -141,16 +144,21 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
   h1, h2, h3, p { margin: 0; }
   h1, h2, h3 { font-family: var(--display); font-weight: 400; }
   h2 { font-size: clamp(46px, 5vw, 76px); line-height: 1; letter-spacing: -.035em; }
-  /* One editorial spread: headline, opening and portrait share the same baseline. */
-  .about-hero { padding-top: clamp(40px, 4.5vw, 72px); background: var(--charcoal); color: var(--ivory); }
-  .hero-composition { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: clamp(32px, 3.5vw, 64px); align-items: stretch; }
-  .hero-heading { min-width: 0; display: flex; flex-direction: column; padding-bottom: clamp(28px, 3vw, 48px); }
-  .hero-heading .kicker { color: var(--gold); }
-  h1 { margin-top: clamp(32px, 3.6vw, 58px); font-size: clamp(62px, 7.8vw, 140px); line-height: .96; letter-spacing: -.04em; }
-  h1 > span { display: block; white-space: nowrap; }
-  h1 em { color: var(--gold); font-style: italic; }
-  .hero-portrait { width: 100%; max-width: 560px; justify-self: end; align-self: end; }
-  .hero-heading .opening-line { max-width: 22ch; margin: auto 0 0; padding-top: clamp(36px, 5vw, 80px); color: var(--ivory); font-family: var(--display); font-size: clamp(28px, 2.7vw, 42px); line-height: 1.14; letter-spacing: -.02em; }
+  /* The name, unframed portrait and gold plane occupy one shared composition. */
+  .about-hero { background: var(--charcoal); color: var(--ivory); }
+  .hero-composition { position: relative; isolation: isolate; container-type: inline-size; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: auto auto auto auto; row-gap: 12px; padding-block: clamp(36px, 3vw, 52px) clamp(24px, 2.4vw, 40px); }
+  .hero-eyebrow { grid-column: 1 / 7; grid-row: 1; z-index: 2; margin-bottom: clamp(20px, 2.2vw, 36px); color: var(--gold); }
+  .hero-gold-plane { grid-column: 9 / -1; grid-row: 1 / 4; background: var(--gold); z-index: 0; }
+  .identity-name { grid-column: 1 / -1; grid-row: 2 / 5; display: grid; grid-template-columns: subgrid; grid-template-rows: subgrid; position: relative; z-index: 3; pointer-events: none; color: var(--ivory); letter-spacing: -.055em; line-height: .86; }
+  .identity-name > span { display: block; white-space: nowrap; }
+  .identity-first { grid-column: 1 / -1; grid-row: 1; font-size: clamp(100px, 24cqw, 400px); }
+  .identity-surname { grid-column: 1 / -1; grid-row: 3; font-size: clamp(64px, 24.8cqw, 420px); }
+  .hero-statement { grid-column: 1 / 5; grid-row: 3; z-index: 2; min-width: 0; padding-block: 8px 20px; }
+  .hero-principle { max-width: 14ch; font-family: var(--display); font-size: clamp(28px, 2.65vw, 42px); line-height: 1.12; letter-spacing: -.025em; }
+  .hero-principle em { color: var(--gold); font-style: italic; }
+  .designation { max-width: 25ch; margin-top: 26px; padding-top: 20px; color: var(--on-dark); font-size: 13px; line-height: 1.6; }
+  .designation::before { content: ''; display: block; width: 28px; height: 1px; margin-bottom: 16px; background: var(--gold); }
+  .hero-portrait { grid-column: 6 / -1; grid-row: 1 / 5; z-index: 1; width: 100%; max-width: 560px; justify-self: end; align-self: end; pointer-events: none; }
   /* A shared left margin anchors the headings; the story occupies the wider right column. */
   .profile-story { background: var(--ivory); color: var(--charcoal); }
   .profile-story > .section > .wrap, .intro-detail > .wrap { max-width: 1440px; }
@@ -208,23 +216,24 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
   .closing a:focus-visible { outline-color: var(--charcoal); }
   @media (hover: hover) { .editorial-link:hover { color: var(--about-accent); } }
   @media (max-width: 1000px) {
-    .hero-composition { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 32px; }
-    .hero-heading { display: contents; }
-    .hero-heading .kicker, h1 { grid-column: 1 / -1; }
-    h1 { margin-top: 0; font-size: clamp(62px, 9.2vw, 92px); }
-    .hero-heading .opening-line { grid-column: 1; grid-row: 3; align-self: end; margin-bottom: 32px; padding-top: 0; font-size: clamp(28px, 3.8vw, 38px); }
-    .hero-portrait { grid-column: 2; grid-row: 3; max-width: 420px; }
+    .hero-portrait { max-width: 420px; }
+    .hero-statement { grid-column: 1 / 6; }
+    .hero-principle { font-size: clamp(28px, 3.6vw, 36px); }
     .approach > .wrap:not(.statement) { display: block; }
     .approach-introduction { margin-top: 24px; }
     .approach-introduction .reading-copy { max-width: 70ch; }
     .approach-sequence { margin-top: 32px; }
   }
   @media (max-width: 640px) {
-    .about-hero { padding-top: 36px; }
-    .hero-composition { grid-template-columns: minmax(0, 1fr); gap: 26px; }
-    h1 { font-size: clamp(38px, 12vw, 76px); }
-    .hero-heading .opening-line { grid-column: 1; grid-row: 3; max-width: 24ch; margin: 0; font-size: 28px; }
-    .hero-portrait { grid-column: 1; grid-row: 4; width: 100%; max-width: 400px; margin-top: 6px; }
+    .hero-composition { grid-template-columns: repeat(6, minmax(0, 1fr)); row-gap: 18px; padding-block: 30px 24px; }
+    .hero-eyebrow { grid-column: 1 / -1; margin-bottom: 6px; font-size: 9px; letter-spacing: 1.4px; }
+    .hero-gold-plane { grid-column: 4 / -1; grid-row: 3; }
+    .identity-first { font-size: clamp(94px, 40cqw, 240px); }
+    .hero-statement { grid-column: 1 / 4; padding-block: 4px 14px; }
+    .hero-principle { max-width: 14ch; font-size: clamp(23px, 5.9vw, 36px); }
+    .designation { margin-top: 18px; padding-top: 0; font-size: 12px; }
+    .designation::before { width: 22px; margin-bottom: 12px; }
+    .hero-portrait { grid-column: 3 / -1; grid-row: 3 / 5; max-width: 360px; }
     .intro-detail-grid, .biography-grid, .experience > .wrap, .together-layout, .closing > .wrap { grid-template-columns: 1fr; gap: 24px; }
     .section-heading h2 { font-size: clamp(42px, 11vw, 60px); }
     .stage-list li { grid-template-columns: 40px minmax(0, 1fr); column-gap: 16px; padding-block: 24px; }

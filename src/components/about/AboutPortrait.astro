@@ -3,42 +3,30 @@ import { Image } from 'astro:assets';
 import { profile } from '../../data/about';
 
 const { portrait } = profile;
-const [firstName, ...surname] = profile.name.split(' ');
 ---
 
 <figure class="portrait" data-about-portrait>
-  <div class="portrait-frame">
-    {portrait.src ? (
-      <Image
-        src={portrait.src}
-        alt={portrait.alt}
-        width={portrait.width}
-        height={portrait.height}
-        loading="eager"
-        decoding="async"
-      />
-    ) : (
-      <div class="portrait-fallback" role="img" aria-label={`Portrait of ${profile.name}; photograph pending.`}>
-        <span class="monogram" aria-hidden="true">LA</span>
-      </div>
-    )}
-  </div>
-  <figcaption>
-    <span class="portrait-name"><span>{firstName}</span> <span>{surname.join(' ')}</span></span>
-    <span class="designation">{profile.designation}</span>
-  </figcaption>
+  {portrait.src ? (
+    <Image
+      src={portrait.src}
+      alt={portrait.alt}
+      width={portrait.width}
+      height={portrait.height}
+      loading="eager"
+      decoding="async"
+    />
+  ) : (
+    <div class="portrait-fallback" role="img" aria-label={`Portrait of ${profile.name}; photograph pending.`}>
+      <span class="monogram" aria-hidden="true">LA</span>
+    </div>
+  )}
 </figure>
 
 <style>
-  .portrait { margin: 0; container-type: inline-size; background: var(--gold); color: var(--charcoal); }
-  .portrait-frame { position: relative; aspect-ratio: 1; overflow: hidden; }
-  .portrait-frame img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
-  .portrait-fallback { display: grid; place-items: center; height: 100%; }
-  .monogram { font-family: var(--display); font-size: clamp(120px, 60cqw, 320px); line-height: 1; letter-spacing: -.07em; }
-  figcaption { position: relative; display: grid; gap: 14px; padding: clamp(22px, 5cqw, 32px); }
-  figcaption::before { content: ''; position: absolute; inset: 0 clamp(22px, 5cqw, 32px) auto; height: 1px; background: color-mix(in srgb, var(--charcoal) 30%, transparent); }
-  .portrait-name { max-width: 100%; font-family: var(--display); font-size: clamp(36px, 10.4cqw, 58px); line-height: .94; letter-spacing: -.03em; }
-  .portrait-name > span { display: block; }
-  .designation { max-width: 31ch; font-size: 12px; line-height: 1.6; }
+  /* Only the lower torso dissolves into the charcoal name baseline. */
+  .portrait { margin: 0; aspect-ratio: 447 / 558; mask-image: linear-gradient(to bottom, #000 0 52%, rgb(0 0 0 / .72) 65%, transparent 82%); }
+  .portrait img { display: block; width: 100%; height: auto; }
+  .portrait-fallback { display: grid; place-items: center; height: 100%; color: var(--gold); }
+  .monogram { font-family: var(--display); font-size: clamp(120px, 24vw, 320px); line-height: 1; letter-spacing: -.07em; }
 </style>
 
