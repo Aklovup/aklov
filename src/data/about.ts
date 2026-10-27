@@ -5,10 +5,10 @@ export const profile = {
   designation: 'Business Systems & Automation Specialist',
   portrait: {
     // Repository-hosted portrait; replace this path when an updated photograph is supplied.
-    src: '/images/portraits/Portrait_about.png' as ImageMetadata | string | undefined,
-    alt: 'Portrait of Loveth Akpochimora',
-    width: 438,
-    height: 570,
+    src: '/images/portraits/About_Portraits.png' as ImageMetadata | string | undefined,
+    alt: 'Portrait of Loveth Akpochimora in a charcoal jacket and white shirt',
+    width: 447,
+    height: 558,
   },
 };
 
