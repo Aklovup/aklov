@@ -31,8 +31,7 @@ export const about = {
   biography: {
     heading: 'A little about me',
     paragraphs: [
-      'My background is in Mechanical Engineering, but over time, my work has taken me deeper into business systems, software, and automation.',
-      'What interests me about both fields is the thinking behind how things work.',
+      'What interests me is the thinking behind how things work.',
       "When something isn't working as expected, I want to understand why. How is the process supposed to work? Where does information come from? What happens next? And what needs to change for everything to work together?",
       'That curiosity has shaped the kind of projects I take on.',
       "I've worked on customer management systems, custom business applications, e-commerce websites, integrations, and AI-powered workflows.",

@@ -102,7 +102,7 @@ try {
     about.biography.heading, about.approach.heading, about.work.heading, about.together.heading, about.closing.headline,
   ]);
   assert.deepEqual((await page.locator('[data-approved-copy]').allInnerTexts()).map(normalize), expectedParagraphs.map(normalize));
-  assert.equal(expectedParagraphs.length, 39);
+  assert.equal(expectedParagraphs.length, 38);
   assert.equal(await page.locator('.hero-heading .opening-line').innerText(), about.introduction.paragraphs[0]);
   assert.equal(await page.locator('.about-hero [data-approved-copy]').count(), 1);
   assert.equal(await page.locator('.intro-detail [data-approved-copy]').count(), 4);
@@ -220,11 +220,11 @@ try {
   const noJs = await browser.newContext({ javaScriptEnabled: false });
   const noJsPage = await noJs.newPage();
   await noJsPage.goto(base + '/about/');
-  assert.equal(await noJsPage.locator('[data-approved-copy]').count(), 39);
+  assert.equal(await noJsPage.locator('[data-approved-copy]').count(), 38);
   assert.ok(await noJsPage.locator('[data-about-portrait] img').isVisible());
   await noJsPage.locator('[data-about-portrait] img').evaluate(img => img.decode());
   await noJs.close();
-  console.log('Passed: all 39 approved paragraphs, metadata, heading hierarchy, uploaded portrait, CTAs, navigation, keyboard focus, reduced motion, text contrast, no-JS rendering and ten viewport widths.');
+  console.log('Passed: all 38 approved paragraphs, metadata, heading hierarchy, uploaded portrait, CTAs, navigation, keyboard focus, reduced motion, text contrast, no-JS rendering and ten viewport widths.');
 } finally {
   await browser?.close();
   server.kill('SIGTERM');
