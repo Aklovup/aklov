@@ -200,9 +200,9 @@ const steps = [
   <!-- One problem-to-practice spread, rather than two competing openings. -->
   <section class="section intro" aria-labelledby="intro-title">
     <div class="wrap intro-spread">
-      <div class="intro-narrative" data-reveal>
+      <div class="intro-narrative">
       <div class="kicker mono">The right solution starts with the problem</div>
-      <h2 id="intro-title">When the way you work starts <em>holding you back.</em></h2>
+      <h2 id="intro-title" data-motion="type">When the way you work starts <em>holding you back.</em></h2>
 
       <div class="intro-grid">
         <p class="intro-big">
@@ -215,8 +215,8 @@ const steps = [
         </div>
       </div>
       </div>
-      <div class="sols-head" id="solutions" data-reveal data-reveal-delay="80">
-      <figure class="sols-figure">
+      <div class="sols-head" id="solutions">
+      <figure class="sols-figure" data-motion="photo">
         <img src={sectionImage.src} srcset={sectionImage.srcset} sizes="(max-width: 640px) 36vw, (max-width: 1000px) 28vw, 260px" width={sectionImage.width} height={sectionImage.height} alt="" loading="lazy" decoding="async" />
       </figure>
 
@@ -232,7 +232,7 @@ const steps = [
   <div class="service-catalogue">
     {solutions.map((s) => (
       <section class="sol" id={s.id} aria-labelledby={`${s.id}-title`}>
-        <div class="wrap" data-reveal>
+        <div class="wrap" data-motion="rule">
           <div class="sol-summary">
             <div class="sol-top">
               <span class="sol-num mono" aria-hidden="true">{s.number}</span>
@@ -273,11 +273,11 @@ const steps = [
   <section class="section approach" aria-labelledby="approach-title">
     <div class="wrap">
       <div class="kicker mono">My approach</div>
-      <h2 id="approach-title" data-reveal>Understand the work before changing the system.</h2>
+      <h2 id="approach-title" data-motion="type">Understand the work before changing the system.</h2>
 
       <div class="steps">
         {steps.map((step) => (
-          <article class="step" data-reveal>
+          <article class="step" data-motion="step">
             <div class="step-n" aria-hidden="true">{step.number}</div>
             <h3>{step.title}</h3>
             <p>{step.description}</p>
@@ -296,9 +296,9 @@ const steps = [
 
     <div class="wrap">
       <div class="kicker mono">Not sure where to start?</div>
-      <h2 id="choose-title" data-reveal>You don’t need to know the <em>technical answer</em> yet.</h2>
+      <h2 id="choose-title">You don’t need to know the <em>technical answer</em> yet.</h2>
 
-      <div class="choose-grid" data-reveal>
+      <div class="choose-grid">
         <p>
           You might know that your website needs work, that your team is spending too much time on manual tasks, or that your business tools are not working well together. You do not need to arrive with a complete technical specification.
         </p>
@@ -322,9 +322,9 @@ const steps = [
   <section class="closing" id="contact" aria-labelledby="closing-title">
     <div class="wrap">
       <div class="kicker mono">Let’s talk about your business</div>
-      <h2 id="closing-title" data-reveal>What would you change if your <em>systems worked better?</em></h2>
+      <h2 id="closing-title" data-motion="type">What would you change if your <em>systems worked better?</em></h2>
 
-      <div class="closing-grid" data-reveal>
+      <div class="closing-grid">
         <div>
           <p>Whether you need a stronger website, a more reliable workflow or a better-connected operation, the first step is understanding the challenge.</p>
           <p>Let’s discuss what you need and work out a practical way forward.</p>

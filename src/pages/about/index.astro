@@ -37,11 +37,11 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
     <div class="profile-story">
       <div class="intro-detail">
         <div class="wrap intro-detail-grid">
-          <div class="intro-profile" data-reveal>
+          <div class="intro-profile">
             <p class="personal-introduction" data-approved-copy>{about.introduction.paragraphs[4]}</p>
             <p data-approved-copy>{about.introduction.paragraphs[3]}</p>
           </div>
-          <div class="intro-context" data-reveal data-reveal-delay="80">
+          <div class="intro-context">
             {about.introduction.paragraphs.slice(0, 3).map((paragraph) => <p data-approved-copy>{paragraph}</p>)}
           </div>
         </div>
@@ -49,10 +49,10 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
 
       <section class="section biography" aria-labelledby="biography-title">
         <div class="wrap biography-grid">
-          <div class="section-heading" data-reveal>
-            <h2 id="biography-title">{biographyStart}<em>about me</em>{biographyEnd}</h2>
+          <div class="section-heading">
+            <h2 id="biography-title" data-motion="type">{biographyStart}<em>about me</em>{biographyEnd}</h2>
           </div>
-          <div class="reading-copy biography-copy" data-reveal>
+          <div class="reading-copy biography-copy">
             {about.biography.paragraphs.map((paragraph, index) => (
               <p class:list={{ lead: index === 0 }} data-approved-copy>{paragraph}</p>
             ))}
@@ -62,11 +62,11 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
 
       <section class="section approach" aria-labelledby="approach-title">
         <div class="wrap">
-          <div class="section-heading" data-reveal>
+          <div class="section-heading">
             <h2 id="approach-title">{approachStart}<em>the work</em>{approachEnd}</h2>
           </div>
           <div class="approach-layout">
-            <div class="approach-introduction" data-reveal>
+            <div class="approach-introduction">
               <p class="approach-lead" data-approved-copy>{about.approach.paragraphs[0]}</p>
               <div class="reading-copy">
                 {about.approach.paragraphs.slice(1).map((paragraph) => <p data-approved-copy>{paragraph}</p>)}
@@ -76,7 +76,7 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
               <p class="sequence-introduction" data-approved-copy>{about.approach.sequenceIntroduction}</p>
               <ol class="stage-list" role="list">
                 {about.approach.stages.map((stage) => (
-                  <li data-reveal>
+                  <li data-motion="rule" data-motion-edge="bottom">
                     <span class="stage-number" aria-hidden="true">{stage.number}</span>
                     <h3>{stage.title}</h3>
                     <p data-approved-copy>{stage.description}</p>
@@ -87,7 +87,7 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
           </div>
         </div>
         <div class="wrap statement">
-          <p class="approach-closing" data-reveal data-approved-copy>{about.approach.closing.split(/(makes sense|actually use it)/g).map((part) => (
+          <p class="approach-closing" data-motion="quote" data-approved-copy>{about.approach.closing.split(/(makes sense|actually use it)/g).map((part) => (
             part === 'makes sense' || part === 'actually use it' ? <em>{part}</em> : part
           ))}</p>
         </div>
@@ -95,9 +95,9 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
 
       <section class="section experience" aria-labelledby="experience-title">
         <div class="wrap">
-          <div class="experience-heading" data-reveal>
+          <div class="experience-heading">
             <div class="section-heading">
-              <h2 id="experience-title">{experienceStart}<em>I've done</em>{experienceEnd}</h2>
+              <h2 id="experience-title" data-motion="type">{experienceStart}<em>I've done</em>{experienceEnd}</h2>
             </div>
             <figure class="experience-proof">
               <a href={links.workImpex} aria-label={`View project: ${proof.data.title}`}>
@@ -107,9 +107,9 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
             </figure>
           </div>
           <div class="experience-story reading-copy">
-            <p class="lead" data-reveal data-approved-copy>{about.work.paragraphs[0]}</p>
-            <div class="experience-column" data-reveal>{about.work.paragraphs.slice(1, 5).map((paragraph) => <p data-approved-copy>{paragraph}</p>)}</div>
-            <div class="experience-column" data-reveal data-reveal-delay="80">{about.work.paragraphs.slice(5).map((paragraph) => <p data-approved-copy>{paragraph}</p>)}</div>
+            <p class="lead" data-approved-copy>{about.work.paragraphs[0]}</p>
+            <div class="experience-column">{about.work.paragraphs.slice(1, 5).map((paragraph) => <p data-approved-copy>{paragraph}</p>)}</div>
+            <div class="experience-column">{about.work.paragraphs.slice(5).map((paragraph) => <p data-approved-copy>{paragraph}</p>)}</div>
           </div>
           <a class="editorial-link" href={links.workClients} data-about-work-link>{about.work.cta}</a>
         </div>
@@ -118,10 +118,10 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
       <section class="section together" aria-labelledby="together-title">
         <div class="wrap">
           <div class="together-layout">
-            <div class="section-heading" data-reveal>
+            <div class="section-heading">
               <h2 id="together-title">{togetherStart}<em>together</em>{togetherEnd}</h2>
             </div>
-            <div class="together-story" data-reveal>
+            <div class="together-story">
               <p class="lead" data-approved-copy>{about.together.paragraphs[0]}</p>
               <div class="reading-copy">
                 {about.together.paragraphs.slice(1).map((paragraph) => <p data-approved-copy>{paragraph}</p>)}
@@ -135,7 +135,7 @@ const [togetherStart, togetherEnd] = about.together.heading.split('together');
 
     <section class="closing" aria-labelledby="closing-title">
       <div class="wrap">
-        <h2 id="closing-title" data-reveal>{about.closing.headline}</h2>
+        <h2 id="closing-title" data-motion="type">{about.closing.headline}</h2>
         <div class="closing-grid">
           <p data-approved-copy>{about.closing.paragraph}</p>
           <div class="closing-actions">

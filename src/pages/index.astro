@@ -105,8 +105,8 @@ const principles = [
     <div class="wrap">
       <div class="sv-head">
         <div class="kicker mono">02 / Capabilities</div>
-        <h2 data-reveal>Make the moving parts <em>work together.</em></h2>
-        <p class="intro" data-reveal data-reveal-delay="80">
+        <h2 data-motion="type">Make the moving parts <em>work together.</em></h2>
+        <p class="intro">
           From a well-designed website to better-connected business operations, the right solution starts with understanding the goal, the people and the problem to be solved.
         </p>
       </div>
@@ -115,8 +115,8 @@ const principles = [
         {services.map((service) => (
           <a class="service" href={service.href} aria-label={`Explore ${service.title}`}>
             <div class="service-number">{service.number}</div>
-            <h3 data-reveal>{service.title}</h3>
-            <div class="service-body" data-reveal data-reveal-delay="80">
+            <h3>{service.title}</h3>
+            <div class="service-body">
               <p>{service.description}</p>
               <div class="service-detail">{service.detail}</div>
             </div>
@@ -133,8 +133,8 @@ const principles = [
       <div class="ap-head">
         <div>
           <div class="kicker mono">03 / The approach</div>
-          <h2 data-reveal>Understand first. Build with purpose.</h2>
-          <p class="ap-sub" data-reveal>
+          <h2 data-motion="type">Understand first. Build with purpose.</h2>
+          <p class="ap-sub">
             A website or business system should make things clearer for the people who use it. That starts before choosing a visual direction, tools or automations.
           </p>
         </div>
@@ -146,7 +146,7 @@ const principles = [
 
       <div class="steps">
         {principles.map((principle, index) => (
-          <article class:list={['principle', `p${index + 1}`]} data-reveal data-reveal-delay={index * 70}>
+          <article class:list={['principle', `p${index + 1}`]} data-motion="step">
             <div class="principle-number" aria-hidden="true">{principle.number}</div>
             <h3>{principle.title}</h3>
             <p>{principle.description}</p>
@@ -160,9 +160,9 @@ const principles = [
   <section class="contact" id="contact">
     <div class="wrap">
       <div class="kicker mono">Start with the real problem</div>
-      <h2 data-reveal>Where could things work better than <em>they do today?</em></h2>
+      <h2 data-motion="type">Where could things work better than <em>they do today?</em></h2>
 
-      <div class="contact-grid" data-reveal>
+      <div class="contact-grid">
         <p class="contact-copy">
           Tell me about a website that needs a stronger presence, a process that takes too much effort, a workflow that keeps breaking down or a system your business has outgrown.
         </p>

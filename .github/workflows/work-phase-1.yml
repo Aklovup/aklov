@@ -63,7 +63,7 @@ jobs:
         run: node tests/solutions.browser.mjs
       - name: Validate sitewide refinements
         run: node tests/site-polish.browser.mjs
-      - name: Review scroll motion and section continuity
+      - name: Review deliberate editorial motion and section continuity
         run: node tests/scroll-reveal.browser.mjs
       - name: Validate the About page
         run: node tests/about.browser.mjs
