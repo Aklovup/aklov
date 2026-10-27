@@ -347,9 +347,9 @@ const steps = [
   h1, h2, h3, h4, p, ul, figure { margin: 0; }
 
   /* A wide ivory drawing plate gives Solutions its own opening composition. */
-  .hero-surface { background: var(--ivory); color: var(--charcoal); --focus-color: var(--charcoal); border-bottom: 1px solid var(--line); }
+  .hero-surface { --hero-detail: color-mix(in srgb, var(--gold-dark) 80%, var(--charcoal)); background: var(--ivory); color: var(--charcoal); --focus-color: var(--charcoal); border-bottom: 1px solid var(--line); }
   .hero { padding-block: clamp(40px, 4.5vw, 72px) 0; }
-  .hero-meta { display: flex; justify-content: space-between; gap: 24px; margin-bottom: 30px; color: var(--gold-dark); }
+  .hero-meta { display: flex; justify-content: space-between; gap: 24px; margin-bottom: 30px; color: var(--hero-detail); }
   .hero-meta span:last-child { color: var(--body); text-align: right; }
   .hero h1 { font-family: var(--display); font-size: clamp(54px, 7.3vw, 126px); font-weight: 400; line-height: .98; letter-spacing: -.04em; }
   .hero h1 .l1 { display: block; }
@@ -366,14 +366,14 @@ const steps = [
   .hero-explore span { font-size: 18px; }
   .hero-art { width: 100%; max-width: 800px; justify-self: end; }
   .idx { width: 100%; min-width: 0; padding-block: 22px 26px; border-top: 1px solid var(--line); color: var(--charcoal); background: transparent; --focus-color: var(--charcoal); }
-  .idx-top { margin-bottom: 16px; color: var(--gold-dark); font-size: 9px; }
+  .idx-top { margin-bottom: 16px; color: var(--hero-detail); font-size: 9px; }
   .idx-links { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .idx-row { min-width: 0; display: grid; grid-template-columns: 20px minmax(0, 1fr) 20px; gap: 10px; align-items: baseline; min-height: 64px; padding: 8px 20px; border-left: 1px solid var(--line); }
   .idx-row:first-child { border-left: 0; padding-left: 0; }
   .idx-row:last-child { padding-right: 0; }
-  .idx-n { color: var(--gold-dark); font-size: 10px; }
+  .idx-n { color: var(--hero-detail); font-size: 10px; }
   .idx-t { overflow-wrap: anywhere; font-family: var(--display); font-size: clamp(20px, 1.7vw, 28px); line-height: 1.12; }
-  .idx-a { color: var(--gold-dark); font-size: 16px; }
+  .idx-a { color: var(--hero-detail); font-size: 16px; }
 
   /* Introduction */
 

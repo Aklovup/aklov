@@ -40,6 +40,21 @@ try {
   assert.equal(await page.locator('[data-solutions-tablet]').count(),0);
   assert.equal(await page.locator('.hero-surface').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(245, 242, 234)');
   assert.equal(await page.locator('.hero-introduction .hero-actions .btn-dark').getAttribute('href'),'/contact/');
+  const lowHeroContrast = await page.evaluate(() => {
+    const canvas=document.createElement('canvas');canvas.width=canvas.height=1;
+    const context=canvas.getContext('2d');
+    const rgba=color=>{context.clearRect(0,0,1,1);context.fillStyle=color;context.fillRect(0,0,1,1);return [...context.getImageData(0,0,1,1).data];};
+    const luminance=rgb=>rgb.slice(0,3).map(c=>{const v=c/255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;}).reduce((s,v,i)=>s+v*[.2126,.7152,.0722][i],0);
+    return [...document.querySelectorAll('.hero-meta span,.hero-copy,.hero-actions a,.idx-top,.idx-n,.idx-t,.idx-a,#page-title,#page-title em')].flatMap(el=>{
+      const style=getComputedStyle(el);let backdrop=el;
+      while(backdrop&&rgba(getComputedStyle(backdrop).backgroundColor)[3]===0)backdrop=backdrop.parentElement;
+      const a=luminance(rgba(style.color)),b=luminance(rgba(getComputedStyle(backdrop||document.body).backgroundColor));
+      const ratio=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+      const large=parseFloat(style.fontSize)>=24||(parseFloat(style.fontSize)>=18.66&&parseFloat(style.fontWeight)>=700);
+      return ratio+.01<(large?3:4.5)?[{text:el.textContent.trim(),ratio}]:[];
+    });
+  });
+  assert.deepEqual(lowHeroContrast,[],'Solutions hero text contrast failed');
   const destinations=['website','customer','workflow','applications','integrations'];
   assert.deepEqual(await page.locator('.idx-row').evaluateAll(items=>items.map(a=>a.getAttribute('href'))),destinations.map(id=>'#'+id));
   for(const id of destinations) {
