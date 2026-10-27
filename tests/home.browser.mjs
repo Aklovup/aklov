@@ -116,11 +116,39 @@ try {
   await page.emulateMedia({reducedMotion:'no-preference'});
   await page.goto(base);
   await page.waitForFunction(() => document.querySelector('[data-hero-sky]').dataset.running === 'true');
-  assert.equal(await sky.locator('circle').count(), 84);
+  assert((await sky.locator('circle').count()) >= 600, 'The hero should contain a full star field');
   assert.equal(await sky.locator('.star-drift').first().evaluate(el => getComputedStyle(el).animationPlayState), 'running');
-  const before = await sky.locator('.star-drift').first().evaluate(el => getComputedStyle(el).transform);
-  await page.waitForTimeout(180);
-  assert.notEqual(await sky.locator('.star-drift').first().evaluate(el => getComputedStyle(el).transform), before, 'The background should move without input');
+  // Measure actual screen-pixel travel, rather than an imperceptible matrix change.
+  const motionMeasurements = [];
+  for (const width of [1440,390]) {
+    await page.setViewportSize({width,height:1000});
+    await page.goto(base);
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForFunction(() => document.querySelector('[data-hero-sky]').dataset.running === 'true');
+    const nearest = sky.locator('.depth-0');
+    const position = () => nearest.evaluate(el => {
+      const matrix = el.getScreenCTM();
+      return {x:matrix.e,y:matrix.f,time:performance.now()};
+    });
+    const before = await position();
+    await page.waitForTimeout(1200);
+    const after = await position();
+    const distance = Math.hypot(after.x-before.x,after.y-before.y);
+    assert(distance >= 6, 'Stars must visibly travel within 1.2 seconds at ' + width + 'px; measured ' + distance);
+    const visible = await sky.locator('circle').evaluateAll(stars => {
+      const hero = document.querySelector('.home-hero').getBoundingClientRect();
+      return stars.filter(star => {
+        const box = star.getBoundingClientRect();
+        return box.x >= 0 && box.right <= innerWidth && box.y >= hero.top && box.bottom <= hero.bottom;
+      }).length;
+    });
+    assert(visible >= (width === 1440 ? 300 : 80), 'The visible sky should be populated at ' + width + 'px; measured ' + visible);
+    motionMeasurements.push({width,distancePixels:distance,elapsedMs:after.time-before.time,visibleStars:visible});
+  }
+  console.log('STAR_MOTION_MEASUREMENTS:' + JSON.stringify(motionMeasurements));
+  await page.setViewportSize({width:1440,height:1000});
+  await page.goto(base);
+  await page.waitForFunction(() => document.querySelector('[data-hero-sky]').dataset.running === 'true');
   await toggle.focus();
   await page.keyboard.press('Space');
   assert.equal(await toggle.innerText(), 'Resume background');
