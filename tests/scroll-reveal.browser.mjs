@@ -114,7 +114,15 @@ try {
       await Promise.all([animated.goto(base+route),still.goto(base+route)]);
       await Promise.all([animated.evaluate(()=>document.fonts.ready),still.evaluate(()=>document.fonts.ready)]);
       const geometry=page=>page.locator('[data-motion="type"]').evaluateAll(items=>items.map(el=>({height:el.offsetHeight,width:el.offsetWidth,text:el.textContent})));
-      assert.deepEqual(await geometry(animated),await geometry(still),'Typography layout changes at '+width+' on '+route);
+      const enhanced=await geometry(animated), native=await geometry(still);
+      assert.equal(enhanced.length,native.length);
+      enhanced.forEach((value,index)=>{
+        assert.equal(value.text,native[index].text,'Motion cannot change the original wording');
+        assert.equal(value.height,native[index].height,'Line wrapping/heights change at '+width+' on '+route);
+        // Separating inline words can round a shrink-to-fit text width across
+        // one CSS pixel. Keep exact line heights and a bounded width tolerance.
+        assert(Math.abs(value.width-native[index].width)<=1,'Headline width changes at '+width+' on '+route);
+      });
       assert(await animated.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
       assert.equal(await still.locator('.motion-ink,[data-motion-ready]').count(),0,'Reduced motion retains native markup');
     }
