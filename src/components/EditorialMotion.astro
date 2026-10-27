@@ -181,6 +181,7 @@
   [data-motion-ready][data-motion="step"]::before {
     content: ''; position: absolute; pointer-events: none; left: 0; right: 0; top: -1px; height: 1px;
     background: var(--motion-rule, var(--line)); transform-origin: left; transform: scaleX(var(--motion-progress, 1));
+    transition: transform .55s cubic-bezier(.22,1,.36,1);
   }
   [data-motion-ready][data-motion-edge="bottom"] { border-bottom-color: transparent; }
   [data-motion-ready][data-motion-edge="bottom"]::before { top: auto; bottom: -1px; }
@@ -188,19 +189,23 @@
   [data-motion-ready][data-motion="step"]::after {
     content: ''; position: absolute; pointer-events: none; left: -1px; top: 0; bottom: 0; width: 1px;
     background: var(--charcoal); transform-origin: top; transform: scaleY(var(--motion-progress, 1));
+    transition: transform .55s cubic-bezier(.22,1,.36,1);
   }
   [data-motion-ready][data-motion="step"]:first-child::after { display: none; }
   [data-motion-ready][data-motion="photo"] { overflow: hidden; }
   [data-motion-ready][data-motion="photo"] > img {
     transform: scale(calc(1.055 - .055 * var(--motion-progress, 1))); transform-origin: center;
+    transition: transform .8s cubic-bezier(.22,1,.36,1);
   }
   [data-motion-ready][data-motion="quote"] em {
     background-image: linear-gradient(currentColor, currentColor); background-repeat: no-repeat;
     background-position: 0 100%; background-size: calc(100% * var(--motion-progress, 1)) 1px;
     -webkit-box-decoration-break: clone; box-decoration-break: clone;
+    transition: background-size .55s cubic-bezier(.22,1,.36,1);
   }
   .contact-page [data-motion-ready][data-motion="rule"] { --motion-rule: var(--contact-rule); }
   @media (max-width: 1000px) { [data-motion-ready][data-motion="step"]::after { display: none; } }
+  @media (min-width: 641px) and (max-width: 1000px) { .step:nth-child(even)[data-motion-ready]::after { display: block; } }
   @media (prefers-reduced-motion: reduce) {
     .motion-ink { translate: none !important; }
     [data-motion-ready] { --motion-progress: 1 !important; }

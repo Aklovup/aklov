@@ -89,7 +89,8 @@ try {
   await place(page,photoBox.top,.7);await page.waitForTimeout(120);
   const scale=await photo.locator('img').evaluate(el=>new DOMMatrixReadOnly(getComputedStyle(el).transform).a);
   assert(scale>1&&scale<1.055,'Photograph settles inside a stationary frame');
-  await place(page,photoBox.top,.19);await page.waitForTimeout(120);
+  await place(page,photoBox.top,.19);
+  await page.waitForFunction(()=>new DOMMatrixReadOnly(getComputedStyle(document.querySelector('.sols-figure img')).transform).a===1);
   assert.equal(await photo.locator('img').evaluate(el=>new DOMMatrixReadOnly(getComputedStyle(el).transform).a),1);
   assert.equal(await photo.evaluate(el=>getComputedStyle(el).opacity),'1');
   const firstService=await page.locator('#website').evaluate(el=>el.getBoundingClientRect().top+scrollY);
