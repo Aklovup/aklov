@@ -15,6 +15,25 @@ async function station(page,name){await page.locator('[data-showroom]').evaluate
 try{
  for(let i=0;i<100;i++){try{if((await fetch(base+'/work/')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
  await mkdir(out,{recursive:true});browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+ // A real touch release must not retarget its compatibility click into the newly revealed image.
+ const entryContext=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,reducedMotion:'reduce'}),entryPage=await entryContext.newPage();
+ await entryPage.addInitScript(()=>{window.__roomEntryEvents=[];for(const type of ['pointerdown','pointerup','click'])document.addEventListener(type,event=>{const target=event.target;window.__roomEntryEvents.push({type,pointer:event.pointerType,target:target?.tagName,media:!!target?.closest?.('[data-exhibit-stage]'),view:document.querySelector('[data-showroom]')?.dataset.view});},true);});
+ try{
+  for(const input of ['mouse','touch']){
+   await goto(entryPage,'/work/?type=client&model=applications');
+   await entryPage.waitForSelector('[data-showroom][data-transition-settled="true"]');
+   const point=await entryPage.locator('[data-showroom-room="impex-automotive"]').evaluate(b=>({x:+b.dataset.worldX,y:+b.dataset.worldY}));
+   if(input==='touch')await entryPage.touchscreen.tap(point.x,point.y);else await entryPage.mouse.click(point.x,point.y);
+   await ready(entryPage);assert.equal(await entryPage.locator('[data-showroom]').getAttribute('data-room'),'impex-automotive');
+   const opened=await entryPage.locator('[data-lift-display]').isVisible();
+   if(opened)console.log('ROOM_ENTRY_EVENT_TRACE',input,await entryPage.evaluate(()=>window.__roomEntryEvents));
+   assert.equal(opened,false,`${input}: entering a miniature room must not enlarge its media with the same activation`);
+   // No artificial debounce: the very next deliberate tap must still work immediately.
+   await entryPage.locator('[data-exhibit-stage]').tap();await entryPage.waitForSelector('[data-lift-display]:not([hidden])');
+   await entryPage.locator('[data-media-lift-close]').tap();assert.equal(await entryPage.locator('[data-lift-display]').isVisible(),false);
+  }
+  report.checks.push('Mouse and native touch miniature-room entry remain separate from explicit media activation, including the immediate next tap');
+ }finally{await entryContext.close();}
  const context=await browser.newContext({viewport:{width:1440,height:1000},deviceScaleFactor:.7,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));
  let release;const gate=new Promise(r=>release=r);await context.route('**/_astro/*.js',async route=>{await gate;await route.continue();});
