@@ -1,0 +1,215 @@
+<!-- Motion is assigned by role. Reading copy and image frames stay in place. -->
+<script>
+ (() => {
+  const preference = matchMedia('(prefers-reduced-motion: reduce)');
+  const headings = [...document.querySelectorAll<HTMLElement>('[data-motion="type"]')];
+  const details = [...document.querySelectorAll<HTMLElement>('[data-motion="step"], [data-motion="photo"], [data-motion="quote"]')];
+  if ((!headings.length && !details.length) || !('IntersectionObserver' in window) || !Element.prototype.animate) return;
+
+  interface Line { anchor: HTMLElement; inks: HTMLElement[]; started: boolean; }
+  interface Title { element: HTMLElement; lines: Line[]; nextLineAt: number; }
+  const titles: Title[] = [];
+  const activeDetails = new Set<HTMLElement>();
+  const progress = new Map<HTMLElement, number>();
+  const running = new Map<Animation, HTMLElement>();
+  let frame = 0;
+  let disposed = false;
+  let viewportWidth = innerWidth;
+  const clamp = (value: number) => Math.max(0, Math.min(1, value));
+  const setProgress = (element: HTMLElement, value: number) => {
+    element.style.setProperty('--motion-progress', String(value));
+    if (element.dataset.motion === 'quote') {
+      const phrases = [...element.querySelectorAll<HTMLElement>('em')];
+      phrases.forEach((phrase, index) => phrase.style.setProperty('--phrase-progress', String(clamp(value * phrases.length - index))));
+    }
+  };
+
+  const finishTitle = (title: Title) => {
+    title.lines.forEach(line => {
+      line.started = true;
+      line.inks.forEach(ink => ink.style.removeProperty('translate'));
+    });
+    for (const [animation, element] of running) {
+      if (title.element.contains(element)) { animation.cancel(); running.delete(animation); }
+    }
+    title.element.dataset.motionState = 'settled';
+  };
+
+  const prepareTitle = (element: HTMLElement) => {
+    // Deep links, restored scroll positions and slow font loading must never
+    // make text that is already on screen disappear for an entrance effect.
+    if (element.getBoundingClientRect().top < innerHeight || preference.matches) return;
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+    const nodes: Text[] = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode as Text);
+    const words: HTMLElement[] = [];
+    for (const node of nodes) {
+      const fragment = document.createDocumentFragment();
+      for (const token of (node.textContent || '').split(/(\s+)/)) {
+        if (!token || /^\s+$/.test(token)) { fragment.append(token); continue; }
+        const word = document.createElement('span');
+        const ink = document.createElement('span');
+        word.className = 'motion-word';
+        ink.className = 'motion-ink';
+        ink.textContent = token;
+        word.append(ink); fragment.append(word); words.push(word);
+      }
+      node.replaceWith(fragment);
+    }
+    // Keep the original text and emphasis in the accessibility tree. There is
+    // no duplicate heading, aria-label replacement or per-character speech.
+    const lines: Line[] = [];
+    let previousTop = -Infinity;
+    for (const word of words) {
+      const top = word.getBoundingClientRect().top;
+      if (Math.abs(top - previousTop) > 3) {
+        lines.push({anchor:word, inks:[], started:false}); previousTop = top;
+      }
+      const ink = word.firstElementChild as HTMLElement;
+      lines[lines.length - 1].inks.push(ink);
+      ink.style.translate = '0 1.35em';
+    }
+    element.dataset.motionState = 'armed';
+    titles.push({element, lines, nextLineAt:0});
+  };
+
+  const playLine = (title: Title, line: Line) => {
+    line.started = true;
+    title.element.dataset.motionState = 'reading';
+    for (const ink of line.inks) {
+      const animation = ink.animate([
+        {translate:'0 1.35em'}, {translate:'0 0'},
+      ], {duration:1100, easing:'cubic-bezier(.25,.1,.25,1)', fill:'both'});
+      animation.id = 'editorial-type';
+      running.set(animation, ink);
+      const clear = () => {
+        ink.style.removeProperty('translate'); animation.cancel(); running.delete(animation);
+        if (title.lines.every(item => item.started) && ![...running.values()].some(element => title.element.contains(element))) title.element.dataset.motionState = 'settled';
+      };
+      animation.onfinish = clear;
+      animation.oncancel = () => { ink.style.removeProperty('translate'); running.delete(animation); };
+    }
+  };
+
+  const update = () => {
+    frame = 0;
+    if (disposed || preference.matches || document.hidden) return;
+    for (const title of titles) {
+      if (title.element.dataset.motionState === 'settled') continue;
+      const bounds = title.element.getBoundingClientRect();
+      // Fast scrolling past a title settles it immediately rather than queuing
+      // an unseen performance that flashes when the visitor returns.
+      if (bounds.bottom < 0) { finishTitle(title); continue; }
+      for (const line of title.lines) {
+        if (line.started) continue;
+        const box = line.anchor.getBoundingClientRect();
+        if (box.top <= innerHeight * .68) {
+          // Lines exposed by one wheel gesture arrive in a short reading cadence.
+          if (performance.now() < title.nextLineAt) break;
+          playLine(title, line); title.nextLineAt = performance.now() + 130;
+          window.setTimeout(schedule, 130);
+          break;
+        }
+      }
+    }
+    for (const element of activeDetails) {
+      const box = element.getBoundingClientRect();
+      const photo = element.dataset.motion === 'photo';
+      const next = clamp((innerHeight * (photo ? .88 : .77) - box.top) / (innerHeight * (photo ? .68 : .32)));
+      const value = Math.max(progress.get(element) || 0, next);
+      progress.set(element, value);
+      setProgress(element, value);
+      if (value >= 1) {
+        element.dataset.motionState = 'settled';
+        activeDetails.delete(element); detailObserver.unobserve(element);
+      }
+    }
+  };
+  function schedule() {
+    if (!frame && !disposed && !preference.matches && !document.hidden) frame = requestAnimationFrame(update);
+  }
+  const detailObserver = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      const element = entry.target as HTMLElement;
+      if (entry.isIntersecting) activeDetails.add(element);
+      else activeDetails.delete(element);
+    }
+    schedule();
+  }, {rootMargin:'80px 0px'});
+
+  const settle = () => {
+    cancelAnimationFrame(frame); frame = 0;
+    titles.forEach(finishTitle);
+    for (const element of details) {
+      setProgress(element, 1);
+      element.dataset.motionState = 'settled';
+    }
+    activeDetails.clear(); detailObserver.disconnect();
+  };
+  const initialize = () => {
+    if (disposed || preference.matches) return;
+    headings.forEach(prepareTitle);
+    for (const element of details) {
+      // Decorative motion never disturbs an already visible surface.
+      if (element.getBoundingClientRect().top < innerHeight) continue;
+      element.dataset.motionReady = '';
+      element.dataset.motionState = 'armed';
+      setProgress(element, 0);
+      detailObserver.observe(element);
+    }
+    schedule();
+  };
+  document.fonts.ready.then(initialize);
+  window.addEventListener('scroll', schedule, {passive:true});
+  // Resize/rotation finishes prepared text. It never re-splits or hides text
+  // that the visitor may already be reading at a different line length.
+  window.addEventListener('resize', () => {
+    if (innerWidth !== viewportWidth) { viewportWidth = innerWidth; settle(); }
+    else schedule(); // Browser chrome changing height on a phone is normal scrolling.
+  });
+  preference.addEventListener('change', () => { if (preference.matches) settle(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) settle(); });
+  document.addEventListener('focusin', event => {
+    const target = event.target as Node;
+    for (const title of titles) if (title.element.contains(target)) finishTitle(title);
+  });
+  window.addEventListener('pagehide', () => { disposed = true; settle(); });
+  window.addEventListener('pageshow', () => { disposed = false; schedule(); });
+ })();
+</script>
+
+<style is:global>
+  .motion-word, .motion-ink { display: inline-block; vertical-align: baseline; }
+  /* Overscan protects Instrument Serif's accents, swashes and descenders. */
+  .motion-word { clip-path: inset(-.22em -.12em -.18em); }
+  [data-motion-ready][data-motion="step"] { position: relative; border-top-color: transparent; }
+  [data-motion-ready][data-motion="step"]::before {
+    content: ''; position: absolute; pointer-events: none; left: 0; right: 0; top: -1px; height: 1px;
+    background: var(--motion-rule, var(--line)); transform-origin: left; transform: scaleX(var(--motion-progress, 1));
+    transition: transform .55s cubic-bezier(.22,1,.36,1);
+  }
+  [data-motion-ready][data-motion="step"] { --motion-rule: var(--charcoal); border-left-color: transparent; }
+  [data-motion-ready][data-motion="step"]::after {
+    content: ''; position: absolute; pointer-events: none; left: -1px; top: 0; bottom: 0; width: 1px;
+    background: var(--charcoal); transform-origin: top; transform: scaleY(var(--motion-progress, 1));
+    transition: transform .55s cubic-bezier(.22,1,.36,1);
+  }
+  [data-motion-ready][data-motion="step"]:first-child::after { display: none; }
+  [data-motion-ready][data-motion="photo"] { overflow: hidden; }
+  [data-motion-ready][data-motion="photo"] > img {
+    transform: scale(calc(1.055 - .055 * var(--motion-progress, 1))); transform-origin: center;
+    transition: transform .8s cubic-bezier(.22,1,.36,1);
+  }
+  [data-motion-ready][data-motion="quote"] em {
+    background-image: linear-gradient(currentColor, currentColor); background-repeat: no-repeat;
+    background-position: 0 100%; background-size: calc(100% * var(--phrase-progress, 1)) 1px;
+    -webkit-box-decoration-break: clone; box-decoration-break: clone;
+    transition: background-size .55s cubic-bezier(.22,1,.36,1);
+  }
+  @media (max-width: 1000px) { [data-motion-ready][data-motion="step"]::after { display: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .motion-ink { translate: none !important; }
+    [data-motion-ready] { --motion-progress: 1 !important; }
+    [data-motion="quote"] em { --phrase-progress: 1 !important; }
+  }
+</style>

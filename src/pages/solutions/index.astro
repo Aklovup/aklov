@@ -197,9 +197,10 @@ const steps = [
     </div>
   </section>
 
-  <!-- Introduction -->
+  <!-- One problem-to-practice spread, rather than two competing openings. -->
   <section class="section intro" aria-labelledby="intro-title">
-    <div class="wrap">
+    <div class="wrap intro-spread">
+      <div class="intro-narrative">
       <div class="kicker mono">The right solution starts with the problem</div>
       <h2 id="intro-title">When the way you work starts <em>holding you back.</em></h2>
 
@@ -213,22 +214,19 @@ const steps = [
           <p>I help businesses address those gaps through thoughtful website design, practical business systems, workflow automation and integrations built around their needs.</p>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- Solutions intro -->
-  <div class="sols-head" id="solutions">
-    <div class="wrap sols-head-grid">
-      <figure class="sols-figure">
-        <img src={sectionImage.src} srcset={sectionImage.srcset} sizes="(max-width: 1000px) calc(100vw - 40px), 42vw" width={sectionImage.width} height={sectionImage.height} alt="" loading="lazy" decoding="async" />
+      </div>
+      <div class="sols-head" id="solutions">
+      <figure class="sols-figure" data-motion="photo">
+        <img src={sectionImage.src} srcset={sectionImage.srcset} sizes="(max-width: 640px) 36vw, (max-width: 1000px) 28vw, 260px" width={sectionImage.width} height={sectionImage.height} alt="" loading="lazy" decoding="async" />
       </figure>
 
       <div class="sols-head-text">
         <div class="kicker mono">What I can help with</div>
         <h2>Practical solutions for the work <em>behind your business.</em></h2>
       </div>
+      </div>
     </div>
-  </div>
+  </section>
 
   <!-- A continuous service catalogue, with stable anchors and shared alignment. -->
   <div class="service-catalogue">
@@ -389,41 +387,36 @@ const steps = [
     letter-spacing: -.04em;
   }
 
-  .intro { padding-block: clamp(44px, 4.5vw, 72px); }
-  .intro h2 { max-width: 18ch; margin-top: 24px; font-size: clamp(48px, 5.3vw, 88px); line-height: .98; }
+  .intro { padding-block: clamp(48px, 5vw, 80px); }
+  .intro-spread { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, .7fr); gap: clamp(36px, 7vw, 120px); align-items: start; }
+  .intro-narrative { min-width: 0; }
+  .intro h2 { max-width: 18ch; margin-top: 24px; font-size: clamp(46px, 4.6vw, 76px); line-height: .98; }
   .intro h2 em, .sols-head h2 em { color: var(--gold-dark); font-style: italic; }
 
   .intro-grid {
     display: grid;
-    grid-template-columns: 1.15fr .85fr;
-    gap: clamp(40px, 7vw, 120px);
+    grid-template-columns: 1fr;
+    gap: 24px;
     margin-top: 28px;
     padding-top: 24px;
     border-top: 1px solid var(--charcoal);
   }
 
-  .intro-big { font-family: var(--display); font-size: clamp(26px, 2.4vw, 38px); line-height: 1.28; letter-spacing: -.02em; }
-  .intro-side p { max-width: 460px; color: var(--body); font-size: 14.5px; line-height: 1.95; }
-  .intro-side p + p { margin-top: 22px; color: var(--charcoal); }
+  .intro-big { max-width: 42ch; font-family: var(--display); font-size: clamp(25px, 2.1vw, 34px); line-height: 1.28; letter-spacing: -.02em; }
+  .intro-side { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+  .intro-side p { max-width: 48ch; color: var(--body); font-size: 14.5px; line-height: 1.85; }
+  .intro-side p + p { color: var(--charcoal); }
 
   /* Solutions intro: image + heading */
 
   .sols-head {
-    padding-block: clamp(36px, 4vw, 64px) clamp(48px, 5vw, 80px);
-    background: var(--ivory);
-  }
-
-  .sols-head-grid {
-    display: grid;
-    grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
-    gap: clamp(36px, 6vw, 100px);
-    align-items: end;
+    min-width: 0; max-width: 340px; justify-self: end; scroll-margin-top: 24px;
   }
 
   .sols-figure {
     position: relative;
     aspect-ratio: 4 / 5;
-    max-height: 760px;
+    max-width: 260px;
     overflow: hidden;
     background: var(--charcoal);
   }
@@ -444,8 +437,9 @@ const steps = [
     pointer-events: none;
   }
 
-  .sols-head-text { padding-bottom: 6px; }
-  .sols-head-text h2 { max-width: 11ch; margin-top: 30px; font-size: clamp(50px, 7.4vw, 132px); line-height: .9; text-align: left; }
+  .sols-head-text { padding-top: 24px; }
+  .sols-head-text .kicker { font-size: 9px; letter-spacing: 1.3px; }
+  .sols-head-text h2 { max-width: 15ch; margin-top: 18px; font-size: clamp(30px, 2.8vw, 44px); line-height: 1.03; text-align: left; }
 
   /* Reference rows: the content provides variation; alignment stays predictable. */
   .service-catalogue { background: var(--ivory); }
@@ -554,9 +548,9 @@ const steps = [
     .choose-grid,
     .closing-grid { grid-template-columns: 1fr; }
 
-    .sols-head-grid { grid-template-columns: 1fr; gap: 40px; }
-    .sols-figure { aspect-ratio: 4 / 3; max-height: none; }
-    .sols-head-text h2 { max-width: 13ch; }
+    .intro-spread { grid-template-columns: minmax(0, 1.4fr) minmax(0, .75fr); gap: 32px; }
+    .intro-side { grid-template-columns: 1fr; gap: 18px; }
+    .sols-head-text h2 { max-width: 14ch; }
 
     .sol > .wrap { gap: 40px; }
     .choose > .wrap { gap: 24px 40px; }
@@ -590,8 +584,12 @@ const steps = [
 
     .intro h2 { font-size: clamp(44px, 10.5vw, 64px); }
 
-    .sols-figure { aspect-ratio: 1 / 1; }
-    .sols-head-text h2 { font-size: clamp(46px, 12.4vw, 70px); }
+    .intro-spread { grid-template-columns: 1fr; gap: 32px; }
+    .sols-head { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 24px; align-items: center; max-width: none; justify-self: stretch; }
+    .sols-head-text { padding-top: 0; }
+    .sols-head-text .kicker { letter-spacing: .7px; gap: 8px; font-size: 8px; }
+    .sols-head-text .kicker::before { flex-basis: 14px; width: 14px; }
+    .sols-head-text h2 { margin-top: 14px; font-size: clamp(26px, 6.8vw, 40px); }
 
     .sol > .wrap { grid-template-columns: 1fr; gap: 28px; }
     .sol-title { font-size: clamp(40px, 10.5vw, 60px); }
@@ -612,6 +610,7 @@ const steps = [
     .closing h2 { font-size: clamp(44px, 11.5vw, 68px); }
   }
 </style>
+
 
 
 

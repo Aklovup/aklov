@@ -105,7 +105,7 @@ const principles = [
     <div class="wrap">
       <div class="sv-head">
         <div class="kicker mono">02 / Capabilities</div>
-        <h2>Make the moving parts <em>work together.</em></h2>
+        <h2 data-motion="type">Make the moving parts <em>work together.</em></h2>
         <p class="intro">
           From a well-designed website to better-connected business operations, the right solution starts with understanding the goal, the people and the problem to be solved.
         </p>
@@ -146,7 +146,7 @@ const principles = [
 
       <div class="steps">
         {principles.map((principle, index) => (
-          <article class:list={['principle', `p${index + 1}`]}>
+          <article class:list={['principle', `p${index + 1}`]} data-motion="step">
             <div class="principle-number" aria-hidden="true">{principle.number}</div>
             <h3>{principle.title}</h3>
             <p>{principle.description}</p>
@@ -308,4 +308,5 @@ const principles = [
   }
   @media(prefers-reduced-motion:reduce) { .hero-copy { transition:none;transform:none!important; } }
 </style>
+
 

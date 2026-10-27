@@ -128,7 +128,7 @@ try {
   for (const [label,width] of [['desktop',1440],['tablet',768],['mobile',390],['narrow',320]]) {
     await page.setViewportSize({width,height:1000});
     const frame = await page.locator('.sols-figure').boundingBox();
-    const expectedRatio = width === 1440 ? .8 : width === 768 ? 4/3 : 1;
+    const expectedRatio = .8; // Preserve the portrait crop inside the compact bridge at every width.
     assert.ok(Math.abs(frame.width/frame.height - expectedRatio) < .01, 'Solutions image composition changed at ' + width);
     await page.locator('.sols-head').screenshot({path:output+'/solutions-image-section-'+label+'.png'});
     await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
@@ -159,6 +159,7 @@ try {
   console.log('SOLUTIONS_AUDIT',JSON.stringify(report));
   writeFileSync(output+'/audit.json',JSON.stringify(report,null,2));
 } finally {await browser?.close();server.kill('SIGTERM');}
+
 
 
 
