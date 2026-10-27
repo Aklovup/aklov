@@ -68,6 +68,7 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   .installation-media>[data-exhibit-asset],.installation-media .project-media { height:100%;min-height:0;display:flex;flex-direction:column; }
   .showroom .room-panel .installation-media .gif-preview { flex:1;min-height:0;max-height:none;aspect-ratio:auto; }
   .showroom .room-panel .installation-media .project-media>img,.showroom .room-panel .installation-media video { flex:1;min-height:0;width:100%;height:0;max-height:none;aspect-ratio:auto;object-fit:cover;object-position:center top; }
+  .showroom .room-panel .installation-media .gif-preview :is(img,canvas) { height:100%;aspect-ratio:auto;object-fit:contain; }
   .showroom .room-panel .installation-media figcaption { flex:0 0 auto;margin:0;padding:12px 16px;color:var(--on-dark);background:var(--charcoal);font:18px/1.5 var(--sans); }
   .showroom .room-panel .gif-toggle { font-size:24px;min-height:52px;background:var(--charcoal); }
   .media-rail { height:100%;min-width:0;min-height:0;display:grid;gap:14px;overflow:hidden; }
@@ -143,7 +144,7 @@ const entries=await Promise.all(projects.map(async(project,index)=>({project,ind
   .showroom[data-layout='compact'] .wall-heading h2 { font-size:28px;line-height:1.05; }
   .showroom[data-layout='compact'] .wall-heading p { font-size:10px;letter-spacing:1.3px; }
   .showroom[data-layout='compact'] .wall-media-layout { height:auto;display:flex;flex-direction:column;gap:12px; }
-  .showroom[data-layout='compact'] .media-primary { flex:none;height:clamp(230px,42dvh,360px); }
+  .showroom[data-layout='compact'] .media-primary { flex:none;height:clamp(220px,34dvh,300px); }
   .showroom[data-layout='compact'] .installation-label { padding:8px 10px;font-size:11px; }
   .showroom[data-layout='compact'] .room-panel .installation-media figcaption { padding:8px 10px;font-size:12px;line-height:1.5; }
   .showroom[data-layout='compact'] .media-rail { height:100px;grid-template-rows:minmax(0,1fr)!important;grid-template-columns:repeat(var(--rail-count,1),minmax(0,1fr));gap:8px;flex:none; }

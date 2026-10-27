@@ -21,7 +21,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
   const pause=root.querySelector<HTMLButtonElement>('[data-showroom-motion]')!;
   let renderer:THREE.WebGLRenderer;
-  try {renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:innerWidth<800?'low-power':'high-performance'});}catch {root.dataset.renderer='fallback';root.dataset.roomReady='true';return {setState:(_state:ShowroomState)=>{},hover:(_key?:string)=>{},start:()=>{}};}
+  try {renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:compact()?'low-power':'high-performance'});}catch {root.dataset.renderer='fallback';root.dataset.roomReady='true';return {setState:(_state:ShowroomState)=>{},hover:(_key?:string)=>{},start:()=>{}};}
   renderer.setPixelRatio(1);
   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -280,7 +280,7 @@ export function createShowroomScene(root:HTMLElement,projects:ShowroomProject[],
     if(!frame){last=0;frame=requestAnimationFrame(tick);}
   }
   function settle(){flight=undefined;viewHeading=roomHeading;pose();currentEye.copy(targetEye);currentLook.copy(targetLook);camera.position.copy(currentEye);camera.lookAt(currentLook);updateModels(1/60);draw();}
-  function respond(){if(motion.matches){yaw=targetYaw;settle();}else{pose();sync();}}
+  function respond(){if(motion.matches){yaw=targetYaw;pitch=targetPitch;settle();}else{pose();sync();}}
   function setState(next:ShowroomState){
     if(lost){state=next;root.dataset.roomReady='true';return;}
     const previous=state,changed=previous.group!==next.group||previous.model!==next.model||previous.room!==next.room,previousRoom=roomFor(previous);
