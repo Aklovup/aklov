@@ -42,7 +42,7 @@ The new Impex browser check verifies the actual uploaded GIF header/dimensions, 
 
 ## Uploaded media integration
 
-The repository retains `public/images/portraits/Portrait_home.png` and `Portrait_about.png`. About uses its portrait; the current homepage review omits the Home portrait. Original files are preserved.
+About now uses the owner’s replacement `public/images/portraits/About_Portraits.png` (447 × 558px), referenced in `profile.portrait`. The owner removed the obsolete `Portrait_home.png` and `Portrait_about.png` files. The homepage does not currently display a portrait.
 
 Project media is mapped in the individual Markdown entries, with dimensions read from the actual GIF/PNG headers:
 
