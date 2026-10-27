@@ -125,6 +125,8 @@ try {
   await page.keyboard.press('Space');
   assert.equal(await toggle.innerText(), 'Resume background');
   assert.equal(await sky.getAttribute('data-running'), 'false');
+  // Let CSS animation pausing settle on the next painted frame before sampling.
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   const paused = await sky.locator('.star-drift').first().evaluate(el => getComputedStyle(el).transform);
   await page.waitForTimeout(180);
   assert.equal(await sky.locator('.star-drift').first().evaluate(el => getComputedStyle(el).transform), paused);
