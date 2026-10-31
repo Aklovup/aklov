@@ -1,0 +1,93 @@
+name: LinkedIn hero screenshots
+on:
+  push:
+    branches:
+      - 'capture/linkedin-heroes-20261031'
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Prepare capture tools
+        run: |
+          mkdir -p /tmp/aklov-linkedin-capture
+          cd /tmp/aklov-linkedin-capture
+          npm init -y
+          npm install --no-save --package-lock=false playwright sharp
+          npx playwright install --with-deps chromium
+      - name: Capture the live heroes and compose the image
+        working-directory: /tmp/aklov-linkedin-capture
+        run: |
+          cat > capture.mjs <<'CAPTURE_SCRIPT'
+          import {chromium} from 'playwright';
+          import sharp from 'sharp';
+          import {mkdir,writeFile} from 'node:fs/promises';
+          const out='artifacts/linkedin-heroes';
+          await mkdir(out,{recursive:true});
+          const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+          const captures=[];
+          try {
+           for(const item of [
+            {name:'Home',path:'/',selector:'.home-hero',bg:'#151515'},
+            {name:'Solutions',path:'/solutions/',selector:'.hero-surface',bg:'#f5f2ea'},
+            {name:'Work',path:'/work/',selector:'[data-showroom]',bg:'#151515'},
+            {name:'About',path:'/about/',selector:'.about-hero',bg:'#151515'}
+           ]){
+            const context=await browser.newContext({viewport:{width:1440,height:1120},deviceScaleFactor:2,reducedMotion:'reduce'});
+            const page=await context.newPage();
+            await page.goto('https://aklov.pages.dev'+item.path,{waitUntil:'domcontentloaded',timeout:60000});
+            await page.evaluate(()=>document.fonts.ready);
+            if(item.name==='Work'){
+             await page.waitForSelector('[data-showroom][data-ready="true"][data-arrival="ready"]',{timeout:90000});
+             await page.waitForFunction(()=>document.querySelectorAll('[data-showroom-model]').length===4);
+             await page.waitForTimeout(1800);
+            }else{
+             if(item.name==='Home'){
+              await page.evaluate(()=>scrollTo({top:64,behavior:'instant'}));
+              await page.waitForFunction(()=>getComputedStyle(document.querySelector('[data-hero-copy]')).opacity==='1');
+              await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+             }
+             await page.evaluate(()=>Promise.all([...document.querySelectorAll('main img')].filter(i=>i.getBoundingClientRect().top<innerHeight).map(i=>i.decode().catch(()=>{}))));
+             await page.waitForTimeout(500);
+            }
+            const end=await page.locator(item.selector).evaluate(e=>{const b=e.getBoundingClientRect();return Math.ceil(b.bottom+scrollY);});
+            const height=item.name==='Work'?1120:Math.min(end,1250);
+            await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+            const file=out+'/'+item.name.toLowerCase()+'-hero.png';
+            await page.screenshot({path:file,type:'png',clip:{x:0,y:0,width:1440,height},captureBeyondViewport:true,timeout:60000});
+            const native=await sharp(file).metadata();
+            console.log('CAPTURED',JSON.stringify({page:item.name,width:native.width,height:native.height,source:'https://aklov.pages.dev'+item.path}));
+            captures.push({...item,file});
+            await context.close();
+           }
+           const margin=56,gutter=32,label=36,tileW=1440,tileH=1120;
+           const W=margin*2+tileW*2+gutter,H=margin*2+(tileH+label)*2+gutter;
+           const layers=[];
+           for(let index=0;index<captures.length;index++){
+            const c=captures[index],left=margin+(index%2)*(tileW+gutter),top=margin+Math.floor(index/2)*(tileH+label+gutter);
+            const image=await sharp(c.file).resize({width:tileW,height:tileH,fit:'contain',position:'top',background:c.bg}).png().toBuffer();
+            const svg=Buffer.from('<svg width="'+tileW+'" height="'+label+'"><text x="0" y="22" font-family="Arial, sans-serif" font-size="17" font-weight="600" letter-spacing="2.5" fill="#d8bd78">'+String(index+1).padStart(2,'0')+' / '+c.name.toUpperCase()+'</text></svg>');
+            layers.push({input:svg,left,top},{input:image,left,top:top+label});
+           }
+           const combined=sharp({create:{width:W,height:H,channels:3,background:'#151515'}}).composite(layers);
+           await combined.clone().png().toFile(out+'/aklov-hero-showcase.png');
+           await combined.clone().jpeg({quality:95,chromaSubsampling:'4:4:4',mozjpeg:true}).toFile(out+'/aklov-hero-showcase.jpg');
+           await combined.clone().resize({width:1200}).jpeg({quality:85}).toFile(out+'/aklov-hero-showcase-preview.jpg');
+           await writeFile(out+'/capture-details.json',JSON.stringify({width:W,height:H,pages:captures.map(c=>({name:c.name,url:'https://aklov.pages.dev'+c.path}))},null,2));
+           console.log('COMPOSITE_SIZE',W,H);
+           console.log('LINKEDIN_PREVIEW:'+ (await sharp(out+'/aklov-hero-showcase-preview.jpg').toBuffer()).toString('base64'));
+          }finally{await browser.close();}
+          
+          CAPTURE_SCRIPT
+          node capture.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aklov-linkedin-hero-showcase
+          path: /tmp/aklov-linkedin-capture/artifacts/linkedin-heroes/
+          if-no-files-found: error
