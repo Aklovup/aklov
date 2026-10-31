@@ -15,19 +15,23 @@
   "cover": {
     "id": "guideyusuf-cover",
     "type": "image",
-    "alt": "",
-    "width": 1600,
-    "height": 1000
+    "alt": "n8n travel-support workflow with connected processing branches and AI agent tools.",
+    "width": 967,
+    "height": 456,
+    "url": "/images/projects/guideyusuf-ai-support/guideyusuf.png",
+    "placeholder": false
   },
   "media": [
     {
       "id": "guideyusuf-workflow",
       "type": "image",
-      "alt": "Screenshot of the n8n workflow showing the AI agent, knowledge retrieval, memory, and supporting tools.",
-      "caption": "AI support workflow",
+      "alt": "n8n travel-support workflow with connected processing branches and AI agent tools.",
+      "caption": "Travel-support automation workflow",
       "order": 1,
-      "width": 1600,
-      "height": 1000
+      "width": 967,
+      "height": 456,
+      "url": "/images/projects/guideyusuf-ai-support/guideyusuf.png",
+      "placeholder": false
     }
   ],
   "featured": false,

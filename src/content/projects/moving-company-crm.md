@@ -14,20 +14,23 @@
   "cover": {
     "id": "moving-crm-cover",
     "type": "image",
-    "alt": "",
-    "width": 1600,
-    "height": 1000
+    "alt": "Zoho CRM workflow rule linking booked or assigned job stages to a labour-status field update.",
+    "width": 1920,
+    "height": 916,
+    "url": "/images/projects/moving-company-crm/chip-crm-workflow.png",
+    "placeholder": false
   },
   "media": [
     {
       "id": "moving-crm-workflow",
       "type": "image",
-      "alt": "Screenshot of the implemented CRM workflow or pipeline.",
-      "caption": "CRM workflow",
+      "alt": "Zoho CRM workflow rule linking booked or assigned job stages to a labour-status field update.",
+      "caption": "Job-stage and labour-status automation",
       "order": 1,
       "placeholder": false,
-      "width": 1600,
-      "height": 1000
+      "width": 1920,
+      "height": 916,
+      "url": "/images/projects/moving-company-crm/chip-crm-workflow.png"
     },
     {
       "id": "moving-crm-scheduling",

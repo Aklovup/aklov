@@ -33,21 +33,24 @@
     {
       "id": "wound-customer-workflow",
       "type": "image",
-      "alt": "Screenshot of the implemented customer-processing workflow.",
-      "caption": "Customer-processing workflow",
+      "alt": "Zoho Thrive customer profile with referral points, purchase statistics, and reward activity.",
+      "caption": "Customer referral profile and loyalty activity",
       "order": 2,
-      "width": 1600,
-      "height": 1000
+      "width": 1920,
+      "height": 911,
+      "url": "/images/projects/wound-concierge/woundconcierge-thrive-customer.png",
+      "placeholder": false
     },
     {
       "id": "wound-loyalty-widget",
       "type": "image",
-      "alt": "Wound Concierge storefront with the Zoho Thrive referral and loyalty widget open.",
-      "caption": "Referral and loyalty widget",
+      "alt": "Wound Concierge storefront with the Zoho Thrive loyalty widget showing points, rewards, and activity options.",
+      "caption": "Storefront loyalty widget",
       "order": 3,
-      "width": 1920,
-      "height": 1080,
-      "url": "/images/projects/wound-concierge/Woundconcierge_thrive.png"
+      "width": 1333,
+      "height": 910,
+      "url": "/images/projects/wound-concierge/wound-thrive-widget.png",
+      "placeholder": false
     }
   ],
   "featured": false,

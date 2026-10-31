@@ -16,19 +16,23 @@
   "cover": {
     "id": "instantresidency-cover",
     "type": "image",
-    "alt": "",
-    "width": 1600,
-    "height": 1000
+    "alt": "n8n booking workflow connecting an AI agent with Google Calendar, Airtable, Gmail, and messaging tools.",
+    "width": 1242,
+    "height": 458,
+    "url": "/images/projects/instantresidency-booking/instantresidency.png",
+    "placeholder": false
   },
   "media": [
     {
       "id": "instantresidency-workflow",
       "type": "image",
-      "alt": "Screenshot of the n8n workflow showing the AI agent, calendar, Airtable, and communication tools.",
-      "caption": "Consultation-booking workflow",
+      "alt": "n8n booking workflow connecting an AI agent with Google Calendar, Airtable, Gmail, and messaging tools.",
+      "caption": "AI consultation-booking workflow",
       "order": 1,
-      "width": 1600,
-      "height": 1000
+      "width": 1242,
+      "height": 458,
+      "url": "/images/projects/instantresidency-booking/instantresidency.png",
+      "placeholder": false
     }
   ],
   "featured": false,
