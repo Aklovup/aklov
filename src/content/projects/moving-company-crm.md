@@ -35,12 +35,13 @@
     {
       "id": "moving-crm-scheduling",
       "type": "image",
-      "alt": "Screenshot of the implemented scheduling or job-management interface.",
-      "caption": "Scheduling and job management",
+      "alt": "Zoho CRM calendar-sync settings with Google Calendar synchronization and automatic availability blocking.",
+      "caption": "Calendar sync and availability blocking",
       "order": 2,
       "placeholder": false,
-      "width": 1600,
-      "height": 1000
+      "width": 1920,
+      "height": 906,
+      "url": "/images/projects/moving-company-crm/chip-calender-sync.png"
     }
   ],
   "featured": false,
